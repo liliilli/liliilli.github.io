@@ -1,0 +1,141 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+	<channel>
+		<title>Posts on neuromantic</title>
+		<link>https://liliilli.github.io/posts/</link>
+		<description>Recent content in Posts on neuromantic</description>
+		<generator>Hugo -- gohugo.io</generator>
+		<language>en-us</language>
+		<copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright>
+		<lastBuildDate>Sat, 09 Nov 2019 22:15:34 +0900</lastBuildDate>
+		<atom:link href="https://liliilli.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+		
+		<item>
+			<title>Chained-Group Allocationパターンについてメモ</title>
+			<link>https://liliilli.github.io/posts/chained-group-allocation/</link>
+			<pubDate>Sat, 09 Nov 2019 22:15:34 +0900</pubDate>
+			
+			<guid>https://liliilli.github.io/posts/chained-group-allocation/</guid>
+			<description>https://www.plflib.org/chained_group_allocation_pattern.htm を見て、分かったことをメモしたいと思います。 Abstract Chanined-Group Allocationパターンは、ダブルリンクリストを拡張して、書くノードは付加的な情報を持</description>
+			<content type="html"><![CDATA[
+
+<p><a href="https://www.plflib.org/chained_group_allocation_pattern.htm">https://www.plflib.org/chained_group_allocation_pattern.htm</a><br>を見て、分かったことをメモしたいと思います。</p>
+
+<h2 id="abstract">Abstract</h2>
+
+<p><strong>Chanined-Group Allocation</strong>パターンは、ダブルリンクリストを拡張して、書くノードは付加的な情報を持ちながらメモリを動的に確保して使わせるパターンです。書くノードは２の二乗バイトのメモリを持ち、もしいま使っているノードが全部埋まったら、次のメモリを持つノードのメモリ量は今までのメモリ量を合わせた分になります。</p>
+
+<h2 id="description">Description</h2>
+
+<p>このパターンは、どれぐらいのメモリが必要になるかが事前にわからないときに使えるパターンだそうです。といったら、<code>std::vector&lt;T, A&gt;</code> とはあんまり変わらないじゃないのと思うかもしれないんですが、動的にメモリを管理して、拡張または縮小するのは同じだけれども、具体的には違うそうです。</p>
+
+<p><code>std::vector&lt;T, A&gt;</code> の場合には、メモリが必ず一列になる必要があります。たとえ、あるベクターがあるメモリを持っているとして、もしメモリを拡張しなければならない場合には全体メモリを他のより広いメモリに移す作業を行いますね。しかし、今のパターンはメモリをまた再割当てせずに、新しいインスタンスの確保のためのメモリ空間を割り当てて、リンクリストのポインターに繋げることで拡張を行います。</p>
+
+<p>このパターンでは「メモリブロック」（または空間を指しているポインター）と「メモリブロックに関しての様々な情報」をまとめて「グループ」と言います。情報の中にはダブルリンクリストを構成するための前のメモリノードと後のメモリノードへのポインターが必ず入ります。それ以外に、今ノードが持っているメモリブロックに何個まで入れるか、何個入ったか、Skipfieldなどなどが入りそうです。</p>
+
+<blockquote>
+<p>Skipfieldは後の<code>Colony</code>コンテナーを説明するときに説明したいと思います。</p>
+</blockquote>
+
+<p>Abstractで書いたように、各ノードは２の二乗バイトのメモリを持ちます。例えば、１番目のブロックが<code>int</code>で8個を持っているとしたら（32Bytes）、次のブロックはまた8個（32Bytes）、そして次々のブロックは1番目と2番目のブロックを足した分の16個（64Bytes）のメモリを持つようにします。で、4番目のブロックは8＋8＋16＝32個が入れるメモリ領域を持つでしょう。</p>
+
+<h2 id="advantages">Advantages</h2>
+
+<p><code>std::vector</code>のような連続メモリとは違って、メモリ領域がリンクリストとして連結していることによって、イテレータとポインターを持っているときに、コンテナーにインスタンスを挿入することでの無効化（Invalidation）が起こらなくなります。</p>
+
+<p>そしてメモリ確保を個別にやってからリンクリストとして連結することで、Resizeなどの関数でよく起こりうるメモリ再確保⇒存在しているインスタンスのコピーまたはムーブコストが発生しなくなります。こうすることで要素（インスタンス）を追加する時の副作用コストが顕著に減ります。（削除する時にもメモリを解除して、リンクリストから除外させれば終わりなんでこれも速いです。）</p>
+
+<p>また、Groupを静的のリストの形として管理したら、Groupのための動的メモリ確保をすることが省きそうなので一部状況ではもっと速く動作すると思われます。</p>
+
+<h2 id="disadvantages">Disadvantages</h2>
+
+<p>メモリ確保がリンクリストとして管理されるので、<code>std::vector</code>のような連続メモリに対してはイテレーターが一回りする速度は遅くなるかもしれません。特に、確保したメモリの実際領域がバラバラになっていたら、キャッシュを改めないとならなくなります。</p>
+
+<p>また、連続メモリでのイテレーターが進むときに、単純にポインターを一つ動くだけとは違って、このパターンのイテレーターは次のメモリを持っているノードに移るべきかを分岐として検証しなければならなくなります。</p>
+
+<p>よって、各メモリの確保数が2の二乗なこともこういった性能落ちを抑制するために意図的に設定した数値だそうです。そして各ノードの持っているメモリが大きすぎないように、各ノードのメモリ確保の限界値を決めることもより速い性能をするために必要だと言ってます。</p>
+
+<h2 id="コード">コード？</h2>
+<div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="cp">#include</span> <span class="cpf">&lt;cstdlib&gt;</span><span class="cp">
+</span><span class="cp">#include</span> <span class="cpf">&lt;type_traits&gt;</span><span class="cp">
+</span><span class="cp"></span>
+<span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">TType</span><span class="o">&gt;</span>
+<span class="k">struct</span> <span class="nc">DGroup</span>
+<span class="p">{</span>
+    <span class="k">struct</span> <span class="nc">DMeta</span>
+    <span class="p">{</span>
+        <span class="n">DGroup</span><span class="o">*</span> <span class="n">mpPrev</span><span class="p">;</span>
+        <span class="n">DGroup</span><span class="o">*</span> <span class="n">mpNext</span><span class="p">;</span>
+        <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">mCnt</span><span class="p">;</span>
+        <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">mCap</span><span class="p">;</span>
+    <span class="p">};</span>
+
+    <span class="n">TType</span><span class="o">*</span> <span class="n">mpMem</span><span class="p">;</span>
+    <span class="n">DMeta</span>  <span class="n">mMeta</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+    <span class="n">DGroup</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;*</span> <span class="n">_1</span> <span class="o">=</span> <span class="p">(</span><span class="n">DGroup</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;*</span><span class="p">)</span><span class="o">::</span><span class="n">calloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">DGroup</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">),</span> <span class="mi">1</span><span class="p">);</span>
+    <span class="n">_1</span><span class="o">-&gt;</span><span class="n">mpMem</span> <span class="o">=</span> <span class="p">(</span><span class="kt">int</span><span class="o">*</span><span class="p">)</span><span class="o">::</span><span class="n">malloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="kt">int</span><span class="p">)</span> <span class="o">*</span> <span class="mi">8</span><span class="p">);</span>
+    <span class="n">_1</span><span class="o">-&gt;</span><span class="n">mMeta</span><span class="p">.</span><span class="n">mCap</span> <span class="o">=</span> <span class="mi">8</span><span class="p">;</span>
+
+    <span class="k">for</span> <span class="p">(</span><span class="kt">unsigned</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">_1</span><span class="o">-&gt;</span><span class="n">mMeta</span><span class="p">.</span><span class="n">mCap</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">_1</span><span class="o">-&gt;</span><span class="n">mpMem</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span> <span class="o">*</span> <span class="n">i</span><span class="p">;</span>
+        <span class="n">_1</span><span class="o">-&gt;</span><span class="n">mMeta</span><span class="p">.</span><span class="n">mCnt</span><span class="o">++</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="p">{</span>   <span class="c1">// Create _2.
+</span><span class="c1"></span>
+        <span class="c1">// We need to calculate next capacity (2^) O(k)
+</span><span class="c1"></span>        <span class="kt">unsigned</span> <span class="n">nextCap</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="n">DGroup</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;*</span> <span class="n">pCur</span> <span class="o">=</span> <span class="n">_1</span><span class="p">;</span>
+        <span class="k">while</span> <span class="p">(</span><span class="n">pCur</span> <span class="o">!=</span> <span class="k">nullptr</span><span class="p">)</span>
+        <span class="p">{</span>
+            <span class="n">nextCap</span> <span class="o">+=</span> <span class="n">pCur</span><span class="o">-&gt;</span><span class="n">mMeta</span><span class="p">.</span><span class="n">mCap</span><span class="p">;</span>
+            <span class="n">pCur</span> <span class="o">=</span> <span class="n">pCur</span><span class="o">-&gt;</span><span class="n">mMeta</span><span class="p">.</span><span class="n">mpNext</span><span class="p">;</span>
+        <span class="p">}</span>
+
+        <span class="n">DGroup</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;*</span> <span class="n">_2</span> <span class="o">=</span> <span class="p">(</span><span class="n">DGroup</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;*</span><span class="p">)</span><span class="o">::</span><span class="n">calloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">DGroup</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">),</span> <span class="mi">1</span><span class="p">);</span>
+        <span class="n">_2</span><span class="o">-&gt;</span><span class="n">mpMem</span>           <span class="o">=</span> <span class="p">(</span><span class="kt">int</span><span class="o">*</span><span class="p">)</span><span class="o">::</span><span class="n">malloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="kt">int</span><span class="p">)</span> <span class="o">*</span> <span class="n">nextCap</span><span class="p">);</span>
+        <span class="n">_2</span><span class="o">-&gt;</span><span class="n">mMeta</span><span class="p">.</span><span class="n">mCap</span>      <span class="o">=</span> <span class="n">nextCap</span><span class="p">;</span>
+        <span class="n">_1</span><span class="o">-&gt;</span><span class="n">mMeta</span><span class="p">.</span><span class="n">mpNext</span>    <span class="o">=</span> <span class="n">_2</span><span class="p">;</span>
+        <span class="n">_2</span><span class="o">-&gt;</span><span class="n">mMeta</span><span class="p">.</span><span class="n">mpPrev</span>    <span class="o">=</span> <span class="n">_1</span><span class="p">;</span>
+
+        <span class="k">for</span> <span class="p">(</span><span class="kt">unsigned</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">_2</span><span class="o">-&gt;</span><span class="n">mMeta</span><span class="p">.</span><span class="n">mCap</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+        <span class="p">{</span>
+            <span class="n">_2</span><span class="o">-&gt;</span><span class="n">mpMem</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="n">nextCap</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="n">nextCap</span><span class="p">);</span>
+            <span class="n">_2</span><span class="o">-&gt;</span><span class="n">mMeta</span><span class="p">.</span><span class="n">mCnt</span><span class="o">++</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    
+    <span class="c1">// DO SOME COMPLEXT THING...
+</span><span class="c1"></span>
+    <span class="k">for</span> <span class="p">(</span><span class="kt">unsigned</span> <span class="n">i</span> <span class="o">=</span> <span class="n">_1</span><span class="o">-&gt;</span><span class="n">mMeta</span><span class="p">.</span><span class="n">mpNext</span><span class="o">-&gt;</span><span class="n">mMeta</span><span class="p">.</span><span class="n">mCap</span><span class="p">;</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">;</span> <span class="o">--</span><span class="n">i</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="c1">// _2-&gt;mpMem[i - 1].~int();
+</span><span class="c1"></span>    <span class="p">}</span>
+    <span class="p">{</span>
+        <span class="k">auto</span><span class="o">*</span> <span class="n">pDelete</span>       <span class="o">=</span> <span class="n">_1</span><span class="o">-&gt;</span><span class="n">mMeta</span><span class="p">.</span><span class="n">mpNext</span><span class="p">;</span>
+        <span class="n">_1</span><span class="o">-&gt;</span><span class="n">mMeta</span><span class="p">.</span><span class="n">mpNext</span>    <span class="o">=</span> <span class="n">pDelete</span><span class="o">-&gt;</span><span class="n">mMeta</span><span class="p">.</span><span class="n">mpNext</span><span class="p">;</span>
+        <span class="o">::</span><span class="n">free</span><span class="p">(</span><span class="n">pDelete</span><span class="p">);</span> 
+        <span class="n">pDelete</span> <span class="o">=</span> <span class="k">nullptr</span><span class="p">;</span>
+    <span class="p">}</span>
+    
+    <span class="k">for</span> <span class="p">(</span><span class="kt">unsigned</span> <span class="n">i</span> <span class="o">=</span> <span class="n">_1</span><span class="o">-&gt;</span><span class="n">mMeta</span><span class="p">.</span><span class="n">mCap</span><span class="p">;</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">;</span> <span class="o">--</span><span class="n">i</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="c1">// _1-&gt;mpMem[i - 1].~int();
+</span><span class="c1"></span>    <span class="p">}</span>
+    <span class="p">{</span>
+        <span class="k">auto</span><span class="o">*</span> <span class="n">pDelete</span>       <span class="o">=</span> <span class="n">_1</span><span class="p">;</span>
+        <span class="o">::</span><span class="n">free</span><span class="p">(</span><span class="n">pDelete</span><span class="p">);</span>
+        <span class="n">pDelete</span> <span class="o">=</span> <span class="k">nullptr</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<h2 id="最後に">最後に</h2>
+]]></content>
+		</item>
+		
+	</channel>
+</rss>
