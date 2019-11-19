@@ -3,22 +3,33 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
-    <loc>https://liliilli.github.io/posts/chained-group-allocation/</loc>
-    <lastmod>2019-11-09T22:15:34+09:00</lastmod>
-  </url>
-  
-  <url>
     <loc>https://liliilli.github.io/</loc>
-    <lastmod>2019-11-09T22:15:34+09:00</lastmod>
+    <lastmod>2019-11-16T19:51:58+09:00</lastmod>
   </url>
   
   <url>
     <loc>https://liliilli.github.io/posts/</loc>
-    <lastmod>2019-11-09T22:15:34+09:00</lastmod>
+    <lastmod>2019-11-16T19:51:58+09:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://liliilli.github.io/posts/shadertoy_pbr/</loc>
+    <lastmod>2019-11-16T19:51:58+09:00</lastmod>
   </url>
   
   <url>
     <loc>https://liliilli.github.io/tags/</loc>
+    <lastmod>2019-11-16T19:51:58+09:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://liliilli.github.io/tags/untagged/</loc>
+    <lastmod>2019-11-16T19:51:58+09:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://liliilli.github.io/posts/chained-group-allocation/</loc>
+    <lastmod>2019-11-09T23:12:58+09:00</lastmod>
   </url>
   
 </urlset>

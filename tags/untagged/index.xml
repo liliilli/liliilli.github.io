@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>neuromantic</title>
-    <link>https://liliilli.github.io/</link>
-    <description>Recent content on neuromantic</description>
+    <title>untagged on neuromantic</title>
+    <link>https://liliilli.github.io/tags/untagged/</link>
+    <description>Recent content in untagged on neuromantic</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright>
     <lastBuildDate>Sat, 16 Nov 2019 19:51:58 +0900</lastBuildDate>
     
-	<atom:link href="https://liliilli.github.io/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://liliilli.github.io/tags/untagged/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
@@ -19,15 +19,6 @@
       
       <guid>https://liliilli.github.io/posts/shadertoy_pbr/</guid>
       <description>実は2週前に、ShaderToyというウェブでGLSLがかけて、それをレンダリングすることができるサイトで、上のシェーダーを書いてました。前</description>
-    </item>
-    
-    <item>
-      <title>Chained-Group Allocationパターンについてメモ</title>
-      <link>https://liliilli.github.io/posts/chained-group-allocation/</link>
-      <pubDate>Sat, 09 Nov 2019 22:15:34 +0900</pubDate>
-      
-      <guid>https://liliilli.github.io/posts/chained-group-allocation/</guid>
-      <description>https://www.plflib.org/chained_group_allocation_pattern.htm を見て、分かったことをメモしたいと思います。 Abstract Chanined-Group Allocationパターンは、ダブルリンクリストを拡張して、書くノードは付加的な情報を持</description>
     </item>
     
   </channel>
