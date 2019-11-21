@@ -6,8 +6,158 @@
 		<generator>Hugo -- gohugo.io</generator>
 		<language>en-us</language>
 		<copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright>
-		<lastBuildDate>Sat, 16 Nov 2019 19:51:58 +0900</lastBuildDate>
+		<lastBuildDate>Thu, 21 Nov 2019 20:33:04 +0900</lastBuildDate>
 		<atom:link href="https://liliilli.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+		
+		<item>
+			<title>C&#43;&#43;2aのconceptsを使ってみた。</title>
+			<link>https://liliilli.github.io/posts/cpp_concept/</link>
+			<pubDate>Thu, 21 Nov 2019 20:33:04 +0900</pubDate>
+			
+			<guid>https://liliilli.github.io/posts/cpp_concept/</guid>
+			<description>C++のConceptを簡略説明 C++2a（20）から追加する文法の一つであるconceptは、あるタイプの制約条件を記すことができる識別子</description>
+			<content type="html"><![CDATA[
+
+<h1 id="c-のconceptを簡略説明">C++のConceptを簡略説明</h1>
+
+<p>C++2a（20）から追加する文法の一つである<code>concept</code>は、あるタイプの制約条件を記すことができる識別子です。制約条件というのは<code>Constraints</code>と呼びますが、あくまでも付与された<code>concept</code>を満足するための一連の条件組だと言えます。以下はある<code>concept</code>を宣言するコードです。</p>
+<div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+<span class="k">concept</span> <span class="n">is_floating_point</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">is_floating_point_v</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">;</span>
+</code></pre></div>
+<p>注意することは、宣言したconceptは、他のconceptを宣言する時に型引数で<code>typename</code>または<code>class</code>の代わりに使うことはできません。また、<code>requires</code>を使うこともできません。ただし、定義する構文で使うことはできます。</p>
+
+<p>constraintsはconceptだけじゃなくて、<code>requires</code>文法を使ってタイプの条件を設定することができます。C#に例えたら、多分<code>where</code>が一番近いんじゃないかな？と思いますね。下はconceptを使わずにconstraintsだけを使っているコードです。</p>
+<div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="c1">// First syntax of `requires` and `constraints`
+</span><span class="c1"></span><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">Float</span><span class="o">&gt;</span>
+<span class="k">auto</span> <span class="n">go3</span><span class="p">(</span><span class="k">const</span> <span class="n">Float</span> <span class="n">v1</span><span class="p">,</span> <span class="k">const</span> <span class="n">Float</span> <span class="n">v2</span><span class="p">)</span> <span class="k">requires</span> <span class="n">std</span><span class="o">::</span><span class="n">is_floating_point_v</span><span class="o">&lt;</span><span class="n">Float</span><span class="o">&gt;</span>
+<span class="p">{</span>
+    <span class="k">return</span> <span class="n">v1</span> <span class="o">+</span> <span class="n">v2</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>宣言したconceptは次のように使えます。conceptじゃない構文であれば、<code>typename</code>と<code>class</code>の代わりに使えることがわかります。</p>
+<div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="k">template</span> <span class="o">&lt;</span><span class="n">is_floating_point</span> <span class="n">Float</span><span class="o">&gt;</span>
+<span class="k">auto</span> <span class="n">go4</span><span class="p">(</span><span class="k">const</span> <span class="n">Float</span> <span class="n">v1</span><span class="p">,</span> <span class="k">const</span> <span class="n">Float</span> <span class="n">v2</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">return</span> <span class="n">v1</span> <span class="o">+</span> <span class="n">v2</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>ただし、上のコードではあくまでも<code>v1</code>と<code>v2</code>が<code>Float</code>という型に縛られているので、<code>v1</code>に<code>double</code>を入れたり<code>v2</code>に<code>float</code>を入れてコンパイルすることはできません。下のコードでは、上記の問題点を解決するため<code>template</code>を使わず、conceptを型として使います。</p>
+<div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="k">auto</span> <span class="nf">go5</span><span class="p">(</span><span class="k">const</span> <span class="n">floating_point</span> <span class="k">auto</span> <span class="n">v1</span><span class="p">,</span> <span class="k">const</span> <span class="n">floating_point</span> <span class="k">auto</span> <span class="n">v2</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">return</span> <span class="n">v1</span> <span class="o">+</span> <span class="n">v2</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><code>[const/volatile] concept auto [&amp;, &amp;&amp;]</code>を使うことで<code>v1</code>と<code>v2</code>のタイプは別々のタイプが持てるようになります。実はリターン型<code>auto</code>の前にもconceptをくっつけることが出来ます。</p>
+
+<p>最後に、変数にもconceptが使えます。<code>auto</code>を一緒に使いますが、前にconceptを書けることでタイプ自体じゃなくてできる行動・特性をもつタイプの一連として考えるようになり、もっと柔軟なロジックを組むことが出来ます。</p>
+<div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="c1">//floating_point auto val2 = go6(1.2f, 3.4f); 
+</span><span class="c1">// go6は`int`を返しますが、`int`はfloating_pointコンセプトの条件が満たしていないので
+</span><span class="c1">// コンパイルエラーが出ます。
+</span><span class="c1"></span><span class="k">const</span> <span class="n">floating_point</span> <span class="k">auto</span> <span class="n">val3</span> <span class="o">=</span> <span class="n">go5</span><span class="p">(</span><span class="mf">1.2f</span><span class="p">,</span> <span class="mf">3.4f</span><span class="p">);</span>
+</code></pre></div>
+<h1 id="もっと詳しく知りたい方へ">もっと詳しく知りたい方へ</h1>
+
+<p>上の説明は、<code>concept</code>と<code>requires</code>、そして条件構文でできることの一部しか紹介していません。詳しく知りたい型には以下の文書をお読みいただけましたら嬉しいです。</p>
+
+<p><a href="https://en.cppreference.com/w/cpp/language/constraints">https://en.cppreference.com/w/cpp/language/constraints</a></p>
+
+<p>また、C++のコードがウェブで作成できるCompiler Explorerというサイトで、gcc (trunk)またはclang (concepts)を選択しましたら<code>concept</code>が実装されたバージョンでコードが組めることが出来ます。</p>
+
+<h1 id="full-code">Full code</h1>
+<div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="cp">#include</span> <span class="cpf">&lt;type_traits&gt;</span><span class="cp">
+</span><span class="cp"></span>
+<span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">Float</span><span class="o">&gt;</span>
+<span class="k">auto</span> <span class="n">go1</span><span class="p">(</span><span class="k">const</span> <span class="n">Float</span> <span class="n">value1</span><span class="p">,</span> <span class="k">const</span> <span class="n">Float</span> <span class="n">value2</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">return</span> <span class="n">value1</span> <span class="o">+</span> <span class="n">value2</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="k">template</span> <span class="o">&lt;</span>
+    <span class="k">typename</span> <span class="n">Float</span><span class="p">,</span>
+    <span class="k">typename</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">enable_if_t</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">is_floating_point_v</span><span class="o">&lt;</span><span class="n">Float</span><span class="o">&gt;&gt;</span>
+<span class="o">&gt;</span>
+<span class="k">auto</span> <span class="n">go2</span><span class="p">(</span><span class="k">const</span> <span class="n">Float</span> <span class="n">value1</span><span class="p">,</span> <span class="k">const</span> <span class="n">Float</span> <span class="n">value2</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">return</span> <span class="n">value1</span> <span class="o">+</span> <span class="n">value2</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="c1">// First syntax of `requires`.
+</span><span class="c1"></span><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">Float</span><span class="o">&gt;</span>
+<span class="k">auto</span> <span class="n">go3</span><span class="p">(</span><span class="k">const</span> <span class="n">Float</span> <span class="n">v1</span><span class="p">,</span> <span class="k">const</span> <span class="n">Float</span> <span class="n">v2</span><span class="p">)</span> 
+    <span class="k">requires</span> <span class="n">std</span><span class="o">::</span><span class="n">is_floating_point_v</span><span class="o">&lt;</span><span class="n">Float</span><span class="o">&gt;</span>
+<span class="p">{</span>
+    <span class="k">return</span> <span class="n">v1</span> <span class="o">+</span> <span class="n">v2</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="c1">// Using concept instead of typename or class in template.
+</span><span class="c1"></span><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+<span class="k">concept</span> <span class="n">is_floating_point</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">is_floating_point_v</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">;</span>
+
+<span class="k">template</span> <span class="o">&lt;</span><span class="n">is_floating_point</span> <span class="n">Float</span><span class="o">&gt;</span>
+<span class="k">auto</span> <span class="n">go4</span><span class="p">(</span><span class="k">const</span> <span class="n">Float</span> <span class="n">v1</span><span class="p">,</span> <span class="k">const</span> <span class="n">Float</span> <span class="n">v2</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">return</span> <span class="n">v1</span> <span class="o">+</span> <span class="n">v2</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+<span class="k">concept</span> <span class="n">floating_point</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">is_floating_point_v</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">;</span>
+
+<span class="c1">// We can write `floating_point` explicitly before `auto` return.
+</span><span class="c1">// When `floating_point` is written before auto, return value should
+</span><span class="c1">// satisfy `floating_point` constraint.
+</span><span class="c1"></span><span class="k">auto</span> <span class="nf">go5</span><span class="p">(</span><span class="k">const</span> <span class="n">floating_point</span> <span class="k">auto</span> <span class="n">v1</span><span class="p">,</span> <span class="k">const</span> <span class="n">floating_point</span> <span class="k">auto</span> <span class="n">v2</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">return</span> <span class="n">v1</span> <span class="o">+</span> <span class="n">v2</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="k">auto</span> <span class="nf">go6</span><span class="p">(</span><span class="k">const</span> <span class="n">floating_point</span> <span class="k">auto</span> <span class="n">v1</span><span class="p">,</span> <span class="k">const</span> <span class="n">floating_point</span> <span class="k">auto</span> <span class="n">v2</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">return</span> <span class="kt">int</span><span class="p">{</span><span class="n">v1</span> <span class="o">+</span> <span class="n">v2</span><span class="p">};</span>
+<span class="p">}</span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+    <span class="c1">//go1(1, 2.3);
+</span><span class="c1"></span>    <span class="c1">//go1(1.2f, 2.3);
+</span><span class="c1"></span>    <span class="n">go1</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">);</span>          <span class="c1">// Float is int.
+</span><span class="c1"></span>    <span class="n">go1</span><span class="p">(</span><span class="mf">1.2f</span><span class="p">,</span> <span class="mf">2.3f</span><span class="p">);</span>    <span class="c1">// Float is float.
+</span><span class="c1"></span>    <span class="n">go1</span><span class="p">(</span><span class="mf">1.2</span><span class="p">,</span> <span class="mf">2.3</span><span class="p">);</span>      <span class="c1">// Float is double.
+</span><span class="c1"></span>
+    <span class="c1">//go2(1, 2);        // Substitution is failed, and output message is bizzare.
+</span><span class="c1"></span>    <span class="n">go2</span><span class="p">(</span><span class="mf">1.2</span><span class="p">,</span> <span class="mf">2.3</span><span class="p">);</span>      <span class="c1">// Float is double.
+</span><span class="c1"></span>
+    <span class="c1">// Substitution is failed 
+</span><span class="c1"></span>    <span class="c1">// but output message is humble and more readable.
+</span><span class="c1"></span>    <span class="c1">//go3(1, 2);
+</span><span class="c1"></span>    <span class="c1">//go3(1, 2.3);
+</span><span class="c1"></span>    <span class="n">go3</span><span class="p">(</span><span class="mf">1.2</span><span class="p">,</span> <span class="mf">3.4</span><span class="p">);</span>        
+
+    <span class="c1">// constraints not satisfied
+</span><span class="c1"></span>    <span class="c1">//go4(1, 10);
+</span><span class="c1"></span>    <span class="c1">// Also need one uniformed type.
+</span><span class="c1"></span>    <span class="c1">// template argument deduction/substitution failed:
+</span><span class="c1"></span>    <span class="c1">//go4(1.2f, 3.4);     
+</span><span class="c1"></span>    <span class="n">go4</span><span class="p">(</span><span class="mf">1.2f</span><span class="p">,</span> <span class="mf">3.4f</span><span class="p">);</span>
+    <span class="n">go4</span><span class="p">(</span><span class="mf">1.2</span><span class="p">,</span> <span class="mf">3.4</span><span class="p">);</span>
+
+    <span class="c1">// error: use of function &#39;auto go5(auto:1, auto:2) 
+</span><span class="c1"></span>    <span class="c1">// [with auto:1 = int; auto:2 = int]&#39; with unsatisfied constraints
+</span><span class="c1"></span>    <span class="c1">//go5(1, 10);
+</span><span class="c1"></span>    <span class="n">go5</span><span class="p">(</span><span class="mf">1.2f</span><span class="p">,</span> <span class="mf">3.4</span><span class="p">);</span>
+    <span class="n">go5</span><span class="p">(</span><span class="mf">1.2</span><span class="p">,</span> <span class="mf">3.4f</span><span class="p">);</span>
+    <span class="n">go5</span><span class="p">(</span><span class="mf">1.2</span><span class="p">,</span> <span class="mf">3.4</span><span class="p">);</span>
+    <span class="n">go5</span><span class="p">(</span><span class="mf">1.2f</span><span class="p">,</span> <span class="mf">3.4f</span><span class="p">);</span>
+
+    <span class="k">auto</span> <span class="n">val1</span> <span class="o">=</span> <span class="n">go6</span><span class="p">(</span><span class="mf">1.2f</span><span class="p">,</span> <span class="mf">3.4f</span><span class="p">);</span> <span class="c1">// This outputs warning but not error,
+</span><span class="c1"></span>    <span class="c1">// But below is failed to compile.
+</span><span class="c1"></span>    <span class="c1">// &lt; constraints not satisfied
+</span><span class="c1"></span>    <span class="c1">// &lt; the expression &#39;is_floating_point_v&lt;T&gt;&#39; evaluated to &#39;false&#39;
+</span><span class="c1"></span>    <span class="c1">//floating_point auto val2 = go6(1.2f, 3.4f);
+</span><span class="c1"></span>    <span class="k">const</span> <span class="n">floating_point</span> <span class="k">auto</span> <span class="n">val3</span> <span class="o">=</span> <span class="n">go5</span><span class="p">(</span><span class="mf">1.2f</span><span class="p">,</span> <span class="mf">3.4f</span><span class="p">);</span>
+    <span class="k">return</span> <span class="kt">int</span><span class="p">{</span><span class="n">val3</span><span class="p">};</span>
+<span class="p">}</span>
+</code></pre></div>]]></content>
+		</item>
 		
 		<item>
 			<title>ShaderToyでPBRを書いてから、自ら解説してみた。</title>

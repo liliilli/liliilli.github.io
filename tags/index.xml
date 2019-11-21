@@ -7,10 +7,19 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright>
-    <lastBuildDate>Sat, 16 Nov 2019 19:51:58 +0900</lastBuildDate>
+    <lastBuildDate>Thu, 21 Nov 2019 20:33:04 +0900</lastBuildDate>
     
 	<atom:link href="https://liliilli.github.io/tags/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>c&#43;&#43;</title>
+      <link>https://liliilli.github.io/tags/c&#43;&#43;/</link>
+      <pubDate>Thu, 21 Nov 2019 20:33:04 +0900</pubDate>
+      
+      <guid>https://liliilli.github.io/tags/c&#43;&#43;/</guid>
+      <description></description>
+    </item>
     
     <item>
       <title>untagged</title>

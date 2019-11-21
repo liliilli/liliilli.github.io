@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>c&#43;&#43; on neuromantic</title>
+    <link>https://liliilli.github.io/tags/c&#43;&#43;/</link>
+    <description>Recent content in c&#43;&#43; on neuromantic</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright>
+    <lastBuildDate>Thu, 21 Nov 2019 20:33:04 +0900</lastBuildDate>
+    
+	<atom:link href="https://liliilli.github.io/tags/c++/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>C&#43;&#43;2aのconceptsを使ってみた。</title>
+      <link>https://liliilli.github.io/posts/cpp_concept/</link>
+      <pubDate>Thu, 21 Nov 2019 20:33:04 +0900</pubDate>
+      
+      <guid>https://liliilli.github.io/posts/cpp_concept/</guid>
+      <description>C++のConceptを簡略説明 C++2a（20）から追加する文法の一つであるconceptは、あるタイプの制約条件を記すことができる識別子</description>
+    </item>
+    
+  </channel>
+</rss>
