@@ -7,10 +7,19 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright>
-    <lastBuildDate>Sat, 16 Nov 2019 19:51:58 +0900</lastBuildDate>
+    <lastBuildDate>Tue, 03 Mar 2020 23:10:28 +0900</lastBuildDate>
     
 	<atom:link href="https://liliilli.github.io/tags/untagged/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Hugoブログを使いこなせるためのメモ</title>
+      <link>https://liliilli.github.io/posts/hugo_memo/</link>
+      <pubDate>Tue, 03 Mar 2020 23:10:28 +0900</pubDate>
+      
+      <guid>https://liliilli.github.io/posts/hugo_memo/</guid>
+      <description>すごく久しぶりにHugoのブログを使おうとしましたが、ブログに記事を書くどころかHugoの使い方すらすっかり忘れてしまいました。だもんで自分</description>
+    </item>
     
     <item>
       <title>ShaderToyでPBRを書いてから、自ら解説してみた。</title>

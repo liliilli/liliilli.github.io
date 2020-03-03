@@ -7,10 +7,19 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright>
-    <lastBuildDate>Thu, 21 Nov 2019 20:33:04 +0900</lastBuildDate>
+    <lastBuildDate>Tue, 03 Mar 2020 23:10:28 +0900</lastBuildDate>
     
 	<atom:link href="https://liliilli.github.io/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Hugoブログを使いこなせるためのメモ</title>
+      <link>https://liliilli.github.io/posts/hugo_memo/</link>
+      <pubDate>Tue, 03 Mar 2020 23:10:28 +0900</pubDate>
+      
+      <guid>https://liliilli.github.io/posts/hugo_memo/</guid>
+      <description>すごく久しぶりにHugoのブログを使おうとしましたが、ブログに記事を書くどころかHugoの使い方すらすっかり忘れてしまいました。だもんで自分</description>
+    </item>
     
     <item>
       <title>C&#43;&#43;2aのconceptsを使ってみた。</title>

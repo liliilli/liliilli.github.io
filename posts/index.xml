@@ -6,8 +6,71 @@
 		<generator>Hugo -- gohugo.io</generator>
 		<language>en-us</language>
 		<copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright>
-		<lastBuildDate>Thu, 21 Nov 2019 20:33:04 +0900</lastBuildDate>
+		<lastBuildDate>Tue, 03 Mar 2020 23:10:28 +0900</lastBuildDate>
 		<atom:link href="https://liliilli.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+		
+		<item>
+			<title>Hugoブログを使いこなせるためのメモ</title>
+			<link>https://liliilli.github.io/posts/hugo_memo/</link>
+			<pubDate>Tue, 03 Mar 2020 23:10:28 +0900</pubDate>
+			
+			<guid>https://liliilli.github.io/posts/hugo_memo/</guid>
+			<description>すごく久しぶりにHugoのブログを使おうとしましたが、ブログに記事を書くどころかHugoの使い方すらすっかり忘れてしまいました。だもんで自分</description>
+			<content type="html"><![CDATA[
+
+<p>すごく久しぶりにHugoのブログを使おうとしましたが、ブログに記事を書くどころかHugoの使い方すらすっかり忘れてしまいました。だもんで自分用のメモみたいなことを書いていつでも覚えさせられるようにしたいと思います。</p>
+
+<p>ちなみにブログの設定環境はWindowsです。新しくインストールするなら<code>$ brew install hugo</code>みたいなもんは当然出来ないし、Windowsのパッケージをダウンロードして設置するしかないみたいですね。</p>
+
+<h1 id="覚えておくといい-かも-メモリスト">覚えておくといい（かも）メモリスト</h1>
+
+<h2 id="レポジトリー登録">レポジトリー登録</h2>
+
+<ul>
+<li><p>WindowsではHugoをインストールしてから環境変数に登録する必要があります。</p></li>
+
+<li><p>HugoはDeployで生成された本サイトページと、そのページを生成するためのリソースが一つのディレクトリの中にまとまっているので、遠隔リポジトリーなどにリソースをセーブする為には２つのリポジトリーを作ることが一番良いらしい。</p>
+
+<ul>
+<li>例えば、Hugoの本コンテンツとリソースを入れ込む用途として使う<code>&lt;YOUR-PROJECT&gt;</code>と
+結果としてDeployされた<code>&lt;USERNAME&gt;.github.io</code>レポジトリ。
+<br /></li>
+</ul></li>
+
+<li><p><code>&lt;YOUR-PROJECT&gt;</code>は本プロジェクトとして<br></p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">$ git remote add origin git@github.com:integerous/blog.git</code></pre></div></li>
+
+<li><p><code>&lt;USERNAME&gt;.github.io</code>はSubmoduleとして登録する。<br></p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">$ git submodule add -b master <span class="se">\
+</span><span class="se"></span>git@github.com:integerous/integerous.github.io.git public</code></pre></div></li>
+</ul>
+
+<p>上記のようにすることで<code>public</code>っていうDeployされた時に作られるウェブサイトフォルダーは本プロジェクトとは違って<code>&lt;USERNAME&gt;.github.io</code>を持つことになる。</p>
+
+<h2 id="コンテンツ生成">コンテンツ生成</h2>
+
+<ul>
+<li>コンテンツ生成はブログのフォルダーから<code>$ hugo new posts/test1.md</code>みたいなコマンドを売ってファイルを生成する。Draftで生成したい場合には<code>-D</code>を最後につける。</li>
+<li>コンテンツをローカルで見る為には<code>hugo server</code>または<code>hugo server -D</code>で確認できる。</li>
+</ul>
+
+<h2 id="コンテンツアップロード">コンテンツアップロード</h2>
+
+<ol>
+<li>まず<code>$ hugo -t テーマの名前</code>で設置されたテーマが適用されたコンテンツを<code>public</code>フォルダーに生成。</li>
+<li><code>public</code>フォルダーに移動し、gitなどで<code>&lt;USERNAME&gt;.github.io</code>にコミットする。</li>
+
+<li><p>ルートフォルダーに戻り、生リソースを<code>&lt;YOUR-PROJECT&gt;</code>にコミットする。</p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">$ git push origin master</code></pre></div></li>
+</ol>
+
+<h1 id="最後に">最後に</h1>
+
+<p>ちなみにほぼ３ヶ月ぐらい放置してたブログをまだ使おうとしたのは、個人プロジェクトの<code>CMakeLists.txt</code>を削除してしまい、また書こうとしても<code>CMake</code>なんてすっかり忘れてしまってブログにメモとりながら再実装する必要があったからです。これで一日無駄使いしてしまいWINAPIのFiberのサンプルを書く時間なんてなくなってしまいました。</p>
+
+<p>ソースコードはちゃんとバックアップしましょうね。</p>
+]]></content>
+		</item>
 		
 		<item>
 			<title>C&#43;&#43;2aのconceptsを使ってみた。</title>
