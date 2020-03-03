@@ -69,6 +69,10 @@
 <p>ちなみにほぼ３ヶ月ぐらい放置してたブログをまだ使おうとしたのは、個人プロジェクトの<code>CMakeLists.txt</code>を削除してしまい、また書こうとしても<code>CMake</code>なんてすっかり忘れてしまってブログにメモとりながら再実装する必要があったからです。これで一日無駄使いしてしまいWINAPIのFiberのサンプルを書く時間なんてなくなってしまいました。</p>
 
 <p>ソースコードはちゃんとバックアップしましょうね。</p>
+
+<h1 id="リンク">リンク</h1>
+
+<p><a href="https://github.com/Integerous/Integerous.github.io">Hugo로 Github.io 블로그 만들기</a></p>
 ]]></content>
 		</item>
 		
