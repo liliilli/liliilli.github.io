@@ -7,10 +7,19 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright>
-    <lastBuildDate>Tue, 03 Mar 2020 23:10:28 +0900</lastBuildDate>
+    <lastBuildDate>Tue, 03 Mar 2020 23:59:05 +0900</lastBuildDate>
     
 	<atom:link href="https://liliilli.github.io/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>CMakeのメモまとめ</title>
+      <link>https://liliilli.github.io/posts/cmake_memo/</link>
+      <pubDate>Tue, 03 Mar 2020 23:59:05 +0900</pubDate>
+      
+      <guid>https://liliilli.github.io/posts/cmake_memo/</guid>
+      <description>https://cliutils.gitlab.io/modern-cmake/chapters/intro/dodonot.html https://gist.github.com/mbinna/c61dbb39bca0e4fb7d1f73b0d66a4fd1 Do&amp;rsquo;s and Don&amp;rsquo;ts CMakeで避けるべきのパターン https://cliutils.gitlab.io/modern-cmake/chapters/intro/dodonot.html https://gist.github.com/mbinna/c61dbb39bca0e4fb7d1f73b0d66a4fd1 link_directories、include_librariesなどのグローバル関数を使わ</description>
+    </item>
     
     <item>
       <title>Hugoブログを使いこなせるためのメモ</title>
