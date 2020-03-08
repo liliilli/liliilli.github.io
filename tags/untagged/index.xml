@@ -7,10 +7,19 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright>
-    <lastBuildDate>Tue, 03 Mar 2020 23:59:05 +0900</lastBuildDate>
+    <lastBuildDate>Sun, 08 Mar 2020 11:48:19 +0900</lastBuildDate>
     
 	<atom:link href="https://liliilli.github.io/tags/untagged/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>自分でやるDyのCMakeListsファイル説明</title>
+      <link>https://liliilli.github.io/posts/dy_cmake/</link>
+      <pubDate>Sun, 08 Mar 2020 11:48:19 +0900</pubDate>
+      
+      <guid>https://liliilli.github.io/posts/dy_cmake/</guid>
+      <description>はじめに 自分の個人プロジェクトのDyという、ゲームエンジンプロジェクトがあって、たまに時間がある時開発をしています。ですけど今は表じゃなく裏</description>
+    </item>
     
     <item>
       <title>CMakeのメモまとめ</title>
