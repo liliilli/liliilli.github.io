@@ -6,8 +6,602 @@
 		<generator>Hugo -- gohugo.io</generator>
 		<language>en-us</language>
 		<copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright>
-		<lastBuildDate>Sun, 08 Mar 2020 11:48:19 +0900</lastBuildDate>
+		<lastBuildDate>Sun, 15 Mar 2020 19:13:14 +0900</lastBuildDate>
 		<atom:link href="https://liliilli.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+		
+		<item>
+			<title>TLSF Allocatorを作ってみた</title>
+			<link>https://liliilli.github.io/posts/tlsf_basic/</link>
+			<pubDate>Sun, 15 Mar 2020 19:13:14 +0900</pubDate>
+			
+			<guid>https://liliilli.github.io/posts/tlsf_basic/</guid>
+			<description>TLSFとは何なのか http://www.gii.upv.es/tlsf/ http://www.gii.upv.es/tlsf/files/ecrts04_tlsf.pdf https://www.researchgate.net/publication/234785757_A_comparison_of_memory_allocators_for_real-time_applications TLSF（Two-Level Segregate Fit）は、リアルタイムで要求される速度、安定性、決定性（Deterministic</description>
+			<content type="html"><![CDATA[
+
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+<h1 id="tlsfとは何なのか">TLSFとは何なのか</h1>
+
+<blockquote>
+<p><a href="http://www.gii.upv.es/tlsf/">http://www.gii.upv.es/tlsf/</a><br>
+<a href="http://www.gii.upv.es/tlsf/files/ecrts04_tlsf.pdf">http://www.gii.upv.es/tlsf/files/ecrts04_tlsf.pdf</a><br>
+<a href="https://www.researchgate.net/publication/234785757_A_comparison_of_memory_allocators_for_real-time_applications">https://www.researchgate.net/publication/234785757_A_comparison_of_memory_allocators_for_real-time_applications</a></p>
+</blockquote>
+
+<p>TLSF（Two-Level Segregate Fit）は、リアルタイムで要求される速度、安定性、決定性（Deterministic）を重視としたメモリ割当のアルゴリズム、そしてそれを実装したメモリアロケータを示します。普通のかんたんなメモリプール（Pool）とは違って、割当をしたいサイズを入れればその分のメモリを割り当ててくれる汎用性も持ちます。</p>
+
+<p>普通に<code>malloc</code>とか<code>free</code>とかすれば良いんじゃね？と思う方もいると思いますが、メモリが十分なら普通にシステムコールをして構わないと思います。しかし、組み込み系とかビデオゲーム機の中に仕込まれた限定的なメモリを十分活用しくちゃという状況なら<code>malloc</code>とか<code>free</code>だけでは内部メモリのフラグメンテーションを抑えることは出来ません。</p>
+
+<p>（OS自体でメモリの管理を行ってフラグメンテーションを抑えることは出来ると思いますが、厳密にはAPP側でもそれを制御したいですね）</p>
+
+<p>なんでそのフラグメンテーションを抑えながらも速度を保つためにいろんなDMA（Dynamic Memory Allocator（動的メモリ確保））アルゴリズムが出ました。その中で一つのアルゴリズムがTLSFです。</p>
+
+<p>TLSFは以下の特徴を持つそうです。</p>
+
+<ul>
+<li>メモリの確保、解除などに最悪<code>O(1)</code>の処理時間を持つ。</li>
+<li>x86アーキテクチャで最悪168個のアセンブリコードを持つため、比較的速い。</li>
+<li>平均15~25％のフラグメンテーション性能向上している。</li>
+<li>リアルタイム条件のプログラムなでど使える。</li>
+<li>確保したメモリの領域を拡張・縮小することが出来る。（この記事ではこれの実装は扱いません）</li>
+</ul>
+
+<h1 id="tlsfの概略な構造">TLSFの概略な構造</h1>
+
+<blockquote>
+<p><a href="http://www.gii.upv.es/tlsf/files/papers/tlsf_desc.pdf">http://www.gii.upv.es/tlsf/files/papers/tlsf_desc.pdf</a></p>
+</blockquote>
+
+<p>上の説明文をお読みください。</p>
+
+<h1 id="なんでtlsfを実装しようとしたの">なんでTLSFを実装しようとしたの</h1>
+
+<p>いくつかのゲームエンジンの中で、メモリを制御するために実装されているのがTLSFだったからです。それにOSでも使ってるらしいし、インターネットで一番明確ながらもソースコードも公開がされ、勉強になりそうなアルゴリズム（ライブラリー）だったので、まずTLSFから始めようとして実装することになりました。</p>
+
+<p>また、TLSF自体はソースが公開されてはいるんですが、ライセンスがGPLまたはLPGLであるため自分の作っているプロジェクトに取り入れることが難しかったです。なので勉強兼ねて新しく実装し、それを個人プロジェクトに入れようとしたいこともあります。</p>
+
+<h1 id="ソースコード">ソースコード</h1>
+
+<blockquote>
+<p><a href="https://gist.github.com/liliilli/01d0a8505dcc3fe4f5c951fbc179c769">https://gist.github.com/liliilli/01d0a8505dcc3fe4f5c951fbc179c769</a></p>
+</blockquote>
+
+<p>説明する前に、まずコードを見せたいと思います。</p>
+
+<p>TSLF関数の全体を説明するのではなく、一部だけを取って説明したいですので、全体のフローはソースコードを見てください。</p>
+
+<h1 id="基本apiリスト">基本APIリスト</h1>
+<div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="c1">//! @brief Create tlsf pool.
+</span><span class="c1">//! @param pool_size Overall memory pool size.
+</span><span class="c1">//! @param p_pool Memory pool pointer to start.
+</span><span class="c1">//! @return If successful, return available memory size of pool.
+</span><span class="c1">//!     If failed, return one of error codes below.
+</span><span class="c1">//!     * ADDRESS_IS_NULL : given p_pool is nullptr.
+</span><span class="c1">//!     * SIZE_IS_ZERO : pool_size is 0.
+</span><span class="c1">//!     * NOT_SUFFICIENT_MEM_SIZE : pool_size is not sufficient to create tlsf allocator.
+</span><span class="c1">//!     * NOT_ALIGNED_ADDRESS : p_pool is not aligned.
+</span><span class="c1"></span><span class="n">u64</span> <span class="nf">tlsf_raw_create</span><span class="p">(</span><span class="n">u64</span> <span class="n">pool_size</span><span class="p">,</span> <span class="kt">void</span><span class="o">*</span> <span class="n">p_pool</span><span class="p">)</span> <span class="n">DY_NOEXCEPT</span><span class="p">;</span>
+
+<span class="c1">//! @brief Destroy tlsf memory pool trivially.
+</span><span class="c1">//!     This function does not check tlsf has a valid object.
+</span><span class="c1">//! @param p_pool Valid tlsf memory pool pointer.
+</span><span class="c1"></span><span class="kt">void</span> <span class="nf">tlsf_raw_destroy</span><span class="p">(</span><span class="kt">void</span><span class="o">*</span> <span class="n">p_pool</span><span class="p">)</span> <span class="n">DY_NOEXCEPT</span><span class="p">;</span>
+
+<span class="c1">//! @brief Check if tlsf memory pool can be destroyed safely.
+</span><span class="c1">//!     This function checks tlsf has valid and every objects are released.
+</span><span class="c1">//! @param p_pool valid tlsf memory pool pointer.
+</span><span class="c1"></span><span class="kt">bool</span> <span class="nf">tlsf_can_destroy</span><span class="p">(</span><span class="kt">void</span><span class="o">*</span> <span class="n">p_pool</span><span class="p">)</span> <span class="n">DY_NOEXCEPT</span><span class="p">;</span>
+
+<span class="c1">//! @brief Try allocate memory with given mem_size.
+</span><span class="c1">//!     Created memory block may not have same mem_size size value, but aligned memory size.
+</span><span class="c1">//!     This function only should be used POD types. (trivial or standard_layout type)
+</span><span class="c1">//! @param mem_size Minimum memory size to allocate.
+</span><span class="c1">//! @param p_tlsf Tlsf pool pointer.
+</span><span class="c1">//! @return If successful, return buffer pointer. Otherwise, return nullptr.
+</span><span class="c1"></span><span class="kt">void</span><span class="o">*</span> <span class="nf">tlsf_malloc</span><span class="p">(</span><span class="n">u64</span> <span class="n">mem_size</span><span class="p">,</span> <span class="n">tlsf_raw_t</span><span class="o">*</span> <span class="n">p_tlsf</span><span class="p">)</span> <span class="n">DY_NOEXCEPT</span><span class="p">;</span>
+
+<span class="c1">//! @brief Try reallocate valid memory trivially.
+</span><span class="c1">//!     Reallocated memory block may not have same mem_size size value, but aligned memory size.
+</span><span class="c1">//!     This function only must be used POD types. (trivial or standard_layout type)
+</span><span class="c1">//! @param p_data Valid data pointer. This pointer should be in given p_tlsf pool.
+</span><span class="c1">//! @param mem_size Minimum memory size to reallocate.
+</span><span class="c1">//! @param p_tlsf Tlsf pool pointer.
+</span><span class="c1">//! @return If successful, return reallocated buffer pointer.
+</span><span class="c1">//!     Otherwise, return nullptr.
+</span><span class="c1"></span><span class="kt">void</span><span class="o">*</span> <span class="nf">tlsf_realloc</span><span class="p">(</span><span class="kt">void</span><span class="o">*</span> <span class="n">p_data</span><span class="p">,</span> <span class="n">u64</span> <span class="n">new_size</span><span class="p">,</span> <span class="n">tlsf_raw_t</span><span class="o">*</span> <span class="n">p_tlsf</span><span class="p">)</span> <span class="n">DY_NOEXCEPT</span><span class="p">;</span>
+
+<span class="c1">//! @brief Try calloc memory trivially.
+</span><span class="c1">//!     Created memory block may not have same mem_size size value, but aligned memory size.
+</span><span class="c1">//!     This function only should be used POD types. (trivial or standard_layout type)
+</span><span class="c1">//!     Created memory will be initialized with 0 (i32)
+</span><span class="c1">//! @param mem_size Minimum memory size to allocate.
+</span><span class="c1">//! @param elem_cnt The count of element list to allocate.
+</span><span class="c1">//! @param p_tlsf Tlsf pool pointer.
+</span><span class="c1">//!
+</span><span class="c1">//! @return If successful, return buffer pointer. Otherwise, return nullptr.
+</span><span class="c1"></span><span class="kt">void</span><span class="o">*</span> <span class="nf">tlsf_calloc</span><span class="p">(</span><span class="n">u64</span> <span class="n">mem_size</span><span class="p">,</span> <span class="n">u64</span> <span class="n">elem_cnt</span><span class="p">,</span> <span class="n">tlsf_raw_t</span><span class="o">*</span> <span class="n">p_tlsf</span><span class="p">)</span> <span class="n">DY_NOEXCEPT</span><span class="p">;</span>
+
+<span class="c1">//! @brief Free valid memory trivially.
+</span><span class="c1">//!     This function only should be called when p_data is POD type. (trivial or standard_layout)
+</span><span class="c1">//! @param p_data Valid data pointer.
+</span><span class="c1">//! @param p_tlsf_pool Tlsf pool pointer.
+</span><span class="c1"></span><span class="kt">void</span> <span class="nf">tlsf_free</span><span class="p">(</span><span class="kt">void</span><span class="o">*</span> <span class="n">p_data</span><span class="p">,</span> <span class="n">tlsf_raw_t</span><span class="o">*</span> <span class="n">p_tlsf_pool</span><span class="p">)</span> <span class="n">DY_NOEXCEPT</span><span class="p">;</span>
+</code></pre></div>
+<ul>
+<li><code>tlsf_raw_create</code>：確保したメモリ領域にTLSFプールを作ろうとします。<br>TLSF自体は確保されたオブジェクトのメモリ領域を管理するために、ちょっと大きいヘッダー構造体が入れるので、メモリ数値がそれの大きさ以上にならないとTLSFプールの生成は失敗になります。</li>
+<li><code>tlsf_raw_destroy</code>：有効なTLSFプールを解除します。ただし、この関数はオブジェクトの確保されたメモリは解除してくれないため、この関数を呼ぶ前に<code>tlsf_can_destroy</code>でTLSFプールが解除できるかを確認することが必要です。</li>
+<li><code>tlsf_can_destroy</code>：有効なTLSFプールが解除できるかを問います。TLSFプールのメモリ管理をするTLSFヘッダー構造体は、プールで確保または解除が行われるたびにいくらのメモリ数値が変動されたかを覚えます。その数値が<code>0</code>かではないかを検査してプールが最終的に解除できるかを判断します。</li>
+<li><code>tlsf_malloc</code>：TLSFプールに対しmalloc（メモリ確保）をやってくれます。もし確保されたプールで入れられるメモリブロックがなければ、確保失敗で<code>nullptr</code>が返されます。また注意する点は、メモリが成功的に確保されるとき、必ずしも<code>mem_size</code>サイズだけが確保されるわけではないです。TLSF自体は出来る限り8Byteまたは16Byte桁アドレスに合わせようとするので、実際に確保されるメモリも当然8または16バイトに合わせようとします。</li>
+<li><code>tlsf_realloc</code>：同一TLSFプールから確保したメモリを再確保（realloc）します。TLSFプールのフラグメンテーションによって別の領域で再確保を行うか、それともメモリを拡張するだけで収めれるか分かれることがあります。また、再確保するメモリサイズに比べてプールの現状確保出来るメモリ量が足りなかったら、再確保は失敗します。</li>
+<li><code>tlsf_calloc</code>：Cライブラリーの<code>calloc</code>と一緒です。メモリ確保が成功したら、メモリ空間を0で初期化してくれます。</li>
+<li><code>tlsf_free</code>：TLSFメモリプールから確保したメモリを解除します。</li>
+</ul>
+
+<h1 id="説明">説明</h1>
+
+<h2 id="1-tlsf-raw-create">1.<code>tlsf_raw_create</code></h2>
+<div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="k">if</span> <span class="p">(</span><span class="n">mem_pool_size</span> <span class="o">&lt;</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">tlsf_raw_t</span><span class="p">)</span> <span class="o">+</span> <span class="n">block_header_t</span><span class="o">::</span><span class="n">sk_block_header_ovhd</span> <span class="o">*</span> <span class="mi">8</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">return</span> <span class="n">error_info</span><span class="p">{</span> <span class="n">NOT_SUFFICIENT_MEM_SIZE</span> <span class="p">};</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>確保しようとするTLSFメモリプールのサイズが一定値以上かをチェックします。<code>tlsf_raw_t</code>はTLSFメモリプールを管理する構造体です。<code>block_header_t</code>は確保されるオブジェクトのメモリ空間の前に出てくるヘッダーです。現在オブジェクトのメモリサイズがいくらか、前、次のメモリブロックはどこに位置しているかについて情報を持ちます。</p>
+<div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="k">class</span> <span class="nc">tlsf_raw_t</span> <span class="k">final</span>
+<span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="k">static</span> <span class="k">constexpr</span> <span class="n">u64</span> <span class="n">k_fli_max</span> <span class="o">=</span> <span class="mi">30</span><span class="p">;</span>
+    <span class="k">static</span> <span class="k">constexpr</span> <span class="n">u64</span> <span class="n">k_fli_offset</span> <span class="o">=</span> <span class="mi">6</span><span class="p">;</span>
+    <span class="k">static</span> <span class="k">constexpr</span> <span class="n">u64</span> <span class="n">k_fli_real</span> <span class="o">=</span> <span class="n">k_fli_max</span> <span class="o">-</span> <span class="n">k_fli_offset</span><span class="p">;</span>
+    <span class="k">static</span> <span class="k">constexpr</span> <span class="n">u64</span> <span class="n">k_sli_log2_max</span> <span class="o">=</span> <span class="mi">5</span><span class="p">;</span>
+    <span class="k">static</span> <span class="k">constexpr</span> <span class="n">u64</span> <span class="n">k_sli_max</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">k_sli_log2_max</span><span class="p">;</span>
+
+    <span class="n">u32</span>             <span class="n">m_tlsf_signature</span><span class="p">;</span>
+    <span class="n">area_info_t</span><span class="o">*</span>    <span class="n">m_area_head</span><span class="p">;</span>
+    <span class="n">u32</span>             <span class="n">m_fl_bitmap</span><span class="p">;</span>
+    <span class="n">u32</span>             <span class="n">m_sl_bitmap</span><span class="p">[</span><span class="n">k_fli_real</span><span class="p">];</span>
+    <span class="n">block_header_t</span><span class="o">*</span> <span class="n">mp_matrix</span><span class="p">[</span><span class="n">k_fli_real</span><span class="p">][</span><span class="n">k_sli_max</span><span class="p">];</span>
+    <span class="n">u64</span>             <span class="n">m_max_mem</span><span class="p">;</span> <span class="c1">// いらなくて良し
+</span><span class="c1"></span>    <span class="n">u64</span>             <span class="n">m_used_mem</span><span class="p">;</span>
+
+    <span class="c1">// 以下メンバー関数宣言
+</span><span class="c1"></span><span class="p">};</span>
+</code></pre></div>
+<p><code>tlsf_raw_t</code>で注目する変数は、<code>m_fl_bitmap</code>と<code>m_sl_bitmap</code>、そして<code>mp_matrix</code>です。</p>
+
+<p><code>fl_bitmap</code>と<code>sl_bitmap</code>はメモリ解除されて使えるブロックのハッシュ情報をビット単位で刻んで入れられるようになった変数らしいです。TLSFはメモリの要求される容量によって２階層のリストから適度な空きブロックへのポインターを持ってこれるようになってるので、この変数でFirst-IndexとSecond-Indexを取得するようになってます。この変数を用いた取得のやり方は<code>find_suitable_block</code>関数で見れます。</p>
+
+<p><code>mp_matrix</code>はメモリ解除されたメモリブロックのポインター先を持ちます。<code>find_suitable_block</code>の中で返されたFirst-IndexとSecond-Index数値でこの配列変数から割当をするブロックのヘッダーを取得します。</p>
+<div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="k">struct</span> <span class="nc">block_header_t</span>
+<span class="p">{</span>
+    <span class="k">static</span> <span class="k">constexpr</span> <span class="n">u64</span> <span class="n">sk_min_block_size</span> <span class="o">=</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">free_ptr_t</span><span class="p">);</span>
+    <span class="k">static</span> <span class="k">const</span> <span class="n">u64</span> <span class="n">sk_block_header_ovhd</span><span class="p">;</span>
+
+    <span class="k">static</span> <span class="k">constexpr</span> <span class="n">u8</span> <span class="n">sk_free_block</span> <span class="o">=</span> <span class="mh">0x01</span><span class="p">;</span>
+    <span class="k">static</span> <span class="k">constexpr</span> <span class="n">u8</span> <span class="n">sk_prev_free</span> <span class="o">=</span> <span class="mh">0x02</span><span class="p">;</span>
+
+    <span class="n">block_header_t</span><span class="o">*</span> <span class="n">p_prev_header</span><span class="p">;</span>
+    <span class="n">u64</span>             <span class="n">stored_size</span><span class="p">;</span>
+    <span class="k">union</span>
+    <span class="p">{</span>
+        <span class="n">free_ptr_t</span>      <span class="n">free_ptr</span><span class="p">;</span>
+        <span class="n">block_buffer_t</span>  <span class="n">buffer</span><span class="p">;</span>
+    <span class="p">}</span> <span class="n">ptr</span><span class="p">;</span>
+  
+    <span class="c1">// 以下メンバー関数宣言
+</span><span class="c1"></span><span class="p">};</span>
+</code></pre></div>
+<p><code>block_header_t</code>は確保された（または解除した後の）メモリブロックについての情報を持ちます。実際のデータバッファは<code>ptr.buffer</code>から始まり、<code>stored_size &gt;&gt; 2</code>バイトまで続きます。もしブロックが解除した状態なら<code>ptr</code>は<code>free_ptr</code>に前と後のブロックヘッダー情報を入れるようになっています。</p>
+
+<p>また、<code>stored_size</code>はデータバッファのサイズだけではなく、0番と1番のビットに自分がフリーブロックなのか、そして前のブロックがフリーかをフラグとして設定するようにしています。なので、TLSFの中で確保されたデータバッファのサイズは必ず4倍の数値になります。（こうしてキャッシュラインなどが整頓される効果も得られます。）</p>
+
+<p><code>tlsf_raw_create</code>関数にまた戻ってTLSFシグニチャーを設定し、<code>memset</code>で0に初期化を行います。</p>
+<div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="n">block_header_t</span><span class="o">*</span> <span class="n">p_area_info_bhdr</span> <span class="o">=</span> <span class="n">process_area</span><span class="p">(</span>
+    <span class="n">p_tlsf</span><span class="o">-&gt;</span><span class="n">get_first_block_header</span><span class="p">(),</span> 
+    <span class="n">get_rddn_size_default</span><span class="p">(</span><span class="n">mem_pool_size</span> <span class="o">-</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">tlsf_raw_t</span><span class="p">))</span>
+<span class="p">);</span>
+<span class="n">p_tlsf</span><span class="o">-&gt;</span><span class="n">m_area_head</span> <span class="o">=</span> <span class="p">(</span><span class="n">area_info_t</span><span class="o">*</span><span class="p">)</span><span class="n">p_area_info_bhdr</span><span class="o">-&gt;</span><span class="n">get_buffer</span><span class="p">();</span>
+<span class="c1">// make first block of tlsf pool.
+</span><span class="c1"></span><span class="n">block_header_t</span><span class="o">*</span> <span class="n">p_first_bhdr</span> <span class="o">=</span> <span class="n">p_area_info_bhdr</span><span class="o">-&gt;</span><span class="n">get_next_block</span><span class="p">();</span>
+<span class="n">tlsf_free</span><span class="p">(</span><span class="n">p_first_bhdr</span><span class="o">-&gt;</span><span class="n">get_buffer</span><span class="p">(),</span> <span class="n">p_tlsf</span><span class="p">);</span>
+</code></pre></div>
+<p>TLSFメモリプールは普通のメモリプールとは違って扱うメモリ空間自体を拡張することが出来ます。ただし、拡張した別途のメモリ領域のアドレスは既存のTLSFと連続してない可能性があるので、リンクリスト（連結リスト）でアドレスを保持する必要があります。</p>
+
+<p>そのため、<code>tlsf_raw_t</code>の後には追加メモリ領域が保持するブロックのアドレス情報を持つ構造体、<code>area_info_t</code>がついて来ます。（ただし、<code>area_info_t</code>自体も特殊ブロックのバッファ部分に置かれるようになっています。）</p>
+
+<h3 id="process-area"><code>process_area()</code></h3>
+
+<p><code>process_area()</code>関数は、TLSFプールの初期メモリブロックを設定する関数です。初期で設定されるメモリブロックは以下となります。</p>
+
+<ul>
+<li><code>p_ib</code>：<code>area_info_t</code>のブロック：別途のメモリ領域を使えるようにする。</li>
+<li><code>p_next_b</code>：任意オブジェクトメモリ確保のためのブロック</li>
+<li><code>p_next_next_b</code>：メモリ領域の終わりを示すブロック（バッファのサイズは0）</li>
+</ul>
+
+<p><code>p_next_b</code>のバッファサイズを初期化するとき、または<code>p_ib</code>のバッファサイズを設定する時には必ずメモリが整列されなければならないため、<code>get_rddn_size_default()</code>と<code>get_rddn_size_default()</code>関数を使ってメモリサイズを調整します。</p>
+<div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="n">block_header_t</span><span class="o">*</span> <span class="n">p_next_b</span> <span class="o">=</span> <span class="n">p_ib</span><span class="o">-&gt;</span><span class="n">get_next_block</span><span class="p">();</span>
+<span class="n">p_next_b</span><span class="o">-&gt;</span><span class="n">set_buffer_size</span><span class="p">(</span><span class="n">get_rddn_size_default</span><span class="p">(</span>
+    <span class="n">size</span> <span class="o">-</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">block_header_t</span><span class="o">::</span><span class="n">sk_min_block_size</span> <span class="o">-</span> <span class="n">p_ib</span><span class="o">-&gt;</span><span class="n">get_block_size</span><span class="p">())</span>
+<span class="p">);</span>
+</code></pre></div>
+<p><code>size - 3 * block_header_t::sk_min_block_size - p_ib-&gt;get_block_size()</code>は、まずTLSF構造体を除外したメモリサイズに３つのブロックヘッダーサイズと、<code>area_info_t</code>分のメモリサイズを引いた、TLSFプールが生成された後で使えるメモリ量を示します。</p>
+
+<hr />
+
+<p>本関数に戻って、</p>
+<div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"> <span class="c1">// make first block of tlsf pool.
+</span><span class="c1"></span> <span class="n">block_header_t</span><span class="o">*</span> <span class="n">p_first_bhdr</span> <span class="o">=</span> <span class="n">p_area_info_bhdr</span><span class="o">-&gt;</span><span class="n">get_next_block</span><span class="p">();</span>
+ <span class="n">tlsf_free</span><span class="p">(</span><span class="n">p_first_bhdr</span><span class="o">-&gt;</span><span class="n">get_buffer</span><span class="p">(),</span> <span class="n">p_tlsf</span><span class="p">);</span>
+</code></pre></div>
+<p><code>p_next_b</code>部分のブロックがまだ使える状態ではないので、TLSFを管理する構造体の<code>bitmap</code>変数と<code>matrix</code>にアドレスをフラグを更新して使えるため<code>free</code>関数を呼びます。最後には<code>p_next_b</code>の使えるメモリ量を返して終わりです。</p>
+
+<h2 id="2-tlsf-malloc">2.<code>tlsf_malloc</code></h2>
+<div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="n">mem_size</span> <span class="o">=</span> <span class="n">calc_min_memblock_size</span><span class="p">(</span><span class="n">mem_size</span><span class="p">);</span>
+<span class="k">const</span> <span class="k">auto</span> <span class="n">rs_search</span>   <span class="o">=</span> <span class="n">mapping_search</span><span class="p">(</span><span class="n">mem_size</span><span class="p">);</span>
+<span class="k">const</span> <span class="k">auto</span> <span class="n">rs_suitable</span> <span class="o">=</span> <span class="n">find_suitable_block</span><span class="p">(</span><span class="n">p_tlsf_pool</span><span class="p">,</span> <span class="n">rs_search</span><span class="p">.</span><span class="n">flv</span><span class="p">,</span> <span class="n">rs_search</span><span class="p">.</span><span class="n">slv</span><span class="p">);</span>
+
+<span class="n">block_header_t</span><span class="o">*</span> <span class="n">p_b</span> <span class="o">=</span> <span class="n">rs_suitable</span><span class="p">.</span><span class="n">p_block_hdr</span><span class="p">;</span>
+<span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">p_b</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="k">nullptr</span><span class="p">;</span> <span class="p">}</span>
+<span class="k">if</span> <span class="p">(</span><span class="n">rs_suitable</span><span class="p">.</span><span class="n">flv</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span> <span class="o">||</span> <span class="n">rs_suitable</span><span class="p">.</span><span class="n">slv</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="k">nullptr</span><span class="p">;</span> <span class="p">}</span>
+</code></pre></div>
+<p>まず、TLSFプールから適当なメモリブロックを探します。一次に<code>mapping_search</code>関数で、First-IndexとSecond-Indexを取得し、最終に<code>find_suitable_block</code>で取得出来たブロックヘッダーのポインターと最終First-Index、Second-Indexを持ってくるようにします。</p>
+
+<h3 id="mapping-search"><code>mapping_search()</code></h3>
+<div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="k">const</span> <span class="k">auto</span> <span class="n">fl_sl</span> <span class="o">=</span> <span class="n">mapping_insert</span><span class="p">(</span><span class="n">size</span><span class="p">);</span>
+<span class="n">result</span><span class="p">.</span><span class="n">flv</span> <span class="o">=</span> <span class="n">fl_sl</span><span class="p">.</span><span class="n">first_lv</span><span class="p">;</span>
+<span class="n">result</span><span class="p">.</span><span class="n">slv</span> <span class="o">=</span> <span class="n">fl_sl</span><span class="p">.</span><span class="n">scnd_lv</span><span class="p">;</span>
+</code></pre></div>
+<p>まず<code>mapping_insert()</code>という関数を使って、First-Level Index（<code>flv</code>）とSecond-Level Index（<code>slv</code>）を取得します。</p>
+
+<h3 id="mapping-insert"><code>mapping_insert()</code></h3>
+<div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="k">if</span> <span class="p">(</span><span class="n">size</span> <span class="o">&lt;</span> <span class="n">k_small_block</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">result</span><span class="p">.</span><span class="n">first_lv</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="n">result</span><span class="p">.</span><span class="n">scnd_lv</span>  <span class="o">=</span> <span class="n">size</span> <span class="o">/</span> <span class="p">(</span><span class="n">k_small_block</span> <span class="o">/</span> <span class="n">tlsf_raw_t</span><span class="o">::</span><span class="n">k_sli_max</span><span class="p">);</span>
+<span class="p">}</span>
+<span class="k">else</span>
+<span class="p">{</span>
+    <span class="n">result</span><span class="p">.</span><span class="n">first_lv</span> <span class="o">=</span> <span class="n">ms_bit</span><span class="p">(</span><span class="n">size</span><span class="p">);</span>
+    <span class="n">result</span><span class="p">.</span><span class="n">scnd_lv</span>  <span class="o">=</span> 
+        <span class="p">(</span><span class="n">size</span> <span class="o">&gt;&gt;</span> <span class="p">(</span><span class="n">result</span><span class="p">.</span><span class="n">first_lv</span> <span class="o">-</span> <span class="n">tlsf_raw_t</span><span class="o">::</span><span class="n">k_sli_log2_max</span><span class="p">))</span> 
+      <span class="o">-</span> <span class="n">tlsf_raw_t</span><span class="o">::</span><span class="n">k_sli_max</span><span class="p">;</span>
+    <span class="n">result</span><span class="p">.</span><span class="n">first_lv</span> <span class="o">-=</span> <span class="n">tlsf_raw_t</span><span class="o">::</span><span class="n">k_fli_offset</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>この関数でFirst-Level IndexとSecond-Level Indexを持ってきます。ところで、ここで<code>size</code>は8Byte整列されたサイズです。そして定数は以下となります。</p>
+
+<ul>
+<li>k_small_block：128Byte</li>
+<li>tlsf_raw_t::k_sli_max：32</li>
+<li>tlsf_raw_t::k_sli_log2_max：5</li>
+<li>tlsf_raw_t::k_fli_offset：6（2^6 == 128Bytes）</li>
+</ul>
+
+<p>まず、<code>size</code>が128Byte以下になると、TLSFプールで提供されてるメモリブロックの中で一番小さいものが確保されるようになります。しかし、それ以上になるともっと適切なFLIとSLIの数値を持って来るため、下のようなアルゴリズムを通します。
+$$
+\begin{align}
+\text{mapping}(\text{size}) &amp;\rightarrow (f, s) \\<br />
+\text{mapping}(\text{size}) &amp;=
+\begin{cases}
+f := \lfloor log_2(size) \rfloor \\<br />
+s := size * \frac{2^{SLI}}{2^f} - 2^{SLI}
+\end{cases}
+\end{align}
+$$
+真ん中の<code>result.first_lv - tlsf_raw_t::k_sli_log2_max</code>は以下となります。
+$$
+\alpha = log_2(2^{f - SLI})
+$$
+上の関数では128Byte以下のブロックは全部FLIが0になるし、128Byte以上から1以上のインデックスを持つため、6を引く必要があります。最後に<code>first_lv</code>に6を引くのはそのためです。</p>
+
+<h3 id="find-suitable-block"><code>find_suitable_block()</code></h3>
+<div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="k">const</span> <span class="n">u32</span> <span class="n">tmp</span> <span class="o">=</span> <span class="n">p_tlsf</span><span class="o">-&gt;</span><span class="n">m_sl_bitmap</span><span class="p">[</span><span class="n">fl</span><span class="p">]</span> <span class="o">&amp;</span> <span class="p">(</span><span class="o">~</span><span class="mi">0</span> <span class="o">&lt;&lt;</span> <span class="n">sl</span><span class="p">);</span>
+<span class="k">if</span> <span class="p">(</span><span class="n">tmp</span><span class="p">)</span>
+<span class="p">{</span>   <span class="c1">// if tmp is not 0.
+</span><span class="c1"></span>    <span class="n">result</span><span class="p">.</span><span class="n">flv</span> <span class="o">=</span> <span class="n">fl</span><span class="p">;</span>
+    <span class="n">result</span><span class="p">.</span><span class="n">slv</span> <span class="o">=</span> <span class="n">ls_bit</span><span class="p">(</span><span class="n">tmp</span><span class="p">);</span>
+    <span class="n">result</span><span class="p">.</span><span class="n">p_block_hdr</span> <span class="o">=</span> <span class="n">p_tlsf</span><span class="o">-&gt;</span><span class="n">mp_matrix</span><span class="p">[</span><span class="n">result</span><span class="p">.</span><span class="n">flv</span><span class="p">][</span><span class="n">result</span><span class="p">.</span><span class="n">slv</span><span class="p">];</span>
+<span class="p">}</span>
+<span class="k">else</span>
+<span class="p">{</span>   <span class="c1">// if tmp is 0
+</span><span class="c1"></span>    <span class="n">result</span><span class="p">.</span><span class="n">flv</span> <span class="o">=</span> <span class="n">ls_bit</span><span class="p">(</span><span class="n">p_tlsf</span><span class="o">-&gt;</span><span class="n">m_fl_bitmap</span> <span class="o">&amp;</span> <span class="p">(</span><span class="o">~</span><span class="mi">0</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="n">fl</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)));</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">result</span><span class="p">.</span><span class="n">flv</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">result</span><span class="p">.</span><span class="n">slv</span> <span class="o">=</span> <span class="n">ls_bit</span><span class="p">(</span><span class="n">p_tlsf</span><span class="o">-&gt;</span><span class="n">m_sl_bitmap</span><span class="p">[</span><span class="n">result</span><span class="p">.</span><span class="n">flv</span><span class="p">]);</span>
+        <span class="n">result</span><span class="p">.</span><span class="n">p_block_hdr</span> <span class="o">=</span> <span class="n">p_tlsf</span><span class="o">-&gt;</span><span class="n">mp_matrix</span><span class="p">[</span><span class="n">result</span><span class="p">.</span><span class="n">flv</span><span class="p">][</span><span class="n">result</span><span class="p">.</span><span class="n">slv</span><span class="p">];</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><code>find_suitable_block()</code>関数は、<code>fl</code>と<code>sl</code>を使って最終的にマトリックスに登録されている、要請されたサイズより大きいか同じの適当なメモリブロックを返します。まず、最初にはSLI（Second-Level Index）を探索し、そしてFLIを探索する形でフリーブロックが位置されているFirst-IndexとSecond-Indexを取得します。そして、TLSF管理構造体にある配列から空いているブロックのアドレスを持って来るようにします。</p>
+
+<p>ただし、この<code>flv</code>と<code>slv</code>が0より低い値になると適合なブロック探しは失敗になります。</p>
+
+<h3 id="ls-bit-ms-bit"><code>ls_bit()</code> &amp; <code>ms_bit()</code></h3>
+
+<ul>
+<li>ls_bit：Find First Set（最初の１の値を持つビットの番地）を探します。</li>
+<li>ms_bit：Find Last Set（最後に１の値を持つビットの番地）を探します。</li>
+</ul>
+
+<p>普通のアルゴリズムでも値を計算することは出来るんですが、この関数の中ではもっとビットを早く計算するためにテーブルを使ってます。</p>
+<div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="k">static</span> <span class="k">constexpr</span> <span class="n">i32</span> <span class="n">sk_table</span><span class="p">[</span><span class="mi">256</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> 
+     <span class="c1">// ...
+</span><span class="c1"></span>     <span class="mi">7</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">7</span>
+<span class="p">};</span>
+
+<span class="c1">// in ms_bit (tls)
+</span><span class="c1"></span><span class="k">const</span> <span class="n">u32</span> <span class="n">x</span> <span class="o">=</span> <span class="p">(</span><span class="n">u32</span><span class="p">)</span><span class="n">val</span><span class="p">;</span>
+<span class="k">const</span> <span class="n">u32</span> <span class="n">a</span> <span class="o">=</span> <span class="p">[](</span><span class="k">const</span> <span class="n">u32</span> <span class="n">v</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">v</span> <span class="o">&lt;=</span> <span class="mh">0xFFFF</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="n">v</span> <span class="o">&lt;=</span> <span class="mh">0xFF</span> <span class="o">?</span> <span class="mi">0</span> <span class="o">:</span> <span class="mi">8</span><span class="p">;</span> <span class="p">}</span>
+    <span class="k">else</span>             <span class="p">{</span> <span class="k">return</span> <span class="n">v</span> <span class="o">&lt;=</span> <span class="mh">0xFFFFFF</span> <span class="o">?</span> <span class="mi">16</span> <span class="o">:</span> <span class="mi">24</span><span class="p">;</span> <span class="p">}</span>
+<span class="p">}(</span><span class="n">x</span><span class="p">);</span>
+<span class="k">return</span> <span class="n">sk_table</span><span class="p">[</span><span class="n">x</span> <span class="o">&gt;&gt;</span> <span class="n">a</span><span class="p">]</span> <span class="o">+</span> <span class="n">a</span><span class="p">;</span>
+</code></pre></div>
+<hr />
+
+<p>malloc関数に戻って…</p>
+<div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="n">extract_block_hdr</span><span class="p">(</span><span class="n">p_b</span><span class="p">,</span> <span class="n">p_tlsf_pool</span><span class="p">,</span> <span class="n">rs_suitable</span><span class="p">.</span><span class="n">flv</span><span class="p">,</span> <span class="n">rs_suitable</span><span class="p">.</span><span class="n">slv</span><span class="p">);</span>
+
+<span class="n">block_header_t</span><span class="o">*</span> <span class="n">p_nb</span> <span class="o">=</span> <span class="n">p_b</span><span class="o">-&gt;</span><span class="n">get_next_block</span><span class="p">();</span>
+<span class="n">mem_size</span> <span class="o">=</span> <span class="n">rs_search</span><span class="p">.</span><span class="n">rdup_size</span><span class="p">;</span>
+</code></pre></div>
+<p>有効なフリーメモリブロックを取得した後には、それをマトリックスから外す必要があります。そして、ブロックと連結されている（リンクリストとして）メモリブロックがある場合には、そのブロックをマトリックスに登録する必要があります。<code>extract_block_hdr</code>はそれをやってくれます。</p>
+
+<h3 id="extract-block-hdr"><code>extract_block_hdr()</code></h3>
+<div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"> <span class="n">block_header_t</span><span class="o">*</span> <span class="n">p_item</span> <span class="o">=</span> 
+     <span class="n">p_tlsf</span><span class="o">-&gt;</span><span class="n">mp_matrix</span><span class="p">[</span><span class="n">final_fl</span><span class="p">][</span><span class="n">final_sl</span><span class="p">]</span> <span class="o">=</span> <span class="n">p_b</span><span class="o">-&gt;</span><span class="n">get_free_ptrs</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">p_next</span><span class="p">;</span>
+ <span class="k">if</span> <span class="p">(</span><span class="n">p_item</span> <span class="o">!=</span> <span class="k">nullptr</span><span class="p">)</span>
+ <span class="p">{</span>
+     <span class="n">p_item</span><span class="o">-&gt;</span><span class="n">get_free_ptrs</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">p_prev</span> <span class="o">=</span> <span class="k">nullptr</span><span class="p">;</span>
+ <span class="p">}</span>
+ <span class="k">else</span>
+ <span class="p">{</span>
+     <span class="n">clear_bit</span><span class="p">(</span><span class="n">final_sl</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">p_tlsf</span><span class="o">-&gt;</span><span class="n">m_sl_bitmap</span><span class="p">[</span><span class="n">final_fl</span><span class="p">]);</span>
+     <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">p_tlsf</span><span class="o">-&gt;</span><span class="n">m_sl_bitmap</span><span class="p">[</span><span class="n">final_fl</span><span class="p">])</span>
+     <span class="p">{</span>
+         <span class="n">clear_bit</span><span class="p">(</span><span class="n">final_fl</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">p_tlsf</span><span class="o">-&gt;</span><span class="n">m_fl_bitmap</span><span class="p">);</span>
+     <span class="p">}</span>
+ <span class="p">}</span>
+</code></pre></div>
+<p>この関数は、フリーブロック<code>p_b</code>に連結しているまた新しいフリーブロックを同じFirst、Second-Indexに連結して次のメモリ確保に対する準備を行うことをやってくれます。またインデックスに該当する新しいフリーブロックがない場合にはTLSF構造体からFirst、Second-Indexを参照するためのビットマップ（<code>m_sl_bitmap</code>、<code>m_fl_bitmap</code>）から自分のインデックス値が取得出来ないようにリセットします。</p>
+
+<hr />
+<div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="k">if</span> <span class="p">(</span><span class="n">tmp_size</span> <span class="o">&gt;=</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">block_header_t</span><span class="p">))</span>
+<span class="p">{</span>   <span class="c1">// 分割する。
+</span><span class="c1"></span>    <span class="n">block_header_t</span><span class="o">*</span> <span class="n">p_b2</span> <span class="o">=</span> <span class="p">(</span><span class="n">block_header_t</span><span class="o">*</span><span class="p">)((</span><span class="n">u8</span><span class="o">*</span><span class="p">)</span><span class="n">p_b</span><span class="o">-&gt;</span><span class="n">get_buffer</span><span class="p">()</span> <span class="o">+</span> <span class="n">mem_size</span><span class="p">);</span>
+    <span class="c1">// Set p_b2 information...
+</span><span class="c1"></span>  
+    <span class="n">p_nb</span><span class="o">-&gt;</span><span class="n">set_prev_bhdr</span><span class="p">(</span><span class="n">p_b2</span><span class="p">);</span>
+    <span class="k">const</span> <span class="k">auto</span> <span class="p">[</span><span class="n">split_fl</span><span class="p">,</span> <span class="n">split_sl</span><span class="p">]</span> <span class="o">=</span> <span class="n">mapping_insert</span><span class="p">(</span><span class="n">tmp_size</span><span class="p">);</span>
+    <span class="n">insert_block</span><span class="p">(</span><span class="n">p_b2</span><span class="p">,</span> <span class="n">p_tlsf_pool</span><span class="p">,</span> <span class="n">split_fl</span><span class="p">,</span> <span class="n">split_sl</span><span class="p">);</span>
+  
+    <span class="c1">// p_b2の設定が終わったら、p_bのサイズを更新する。
+</span><span class="c1"></span><span class="p">}</span>
+<span class="k">else</span>
+<span class="p">{</span>
+    <span class="n">p_nb</span><span class="o">-&gt;</span><span class="n">set_prev_freed</span><span class="p">(</span><span class="nb">false</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>最後に、<code>tmp_size := p_b-&gt;block_size - mem_size</code>を計算し、確保されたメモリの量に対して新しい空きブロックが作れたら作るようにします。空きブロックが作られたら、<code>insert_block()</code>関数でTLSF構造体の空きブロック管理マトリックスに入れるようにします。</p>
+
+<h3 id="insert-block"><code>insert_block()</code></h3>
+<div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="n">free_ptr_t</span><span class="o">*</span> <span class="n">p_free_ptr</span> <span class="o">=</span> <span class="n">p_b</span><span class="o">-&gt;</span><span class="n">get_free_ptrs</span><span class="p">();</span>
+<span class="n">p_free_ptr</span><span class="o">-&gt;</span><span class="n">p_prev</span> <span class="o">=</span> <span class="k">nullptr</span><span class="p">;</span>
+<span class="n">p_free_ptr</span><span class="o">-&gt;</span><span class="n">p_next</span> <span class="o">=</span> <span class="n">p_tlsf</span><span class="o">-&gt;</span><span class="n">mp_matrix</span><span class="p">[</span><span class="n">final_fl</span><span class="p">][</span><span class="n">final_sl</span><span class="p">];</span>
+
+<span class="k">if</span> <span class="p">(</span><span class="n">p_tlsf</span><span class="o">-&gt;</span><span class="n">mp_matrix</span><span class="p">[</span><span class="n">final_fl</span><span class="p">][</span><span class="n">final_sl</span><span class="p">])</span>
+<span class="p">{</span>
+    <span class="n">p_tlsf</span><span class="o">-&gt;</span><span class="n">mp_matrix</span><span class="p">[</span><span class="n">final_fl</span><span class="p">][</span><span class="n">final_sl</span><span class="p">]</span><span class="o">-&gt;</span><span class="n">get_free_ptrs</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">p_prev</span><span class="o">=</span> <span class="n">p_b</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="n">p_tlsf</span><span class="o">-&gt;</span><span class="n">mp_matrix</span><span class="p">[</span><span class="n">final_fl</span><span class="p">][</span><span class="n">final_sl</span><span class="p">]</span> <span class="o">=</span> <span class="n">p_b</span><span class="p">;</span>
+</code></pre></div>
+<p>空きブロック<code>p_b</code>を空きブロック管理マトリックスに入れます。ただし、指定されたインデックスにはすでに空きブロックがあるかもしれません。そのときにはリンクリストで２つを繋ぐようにします。こうすることで、<code>extract_block_hdr</code>などで接近した複数のブロックが一つずつ抜かれて使えるようになります。</p>
+
+<hr />
+
+<p>最後に、取得出来た空きブロック<code>p_b</code>の設定をし、リターン値として返せば終わります。</p>
+
+<h2 id="3-tlsf-realloc">3.<code>tlsf_realloc</code></h2>
+
+<p>TLSFの<code>realloc</code>アルゴリズムは３つの分岐に分かれます。</p>
+
+<ol>
+<li>再確保するサイズが既存のサイズより小さく、使ってるブロックが使い回せる場合</li>
+<li>確保するサイズは既存より大きいが、隣接する次のブロックを使って確保できる場合</li>
+<li>１も２も当てはまらなく、<code>malloc</code>をして完全に新しいブロックを確保する場合</li>
+</ol>
+
+<h3 id="1-サイズが既存のサイズより小さい時">1. サイズが既存のサイズより小さい時</h3>
+
+<p>まず、サイズが小さくて隣接したブロックが空きブロックの場合には、その空きブロックと今の余りのメモリバッファを合わせて大きい空きブロックが作れるかを判断することが出来ます。以下のロジックではそれを判断し、満足したら併合するようにしています。</p>
+<div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="k">if</span> <span class="p">(</span><span class="n">p_next_bhdr</span><span class="o">-&gt;</span><span class="n">is_freed</span><span class="p">())</span>
+<span class="p">{</span>
+    <span class="k">const</span> <span class="k">auto</span> <span class="p">[</span><span class="n">next_fl</span><span class="p">,</span> <span class="n">next_sl</span><span class="p">]</span> <span class="o">=</span> <span class="n">mapping_insert</span><span class="p">(</span><span class="n">p_next_bhdr</span><span class="o">-&gt;</span><span class="n">get_block_size</span><span class="p">());</span>
+    <span class="n">extract_block</span><span class="p">(</span><span class="n">p_next_bhdr</span><span class="p">,</span> <span class="n">p_tlsf</span><span class="p">,</span> <span class="n">next_fl</span><span class="p">,</span> <span class="n">next_sl</span><span class="p">);</span>
+
+    <span class="n">old_size</span> <span class="o">+=</span> <span class="n">p_next_bhdr</span><span class="o">-&gt;</span><span class="n">get_block_size_with_header</span><span class="p">();</span>
+    <span class="n">p_next_bhdr</span> <span class="o">=</span> <span class="n">p_next_bhdr</span><span class="o">-&gt;</span><span class="n">get_next_block</span><span class="p">();</span>
+<span class="p">}</span>
+
+<span class="n">u64</span> <span class="n">new_free_size</span> <span class="o">=</span> <span class="n">old_size</span> <span class="o">-</span> <span class="n">new_size</span><span class="p">;</span>
+<span class="k">if</span> <span class="p">(</span><span class="n">new_free_size</span> <span class="o">&gt;=</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">block_header_t</span><span class="p">))</span>
+<span class="p">{</span>
+    <span class="n">new_free_size</span> <span class="o">-=</span> <span class="n">block_header_t</span><span class="o">::</span><span class="n">sk_block_header_ovhd</span><span class="p">;</span>
+    <span class="k">auto</span><span class="o">*</span> <span class="n">p_new_bhdr</span> <span class="o">=</span> <span class="p">(</span><span class="n">block_header_t</span><span class="o">*</span><span class="p">)((</span><span class="n">u8</span><span class="o">*</span><span class="p">)</span><span class="n">p_bhdr</span><span class="o">-&gt;</span><span class="n">get_buffer</span><span class="p">()</span> <span class="o">+</span> <span class="n">new_size</span><span class="p">);</span>
+    <span class="c1">// p_new_bhdrの設定
+</span><span class="c1"></span>    <span class="c1">// p_next_next_bhdr (既存p_next_bhdrの次ブロック)をp_newに連結
+</span><span class="c1"></span>　　 <span class="c1">// p_new_bhdrをマトリックスに挿入
+</span><span class="c1"></span>    <span class="k">const</span> <span class="k">auto</span> <span class="p">[</span><span class="n">new_fl</span><span class="p">,</span> <span class="n">new_sl</span><span class="p">]</span> <span class="o">=</span> <span class="n">mapping_insert</span><span class="p">(</span><span class="n">new_free_size</span><span class="p">);</span>
+    <span class="n">insert_block</span><span class="p">(</span><span class="n">p_new_bhdr</span><span class="p">,</span> <span class="n">p_tlsf</span><span class="p">,</span> <span class="n">new_fl</span><span class="p">,</span> <span class="n">new_sl</span><span class="p">);</span>
+    <span class="c1">// 最後にp_bの情報を更新
+</span><span class="c1"></span><span class="p">}</span>
+</code></pre></div>
+<h3 id="extract-block"><code>extract_block()</code></h3>
+
+<p>この関数は<code>extract_block_hdr()</code>に似ていますが、自分の前後ブロックを連結させて、空きブロックマトリックスから自分を抜いて参照させないようにしています。ただし、マトリックスリストに先頭に見えないとマトリックスでの削除はされません。</p>
+
+<p>なぜ先頭に出てからこそ削除できるかはわからないですが、多分マトリックスに接近する時に必要となるFirst-IndexとSecond-Indexが前後同じになるから、わざとリンクリストを一通り回って削除するかを判断しなくても済ませるのではないかと思ってます。（間違ってるかもしれません）</p>
+<div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="k">if</span> <span class="p">(</span><span class="n">p_free_ptr</span><span class="o">-&gt;</span><span class="n">p_next</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">p_free_ptr</span><span class="o">-&gt;</span><span class="n">p_next</span><span class="o">-&gt;</span><span class="n">get_free_ptrs</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">p_prev</span> <span class="o">=</span> <span class="n">p_free_ptr</span><span class="o">-&gt;</span><span class="n">p_prev</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="k">if</span> <span class="p">(</span><span class="n">p_free_ptr</span><span class="o">-&gt;</span><span class="n">p_prev</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">p_free_ptr</span><span class="o">-&gt;</span><span class="n">p_prev</span><span class="o">-&gt;</span><span class="n">get_free_ptrs</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">p_next</span> <span class="o">=</span> <span class="n">p_free_ptr</span><span class="o">-&gt;</span><span class="n">p_next</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="k">if</span> <span class="p">(</span><span class="k">auto</span><span class="o">*</span> <span class="n">p_matrix_b</span> <span class="o">=</span> <span class="n">p_tlsf</span><span class="o">-&gt;</span><span class="n">mp_matrix</span><span class="p">[</span><span class="n">final_fl</span><span class="p">][</span><span class="n">final_sl</span><span class="p">];</span> <span class="n">p_matrix_b</span> <span class="o">==</span> <span class="n">p_b</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">p_matrix_b</span> <span class="o">=</span> <span class="n">p_tlsf</span><span class="o">-&gt;</span><span class="n">mp_matrix</span><span class="p">[</span><span class="n">final_fl</span><span class="p">][</span><span class="n">final_sl</span><span class="p">]</span> <span class="o">=</span> <span class="n">p_free_ptr</span><span class="o">-&gt;</span><span class="n">p_next</span><span class="p">;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">p_matrix_b</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">clear_bit</span><span class="p">(</span><span class="n">final_sl</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">p_tlsf</span><span class="o">-&gt;</span><span class="n">m_sl_bitmap</span><span class="p">[</span><span class="n">final_fl</span><span class="p">]);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">p_tlsf</span><span class="o">-&gt;</span><span class="n">m_sl_bitmap</span><span class="p">[</span><span class="n">final_fl</span><span class="p">])</span>
+        <span class="p">{</span>
+            <span class="n">clear_bit</span><span class="p">(</span><span class="n">final_fl</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">p_tlsf</span><span class="o">-&gt;</span><span class="n">m_fl_bitmap</span><span class="p">);</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<hr />
+
+<h3 id="2-サイズが既存より大きいが-隣接空きブロックで解決できる場合">2. サイズが既存より大きいが、隣接空きブロックで解決できる場合</h3>
+
+<p>隣接した空きブロックをくっつけることでサイズの問題が解決できれば、空きブロックをマトリックスから抜いてくっつけて、そして余ったメモリ空間を新しい空きブロックとして作ります。</p>
+<div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="k">if</span> <span class="p">(</span><span class="n">new_size</span> <span class="o">&lt;=</span> <span class="p">(</span><span class="n">old_size</span> <span class="o">+</span> <span class="n">p_next_bhdr</span><span class="o">-&gt;</span><span class="n">get_block_size</span><span class="p">()))</span>
+<span class="p">{</span>
+    <span class="n">p_tlsf</span><span class="o">-&gt;</span><span class="n">m_used_mem</span> <span class="o">-=</span> <span class="n">p_bhdr</span><span class="o">-&gt;</span><span class="n">get_block_size_with_header</span><span class="p">();</span>
+
+    <span class="k">const</span> <span class="k">auto</span> <span class="p">[</span><span class="n">next_fl</span><span class="p">,</span> <span class="n">next_sl</span><span class="p">]</span> <span class="o">=</span> <span class="n">mapping_insert</span><span class="p">(</span><span class="n">p_next_bhdr</span><span class="o">-&gt;</span><span class="n">get_block_size</span><span class="p">());</span>
+    <span class="n">extract_block</span><span class="p">(</span><span class="n">p_next_bhdr</span><span class="p">,</span> <span class="n">p_tlsf</span><span class="p">,</span> <span class="n">next_fl</span><span class="p">,</span> <span class="n">next_sl</span><span class="p">);</span>
+    <span class="c1">// ...
+</span><span class="c1"></span>    <span class="n">p_next_bhdr</span> <span class="o">=</span> <span class="n">p_bhdr</span><span class="o">-&gt;</span><span class="n">get_next_block</span><span class="p">();</span>
+    <span class="c1">// ...
+</span><span class="c1"></span>
+    <span class="n">u64</span> <span class="n">new_free_size</span> <span class="o">=</span> <span class="n">p_bhdr</span><span class="o">-&gt;</span><span class="n">get_block_size</span><span class="p">()</span> <span class="o">-</span> <span class="n">new_size</span><span class="p">;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">new_free_size</span> <span class="o">&gt;=</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">block_header_t</span><span class="p">))</span>
+    <span class="p">{</span>
+        <span class="n">new_free_size</span> <span class="o">-=</span> <span class="n">block_header_t</span><span class="o">::</span><span class="n">sk_block_header_ovhd</span><span class="p">;</span>
+        <span class="k">auto</span><span class="o">*</span> <span class="n">p_new_bhdr</span> <span class="o">=</span> <span class="p">(</span><span class="n">block_header_t</span><span class="o">*</span><span class="p">)((</span><span class="n">u8</span><span class="o">*</span><span class="p">)</span><span class="n">p_bhdr</span><span class="o">-&gt;</span><span class="n">get_buffer</span><span class="p">()</span> <span class="o">+</span> <span class="n">new_size</span><span class="p">);</span>
+        <span class="c1">// ...
+</span><span class="c1"></span>        <span class="c1">// ...
+</span><span class="c1"></span>
+        <span class="k">const</span> <span class="k">auto</span> <span class="p">[</span><span class="n">new_fl</span><span class="p">,</span> <span class="n">new_sl</span><span class="p">]</span> <span class="o">=</span> <span class="n">mapping_insert</span><span class="p">(</span><span class="n">new_free_size</span><span class="p">);</span>
+        <span class="n">insert_block</span><span class="p">(</span><span class="n">p_new_bhdr</span><span class="p">,</span> <span class="n">p_tlsf</span><span class="p">,</span> <span class="n">new_fl</span><span class="p">,</span> <span class="n">new_sl</span><span class="p">);</span>
+        <span class="c1">// ...
+</span><span class="c1"></span>    <span class="p">}</span>
+  
+    <span class="c1">// ...
+</span><span class="c1"></span>    <span class="k">return</span> <span class="n">p_data</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="3-mallocで新しいブロックを探すしかない場合">3. mallocで新しいブロックを探すしかない場合</h3>
+
+<p>どうしようもないので<code>malloc</code>で新しいブロックを探します。探すことが出来たら、<code>memcpy</code>で既存のブロックの内容を新しいブロックにコピーします。ただし、この場合だとPODでしかちゃんとコピーが出来ないのでC++のクラスの情報が入ったブロックをコピーしたい場合には特殊なロジックが要るかもしれません。</p>
+
+<p>最後には既存のブロックを<code>free</code>します。（<code>tlsf_free()</code>）</p>
+<div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="c1">// Otherwise, we need to find another free-block.
+</span><span class="c1"></span><span class="n">block_buffer_t</span><span class="o">*</span> <span class="n">p_new_buffer</span> <span class="o">=</span> <span class="p">(</span><span class="n">block_buffer_t</span><span class="o">*</span><span class="p">)</span><span class="n">tlsf_malloc</span><span class="p">(</span><span class="n">new_size</span><span class="p">,</span> <span class="n">p_tlsf</span><span class="p">);</span>
+<span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">p_new_buffer</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="k">nullptr</span><span class="p">;</span> <span class="p">}</span>
+
+<span class="k">const</span> <span class="n">u64</span> <span class="n">copy_size</span> <span class="o">=</span> <span class="n">p_bhdr</span><span class="o">-&gt;</span><span class="n">get_block_size</span><span class="p">()</span> <span class="o">&gt;</span> <span class="n">new_size</span> 
+    <span class="o">?</span> <span class="nl">new_size</span> 
+    <span class="p">:</span> <span class="n">p_bhdr</span><span class="o">-&gt;</span><span class="n">get_block_size</span><span class="p">();</span>
+<span class="n">memcpy</span><span class="p">(</span><span class="n">p_new_buffer</span><span class="p">,</span> <span class="n">p_buffer</span><span class="p">,</span> <span class="n">copy_size</span><span class="p">);</span>
+<span class="n">tlsf_free</span><span class="p">(</span><span class="n">p_buffer</span><span class="p">,</span> <span class="n">p_tlsf</span><span class="p">);</span>
+</code></pre></div>
+<h2 id="4-tlsf-free">4.<code>tlsf_free()</code></h2>
+
+<p>確保したメモリブロックを解除したい場合にはこの関数を使います。（ただし、PODタイプのみ）<br>しかしメモリ解除をする時に、今解除するメモリブロックに隣接したブロックが空き（フリー）かを確認し、空きだったら併合して一つのブロックに纏めさせることも出来ます。</p>
+<div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="c1">// 消す前に次のブロックがFreeなのかを確認する。
+</span><span class="c1"></span><span class="k">if</span> <span class="p">(</span><span class="n">block_header_t</span><span class="o">*</span> <span class="n">p_temp_bhdr</span> <span class="o">=</span> <span class="n">p_bhdr</span><span class="o">-&gt;</span><span class="n">get_next_block</span><span class="p">();</span>
+    <span class="n">p_temp_bhdr</span><span class="o">-&gt;</span><span class="n">is_freed</span><span class="p">())</span>
+<span class="p">{</span>   <span class="c1">// 併合
+</span><span class="c1"></span>    <span class="k">const</span> <span class="k">auto</span> <span class="p">[</span><span class="n">fl</span><span class="p">,</span> <span class="n">sl</span><span class="p">]</span> <span class="o">=</span> <span class="n">mapping_insert</span><span class="p">(</span><span class="n">p_temp_bhdr</span><span class="o">-&gt;</span><span class="n">get_block_size</span><span class="p">());</span>
+    <span class="n">extract_block</span><span class="p">(</span><span class="n">p_temp_bhdr</span><span class="p">,</span> <span class="n">p_tlsf_pool</span><span class="p">,</span> <span class="n">fl</span><span class="p">,</span> <span class="n">sl</span><span class="p">);</span>
+    <span class="c1">// 後処理
+</span><span class="c1"></span><span class="p">}</span>
+
+<span class="c1">// 消す前に前のブロックがFreeなのかを確認する。
+</span><span class="c1"></span><span class="k">if</span> <span class="p">(</span><span class="n">p_bhdr</span><span class="o">-&gt;</span><span class="n">is_prev_freed</span><span class="p">())</span>
+<span class="p">{</span>
+    <span class="n">block_header_t</span><span class="o">*</span> <span class="n">p_prev_bhdr</span> <span class="o">=</span> <span class="n">p_bhdr</span><span class="o">-&gt;</span><span class="n">get_prev_bhdr</span><span class="p">();</span>
+    <span class="c1">// 併合
+</span><span class="c1"></span>    <span class="k">const</span> <span class="k">auto</span> <span class="p">[</span><span class="n">fl</span><span class="p">,</span> <span class="n">sl</span><span class="p">]</span> <span class="o">=</span> <span class="n">mapping_insert</span><span class="p">(</span><span class="n">p_prev_bhdr</span><span class="o">-&gt;</span><span class="n">get_block_size</span><span class="p">());</span>
+    <span class="n">extract_block</span><span class="p">(</span><span class="n">p_prev_bhdr</span><span class="p">,</span> <span class="n">p_tlsf_pool</span><span class="p">,</span> <span class="n">fl</span><span class="p">,</span> <span class="n">sl</span><span class="p">);</span>
+    <span class="c1">// 後処理
+</span><span class="c1"></span><span class="p">}</span>
+</code></pre></div>
+<p>最後に空いたブロックを空きブロック管理マトリックスに入れます。</p>
+<div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="c1">// Final mapping insert.
+</span><span class="c1"></span><span class="k">const</span> <span class="k">auto</span> <span class="p">[</span><span class="n">fl</span><span class="p">,</span> <span class="n">sl</span><span class="p">]</span> <span class="o">=</span> <span class="n">mapping_insert</span><span class="p">(</span><span class="n">p_bhdr</span><span class="o">-&gt;</span><span class="n">get_block_size</span><span class="p">());</span>
+<span class="n">insert_block</span><span class="p">(</span><span class="n">p_bhdr</span><span class="p">,</span> <span class="n">p_tlsf_pool</span><span class="p">,</span> <span class="n">fl</span><span class="p">,</span> <span class="n">sl</span><span class="p">);</span>
+</code></pre></div>
+<h2 id="5-tlsf-raw-destroy">5.<code>tlsf_raw_destroy</code></h2>
+<div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="n">tlsf_raw_t</span><span class="o">*</span> <span class="n">p_tlsf</span> <span class="o">=</span> <span class="p">(</span><span class="n">tlsf_raw_t</span><span class="o">*</span><span class="p">)</span><span class="n">p_pool</span><span class="p">;</span>
+<span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">p_tlsf</span><span class="o">-&gt;</span><span class="n">has_signature</span><span class="p">())</span>
+<span class="p">{</span>
+    <span class="k">return</span> <span class="nb">false</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="k">return</span> <span class="n">p_tlsf</span><span class="o">-&gt;</span><span class="n">m_used_mem</span> <span class="o">==</span> <span class="mi">0</span><span class="p">;</span>
+</code></pre></div>
+<p>TLSF構造体のシグニチャーを無効化します。それだけです。</p>
+
+<h1 id="改善点">改善点</h1>
+
+<h3 id="ビットシフトアルゴリズムがまだ完全に理解できてない">・ビットシフトアルゴリズムがまだ完全に理解できてない</h3>
+
+<p>First-IndexとSecond-Indexの数値をビットマップ変数に更新するためのアルゴリズムが完全には理解できませんでした。テストケースを作って、どのようにフラグ値が変わるのかを詳しく調べてみたいですね。</p>
+
+<h3 id="まだscalableではない">・まだScalableではない</h3>
+
+<p>TLSFの特徴の一つである、メモリプールをくっつけて更に多くのメモリが確保出来るようにするための機能がまだ実装してませんでした。次の記事を書くときには今抜かれた機能まで付けて、それの説明までしたいです。</p>
+
+<h1 id="まとめ">まとめ</h1>
+
+<p>最後までがんばります。（適当）</p>
+]]></content>
+		</item>
+		
+		<item>
+			<title>行列変数のネーミングについて</title>
+			<link>https://liliilli.github.io/posts/matrix_name/</link>
+			<pubDate>Fri, 13 Mar 2020 13:11:47 +0900</pubDate>
+			
+			<guid>https://liliilli.github.io/posts/matrix_name/</guid>
+			<description>https://www.sebastiansylvan.com/post/matrix_naming_convention/ D3Dスタイル（Row-Major、左から右へ演算していくスタイル）でやると、 vector4_t transformed_point = point * M * A; が普通だけど、このままじゃ後でまた見る時に何</description>
+			<content type="html"><![CDATA[<p><a href="https://www.sebastiansylvan.com/post/matrix_naming_convention/">https://www.sebastiansylvan.com/post/matrix_naming_convention/</a></p>
+
+<p>D3Dスタイル（Row-Major、左から右へ演算していくスタイル）でやると、</p>
+<div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="n">vector4_t</span> <span class="n">transformed_point</span> <span class="o">=</span> <span class="n">point</span> <span class="o">*</span> <span class="n">M</span> <span class="o">*</span> <span class="n">A</span><span class="p">;</span>
+</code></pre></div>
+<p>が普通だけど、このままじゃ後でまた見る時に何をしているかが分からないかもしれない。</p>
+
+<p>なので、お勧めしている変数名の書き方としては、<code>foo_to_bar</code>または<code>bar_from_too</code>（これはOpenGLかVulkan系列）みたいに座標空間から別の座標空間の名前を書くのが良いらしい。例えば、<code>world_to_view</code>または<code>view_to_projection</code>みたいな…<code>transform_matrix</code>のような名前よりは全然意味がわかるようになってる。</p>
+
+<p>ということで、お勧めした変数ネーミングスタイルで例を書いてみると、</p>
+<div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="k">const</span> <span class="n">matrix4_t</span> <span class="n">object_to_view</span> <span class="o">=</span> <span class="n">object_to_world</span> <span class="o">*</span> <span class="n">world_to_view</span><span class="p">;</span>
+<span class="k">const</span> <span class="n">matrix4_t</span> <span class="n">object_to_proj</span> <span class="o">=</span> <span class="n">object_to_view</span> <span class="o">*</span> <span class="n">view_to_proj</span><span class="p">;</span>
+
+<span class="k">const</span> <span class="n">vector4_t</span> <span class="n">point_in_proj</span> <span class="o">=</span> <span class="n">point</span> <span class="o">*</span> <span class="n">object_to_proj</span><span class="p">;</span>
+</code></pre></div>
+<p>逆行列の場合には、単純に前の座標空間と後ろの座標空間の名前を書き換えることだけ。</p>
+<div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="k">const</span> <span class="n">matrix4_t</span> <span class="n">view_to_object</span> <span class="o">=</span> <span class="p">(</span><span class="n">object_to_world</span> <span class="o">*</span> <span class="n">world_to_view</span><span class="p">).</span><span class="n">to_inverse</span><span class="p">();</span>
+
+<span class="k">const</span> <span class="n">matrix4_t</span> <span class="n">head_to_right_hand</span> <span class="o">=</span> <span class="n">rigth_hand_to_head</span><span class="p">.</span><span class="n">to_inverse</span><span class="p">();</span>
+<span class="k">const</span> <span class="n">matrix4_t</span> <span class="n">object_to_right_hand</span> <span class="o">=</span> 
+    <span class="n">object_to_world</span> <span class="o">*</span> <span class="n">world_to_head</span> <span class="o">*</span> <span class="n">head_to_right_hand</span><span class="p">;</span>
+</code></pre></div>
+<p>OpenGLでは、<code>to</code>の代わりに<code>from</code>を使い、そして演算の手順に沿って逆に書く。</p>
+<div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="k">const</span> <span class="n">matrix4_t</span> <span class="n">proj_from_object</span> <span class="o">=</span> 
+    <span class="n">proj_from_view</span> <span class="o">*</span> <span class="n">view_from_world</span> <span class="o">*</span> <span class="n">world_from_object</span><span class="p">;</span>
+</code></pre></div>]]></content>
+		</item>
 		
 		<item>
 			<title>自分でやるDyのCMakeListsファイル説明</title>

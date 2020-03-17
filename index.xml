@@ -7,10 +7,28 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright>
-    <lastBuildDate>Sun, 08 Mar 2020 11:48:19 +0900</lastBuildDate>
+    <lastBuildDate>Sun, 15 Mar 2020 19:13:14 +0900</lastBuildDate>
     
 	<atom:link href="https://liliilli.github.io/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>TLSF Allocatorを作ってみた</title>
+      <link>https://liliilli.github.io/posts/tlsf_basic/</link>
+      <pubDate>Sun, 15 Mar 2020 19:13:14 +0900</pubDate>
+      
+      <guid>https://liliilli.github.io/posts/tlsf_basic/</guid>
+      <description>TLSFとは何なのか http://www.gii.upv.es/tlsf/ http://www.gii.upv.es/tlsf/files/ecrts04_tlsf.pdf https://www.researchgate.net/publication/234785757_A_comparison_of_memory_allocators_for_real-time_applications TLSF（Two-Level Segregate Fit）は、リアルタイムで要求される速度、安定性、決定性（Deterministic</description>
+    </item>
+    
+    <item>
+      <title>行列変数のネーミングについて</title>
+      <link>https://liliilli.github.io/posts/matrix_name/</link>
+      <pubDate>Fri, 13 Mar 2020 13:11:47 +0900</pubDate>
+      
+      <guid>https://liliilli.github.io/posts/matrix_name/</guid>
+      <description>https://www.sebastiansylvan.com/post/matrix_naming_convention/ D3Dスタイル（Row-Major、左から右へ演算していくスタイル）でやると、 vector4_t transformed_point = point * M * A; が普通だけど、このままじゃ後でまた見る時に何</description>
+    </item>
     
     <item>
       <title>自分でやるDyのCMakeListsファイル説明</title>
