@@ -7,10 +7,19 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright>
-    <lastBuildDate>Sun, 15 Mar 2020 19:13:14 +0900</lastBuildDate>
+    <lastBuildDate>Sat, 25 Apr 2020 13:28:07 +0900</lastBuildDate>
     
 	<atom:link href="https://liliilli.github.io/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>DirectInput8 導入メモ</title>
+      <link>https://liliilli.github.io/posts/dinput8/</link>
+      <pubDate>Sat, 25 Apr 2020 13:28:07 +0900</pubDate>
+      
+      <guid>https://liliilli.github.io/posts/dinput8/</guid>
+      <description>https://en.wikipedia.org/wiki/DirectInput https://bell0bytes.eu/directinput/ https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee416842(v=vs.85)?redirectedfrom=MSDN https://docs.microsoft.com/ko-kr/windows/win32/xinput/xinput-and-directinput?redirectedfrom=MSDN DirectInputとは DirectInputは、キーボード、マウス、そして各種のコントローラーを含んでほぼ同一な挙動制御をサポー</description>
+    </item>
     
     <item>
       <title>TLSF Allocatorを作ってみた</title>
