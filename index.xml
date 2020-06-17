@@ -7,10 +7,19 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright>
-    <lastBuildDate>Sat, 25 Apr 2020 13:28:07 +0900</lastBuildDate>
+    <lastBuildDate>Wed, 17 Jun 2020 12:00:15 +0900</lastBuildDate>
     
 	<atom:link href="https://liliilli.github.io/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Low Level Thinking in High Shader Languages</title>
+      <link>https://liliilli.github.io/posts/shader_opti_memo/</link>
+      <pubDate>Wed, 17 Jun 2020 12:00:15 +0900</pubDate>
+      
+      <guid>https://liliilli.github.io/posts/shader_opti_memo/</guid>
+      <description>これは参照項目のGDCのリンクを読んで適当にメモしたものです。詳しくは参照のリンクをご覧ください。 Goal of this presentation ローレベル思考はいまだに有効である</description>
+    </item>
     
     <item>
       <title>DirectInput8 導入メモ</title>

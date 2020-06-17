@@ -1,86 +1,52 @@
 <!DOCTYPE html>
 <html lang="en-us">
-
 <head>
 	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<meta http-equiv="X-UA-Compatible" content="ie=edge">
-	<meta name="theme-color" content="#494f5c">
-	<meta name="msapplication-TileColor" content="#494f5c">
-<meta itemprop="name" content="TLSF Allocatorを作ってみた">
-<meta itemprop="description" content="TLSFとは何なのか http://www.gii.upv.es/tlsf/ http://www.gii.upv.es/tlsf/files/ecrts04_tlsf.pdf https://www.researchgate.net/publication/234785757_A_comparison_of_memory_allocators_for_real-time_applications TLSF（Two-Level Segregate Fit）は、リアルタイムで要求される速度、安定性、決定性（Deterministic">
-
-
-<meta itemprop="datePublished" content="2020-03-15T19:13:14&#43;09:00" />
-<meta itemprop="dateModified" content="2020-03-17T23:17:23&#43;09:00" />
-<meta itemprop="wordCount" content="8278">
-
-
-
-<meta itemprop="keywords" content="untagged," />
-<meta property="og:title" content="TLSF Allocatorを作ってみた" />
-<meta property="og:description" content="TLSFとは何なのか http://www.gii.upv.es/tlsf/ http://www.gii.upv.es/tlsf/files/ecrts04_tlsf.pdf https://www.researchgate.net/publication/234785757_A_comparison_of_memory_allocators_for_real-time_applications TLSF（Two-Level Segregate Fit）は、リアルタイムで要求される速度、安定性、決定性（Deterministic" />
-<meta property="og:type" content="article" />
-<meta property="og:url" content="https://liliilli.github.io/posts/tlsf_basic/" />
-<meta property="article:published_time" content="2020-03-15T19:13:14+09:00" />
-<meta property="article:modified_time" content="2020-03-17T23:17:23+09:00" />
-<meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="TLSF Allocatorを作ってみた"/>
-<meta name="twitter:description" content="TLSFとは何なのか http://www.gii.upv.es/tlsf/ http://www.gii.upv.es/tlsf/files/ecrts04_tlsf.pdf https://www.researchgate.net/publication/234785757_A_comparison_of_memory_allocators_for_real-time_applications TLSF（Two-Level Segregate Fit）は、リアルタイムで要求される速度、安定性、決定性（Deterministic"/>
-
-	<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-	<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-	<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-	<link rel="manifest" href="/site.webmanifest">
-	<link rel="mask-icon" href="/safari-pinned-tab.svg" color="">
-	<link rel="shortcut icon" href="/favicon.ico">
-
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<style type=text/css>body{font-family:monospace;}</style>
 	<title>TLSF Allocatorを作ってみた</title>
-	<link rel="stylesheet" href="https://liliilli.github.io/css/style.min.5ee5e7976cd09872c64e40a582206543f6aa38c69a8c43898aadc70040344b92.css" integrity="sha256-XuXnl2zQmHLGTkClgiBlQ/aqOMaajEOJiq3HAEA0S5I=" crossorigin="anonymous">
+	
+	
+	<link rel="stylesheet" href="/css/style.css">
 	
 </head>
-
-<body id="page">
+<body>
+	<header>
+	=================<br>
+	== <a href="https://liliilli.github.io">neuromantic</a> ==<br>
+	=================
+	<div style="float: right;"></div><br>
+	<p>
+	<nav>
+			<a href="/"><b>Start</b></a>.
+			
+			
+			<a href="/posts/"><b>Posts</b></a>.
+			
+			<a href="/about-hugo/"><b>About</b></a>.
+			
+	</nav>
+	</p>
 	
-	<header id="site-header" class="animated slideInUp faster">
-		<div class="hdr-wrapper section-inner">
-			<div class="hdr-left">
-				<div class="site-branding">
-					<a href="https://liliilli.github.io">neuromantic</a>
-				</div>
-				<nav class="site-nav hide-in-mobile">
-					
-				<a href="https://liliilli.github.io/posts/">Posts</a>
-				<a href="https://liliilli.github.io/about-hugo/">About</a>
+</header>
 
-				</nav>
-			</div>
-			<div class="hdr-right hdr-icons">
-				<span class="hdr-social hide-in-mobile"><a href="https://twitter.com/NeuliliilliD" target="_blank" rel="noopener me" title="Twitter"><svg xmlns="http://www.w3.org/2000/svg" class="feather" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg></a><a href="https://github.com/liliilli" target="_blank" rel="noopener me" title="Github"><svg xmlns="http://www.w3.org/2000/svg" class="feather" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg></a></span><button id="menu-btn" class="hdr-btn" title="Menu"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-menu"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg></button>
-			</div>
-		</div>
-	</header>
-	<div id="mobile-menu" class="animated fast">
-		<ul>
-			<li><a href="https://liliilli.github.io/posts/">Posts</a></li>
-			<li><a href="https://liliilli.github.io/about-hugo/">About</a></li>
-		</ul>
-	</div>
+	
+	<main>
+		<article>
+			<h1>TLSF Allocatorを作ってみた</h1>
+			<b><time>15.03.2020 19:13</time></b>
+		       
+		           <a href="/tags/untagged">untagged</a>
+        	       
 
-
-	<main class="site-main section-inner animated fadeIn faster">
-		<article class="thin">
-			<header class="post-header">
-				<div class="post-meta"><span>Mar 15, 2020</span></div>
-				<h1>TLSF Allocatorを作ってみた</h1>
-			</header>
-			<div class="content">
+			<div>
 				
 
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
 </script>
 
-<h1 id="tlsfとは何なのか">TLSFとは何なのか<a href="#tlsfとは何なのか" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h1>
+<h1 id="tlsfとは何なのか">TLSFとは何なのか</h1>
 
 <blockquote>
 <p><a href="http://www.gii.upv.es/tlsf/">http://www.gii.upv.es/tlsf/</a><br>
@@ -106,7 +72,7 @@
 <li>確保したメモリの領域を拡張・縮小することが出来る。（この記事ではこれの実装は扱いません）</li>
 </ul>
 
-<h1 id="tlsfの概略な構造">TLSFの概略な構造<a href="#tlsfの概略な構造" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h1>
+<h1 id="tlsfの概略な構造">TLSFの概略な構造</h1>
 
 <blockquote>
 <p><a href="http://www.gii.upv.es/tlsf/files/papers/tlsf_desc.pdf">http://www.gii.upv.es/tlsf/files/papers/tlsf_desc.pdf</a></p>
@@ -114,13 +80,13 @@
 
 <p>上の説明文をお読みください。</p>
 
-<h1 id="なんでtlsfを実装しようとしたの">なんでTLSFを実装しようとしたの<a href="#なんでtlsfを実装しようとしたの" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h1>
+<h1 id="なんでtlsfを実装しようとしたの">なんでTLSFを実装しようとしたの</h1>
 
 <p>いくつかのゲームエンジンの中で、メモリを制御するために実装されているのがTLSFだったからです。それにOSでも使ってるらしいし、インターネットで一番明確ながらもソースコードも公開がされ、勉強になりそうなアルゴリズム（ライブラリー）だったので、まずTLSFから始めようとして実装することになりました。</p>
 
 <p>また、TLSF自体はソースが公開されてはいるんですが、ライセンスがGPLまたはLPGLであるため自分の作っているプロジェクトに取り入れることが難しかったです。なので勉強兼ねて新しく実装し、それを個人プロジェクトに入れようとしたいこともあります。</p>
 
-<h1 id="ソースコード">ソースコード<a href="#ソースコード" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h1>
+<h1 id="ソースコード">ソースコード</h1>
 
 <blockquote>
 <p><a href="https://gist.github.com/liliilli/01d0a8505dcc3fe4f5c951fbc179c769">https://gist.github.com/liliilli/01d0a8505dcc3fe4f5c951fbc179c769</a></p>
@@ -130,7 +96,7 @@
 
 <p>TSLF関数の全体を説明するのではなく、一部だけを取って説明したいですので、全体のフローはソースコードを見てください。</p>
 
-<h1 id="基本apiリスト">基本APIリスト<a href="#基本apiリスト" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h1>
+<h1 id="基本apiリスト">基本APIリスト</h1>
 <div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="c1">//! @brief Create tlsf pool.
 </span><span class="c1">//! @param pool_size Overall memory pool size.
 </span><span class="c1">//! @param p_pool Memory pool pointer to start.
@@ -197,9 +163,9 @@
 <li><code>tlsf_free</code>：TLSFメモリプールから確保したメモリを解除します。</li>
 </ul>
 
-<h1 id="説明">説明<a href="#説明" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h1>
+<h1 id="説明">説明</h1>
 
-<h2 id="1-tlsf-raw-create">1.<code>tlsf_raw_create</code><a href="#1-tlsf-raw-create" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
+<h2 id="1-tlsf-raw-create">1.<code>tlsf_raw_create</code></h2>
 <div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="k">if</span> <span class="p">(</span><span class="n">mem_pool_size</span> <span class="o">&lt;</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">tlsf_raw_t</span><span class="p">)</span> <span class="o">+</span> <span class="n">block_header_t</span><span class="o">::</span><span class="n">sk_block_header_ovhd</span> <span class="o">*</span> <span class="mi">8</span><span class="p">)</span>
 <span class="p">{</span>
     <span class="k">return</span> <span class="n">error_info</span><span class="p">{</span> <span class="n">NOT_SUFFICIENT_MEM_SIZE</span> <span class="p">};</span>
@@ -268,7 +234,7 @@
 
 <p>そのため、<code>tlsf_raw_t</code>の後には追加メモリ領域が保持するブロックのアドレス情報を持つ構造体、<code>area_info_t</code>がついて来ます。（ただし、<code>area_info_t</code>自体も特殊ブロックのバッファ部分に置かれるようになっています。）</p>
 
-<h3 id="process-area"><code>process_area()</code><a href="#process-area" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
+<h3 id="process-area"><code>process_area()</code></h3>
 
 <p><code>process_area()</code>関数は、TLSFプールの初期メモリブロックを設定する関数です。初期で設定されるメモリブロックは以下となります。</p>
 
@@ -295,7 +261,7 @@
 </code></pre></div>
 <p><code>p_next_b</code>部分のブロックがまだ使える状態ではないので、TLSFを管理する構造体の<code>bitmap</code>変数と<code>matrix</code>にアドレスをフラグを更新して使えるため<code>free</code>関数を呼びます。最後には<code>p_next_b</code>の使えるメモリ量を返して終わりです。</p>
 
-<h2 id="2-tlsf-malloc">2.<code>tlsf_malloc</code><a href="#2-tlsf-malloc" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
+<h2 id="2-tlsf-malloc">2.<code>tlsf_malloc</code></h2>
 <div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="n">mem_size</span> <span class="o">=</span> <span class="n">calc_min_memblock_size</span><span class="p">(</span><span class="n">mem_size</span><span class="p">);</span>
 <span class="k">const</span> <span class="k">auto</span> <span class="n">rs_search</span>   <span class="o">=</span> <span class="n">mapping_search</span><span class="p">(</span><span class="n">mem_size</span><span class="p">);</span>
 <span class="k">const</span> <span class="k">auto</span> <span class="n">rs_suitable</span> <span class="o">=</span> <span class="n">find_suitable_block</span><span class="p">(</span><span class="n">p_tlsf_pool</span><span class="p">,</span> <span class="n">rs_search</span><span class="p">.</span><span class="n">flv</span><span class="p">,</span> <span class="n">rs_search</span><span class="p">.</span><span class="n">slv</span><span class="p">);</span>
@@ -306,14 +272,14 @@
 </code></pre></div>
 <p>まず、TLSFプールから適当なメモリブロックを探します。一次に<code>mapping_search</code>関数で、First-IndexとSecond-Indexを取得し、最終に<code>find_suitable_block</code>で取得出来たブロックヘッダーのポインターと最終First-Index、Second-Indexを持ってくるようにします。</p>
 
-<h3 id="mapping-search"><code>mapping_search()</code><a href="#mapping-search" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
+<h3 id="mapping-search"><code>mapping_search()</code></h3>
 <div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="k">const</span> <span class="k">auto</span> <span class="n">fl_sl</span> <span class="o">=</span> <span class="n">mapping_insert</span><span class="p">(</span><span class="n">size</span><span class="p">);</span>
 <span class="n">result</span><span class="p">.</span><span class="n">flv</span> <span class="o">=</span> <span class="n">fl_sl</span><span class="p">.</span><span class="n">first_lv</span><span class="p">;</span>
 <span class="n">result</span><span class="p">.</span><span class="n">slv</span> <span class="o">=</span> <span class="n">fl_sl</span><span class="p">.</span><span class="n">scnd_lv</span><span class="p">;</span>
 </code></pre></div>
 <p>まず<code>mapping_insert()</code>という関数を使って、First-Level Index（<code>flv</code>）とSecond-Level Index（<code>slv</code>）を取得します。</p>
 
-<h3 id="mapping-insert"><code>mapping_insert()</code><a href="#mapping-insert" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
+<h3 id="mapping-insert"><code>mapping_insert()</code></h3>
 <div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="k">if</span> <span class="p">(</span><span class="n">size</span> <span class="o">&lt;</span> <span class="n">k_small_block</span><span class="p">)</span>
 <span class="p">{</span>
     <span class="n">result</span><span class="p">.</span><span class="n">first_lv</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
@@ -354,7 +320,7 @@ $$
 $$
 上の関数では128Byte以下のブロックは全部FLIが0になるし、128Byte以上から1以上のインデックスを持つため、6を引く必要があります。最後に<code>first_lv</code>に6を引くのはそのためです。</p>
 
-<h3 id="find-suitable-block"><code>find_suitable_block()</code><a href="#find-suitable-block" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
+<h3 id="find-suitable-block"><code>find_suitable_block()</code></h3>
 <div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="k">const</span> <span class="n">u32</span> <span class="n">tmp</span> <span class="o">=</span> <span class="n">p_tlsf</span><span class="o">-&gt;</span><span class="n">m_sl_bitmap</span><span class="p">[</span><span class="n">fl</span><span class="p">]</span> <span class="o">&amp;</span> <span class="p">(</span><span class="o">~</span><span class="mi">0</span> <span class="o">&lt;&lt;</span> <span class="n">sl</span><span class="p">);</span>
 <span class="k">if</span> <span class="p">(</span><span class="n">tmp</span><span class="p">)</span>
 <span class="p">{</span>   <span class="c1">// if tmp is not 0.
@@ -376,7 +342,7 @@ $$
 
 <p>ただし、この<code>flv</code>と<code>slv</code>が0より低い値になると適合なブロック探しは失敗になります。</p>
 
-<h3 id="ls-bit-ms-bit"><code>ls_bit()</code> &amp; <code>ms_bit()</code><a href="#ls-bit-ms-bit" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
+<h3 id="ls-bit-ms-bit"><code>ls_bit()</code> &amp; <code>ms_bit()</code></h3>
 
 <ul>
 <li>ls_bit：Find First Set（最初の１の値を持つビットの番地）を探します。</li>
@@ -409,7 +375,7 @@ $$
 </code></pre></div>
 <p>有効なフリーメモリブロックを取得した後には、それをマトリックスから外す必要があります。そして、ブロックと連結されている（リンクリストとして）メモリブロックがある場合には、そのブロックをマトリックスに登録する必要があります。<code>extract_block_hdr</code>はそれをやってくれます。</p>
 
-<h3 id="extract-block-hdr"><code>extract_block_hdr()</code><a href="#extract-block-hdr" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
+<h3 id="extract-block-hdr"><code>extract_block_hdr()</code></h3>
 <div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"> <span class="n">block_header_t</span><span class="o">*</span> <span class="n">p_item</span> <span class="o">=</span> 
      <span class="n">p_tlsf</span><span class="o">-&gt;</span><span class="n">mp_matrix</span><span class="p">[</span><span class="n">final_fl</span><span class="p">][</span><span class="n">final_sl</span><span class="p">]</span> <span class="o">=</span> <span class="n">p_b</span><span class="o">-&gt;</span><span class="n">get_free_ptrs</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">p_next</span><span class="p">;</span>
  <span class="k">if</span> <span class="p">(</span><span class="n">p_item</span> <span class="o">!=</span> <span class="k">nullptr</span><span class="p">)</span>
@@ -446,7 +412,7 @@ $$
 </code></pre></div>
 <p>最後に、<code>tmp_size := p_b-&gt;block_size - mem_size</code>を計算し、確保されたメモリの量に対して新しい空きブロックが作れたら作るようにします。空きブロックが作られたら、<code>insert_block()</code>関数でTLSF構造体の空きブロック管理マトリックスに入れるようにします。</p>
 
-<h3 id="insert-block"><code>insert_block()</code><a href="#insert-block" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
+<h3 id="insert-block"><code>insert_block()</code></h3>
 <div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="n">free_ptr_t</span><span class="o">*</span> <span class="n">p_free_ptr</span> <span class="o">=</span> <span class="n">p_b</span><span class="o">-&gt;</span><span class="n">get_free_ptrs</span><span class="p">();</span>
 <span class="n">p_free_ptr</span><span class="o">-&gt;</span><span class="n">p_prev</span> <span class="o">=</span> <span class="k">nullptr</span><span class="p">;</span>
 <span class="n">p_free_ptr</span><span class="o">-&gt;</span><span class="n">p_next</span> <span class="o">=</span> <span class="n">p_tlsf</span><span class="o">-&gt;</span><span class="n">mp_matrix</span><span class="p">[</span><span class="n">final_fl</span><span class="p">][</span><span class="n">final_sl</span><span class="p">];</span>
@@ -463,7 +429,7 @@ $$
 
 <p>最後に、取得出来た空きブロック<code>p_b</code>の設定をし、リターン値として返せば終わります。</p>
 
-<h2 id="3-tlsf-realloc">3.<code>tlsf_realloc</code><a href="#3-tlsf-realloc" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
+<h2 id="3-tlsf-realloc">3.<code>tlsf_realloc</code></h2>
 
 <p>TLSFの<code>realloc</code>アルゴリズムは３つの分岐に分かれます。</p>
 
@@ -473,7 +439,7 @@ $$
 <li>１も２も当てはまらなく、<code>malloc</code>をして完全に新しいブロックを確保する場合</li>
 </ol>
 
-<h3 id="1-サイズが既存のサイズより小さい時">1. サイズが既存のサイズより小さい時<a href="#1-サイズが既存のサイズより小さい時" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
+<h3 id="1-サイズが既存のサイズより小さい時">1. サイズが既存のサイズより小さい時</h3>
 
 <p>まず、サイズが小さくて隣接したブロックが空きブロックの場合には、その空きブロックと今の余りのメモリバッファを合わせて大きい空きブロックが作れるかを判断することが出来ます。以下のロジックではそれを判断し、満足したら併合するようにしています。</p>
 <div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="k">if</span> <span class="p">(</span><span class="n">p_next_bhdr</span><span class="o">-&gt;</span><span class="n">is_freed</span><span class="p">())</span>
@@ -498,7 +464,7 @@ $$
     <span class="c1">// 最後にp_bの情報を更新
 </span><span class="c1"></span><span class="p">}</span>
 </code></pre></div>
-<h3 id="extract-block"><code>extract_block()</code><a href="#extract-block" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
+<h3 id="extract-block"><code>extract_block()</code></h3>
 
 <p>この関数は<code>extract_block_hdr()</code>に似ていますが、自分の前後ブロックを連結させて、空きブロックマトリックスから自分を抜いて参照させないようにしています。ただし、マトリックスリストに先頭に見えないとマトリックスでの削除はされません。</p>
 
@@ -528,7 +494,7 @@ $$
 </code></pre></div>
 <hr />
 
-<h3 id="2-サイズが既存より大きいが-隣接空きブロックで解決できる場合">2. サイズが既存より大きいが、隣接空きブロックで解決できる場合<a href="#2-サイズが既存より大きいが-隣接空きブロックで解決できる場合" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
+<h3 id="2-サイズが既存より大きいが-隣接空きブロックで解決できる場合">2. サイズが既存より大きいが、隣接空きブロックで解決できる場合</h3>
 
 <p>隣接した空きブロックをくっつけることでサイズの問題が解決できれば、空きブロックをマトリックスから抜いてくっつけて、そして余ったメモリ空間を新しい空きブロックとして作ります。</p>
 <div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="k">if</span> <span class="p">(</span><span class="n">new_size</span> <span class="o">&lt;=</span> <span class="p">(</span><span class="n">old_size</span> <span class="o">+</span> <span class="n">p_next_bhdr</span><span class="o">-&gt;</span><span class="n">get_block_size</span><span class="p">()))</span>
@@ -558,7 +524,7 @@ $$
 </span><span class="c1"></span>    <span class="k">return</span> <span class="n">p_data</span><span class="p">;</span>
 <span class="p">}</span>
 </code></pre></div>
-<h3 id="3-mallocで新しいブロックを探すしかない場合">3. mallocで新しいブロックを探すしかない場合<a href="#3-mallocで新しいブロックを探すしかない場合" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
+<h3 id="3-mallocで新しいブロックを探すしかない場合">3. mallocで新しいブロックを探すしかない場合</h3>
 
 <p>どうしようもないので<code>malloc</code>で新しいブロックを探します。探すことが出来たら、<code>memcpy</code>で既存のブロックの内容を新しいブロックにコピーします。ただし、この場合だとPODでしかちゃんとコピーが出来ないのでC++のクラスの情報が入ったブロックをコピーしたい場合には特殊なロジックが要るかもしれません。</p>
 
@@ -573,7 +539,7 @@ $$
 <span class="n">memcpy</span><span class="p">(</span><span class="n">p_new_buffer</span><span class="p">,</span> <span class="n">p_buffer</span><span class="p">,</span> <span class="n">copy_size</span><span class="p">);</span>
 <span class="n">tlsf_free</span><span class="p">(</span><span class="n">p_buffer</span><span class="p">,</span> <span class="n">p_tlsf</span><span class="p">);</span>
 </code></pre></div>
-<h2 id="4-tlsf-free">4.<code>tlsf_free()</code><a href="#4-tlsf-free" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
+<h2 id="4-tlsf-free">4.<code>tlsf_free()</code></h2>
 
 <p>確保したメモリブロックを解除したい場合にはこの関数を使います。（ただし、PODタイプのみ）<br>しかしメモリ解除をする時に、今解除するメモリブロックに隣接したブロックが空き（フリー）かを確認し、空きだったら併合して一つのブロックに纏めさせることも出来ます。</p>
 <div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="c1">// 消す前に次のブロックがFreeなのかを確認する。
@@ -600,7 +566,7 @@ $$
 </span><span class="c1"></span><span class="k">const</span> <span class="k">auto</span> <span class="p">[</span><span class="n">fl</span><span class="p">,</span> <span class="n">sl</span><span class="p">]</span> <span class="o">=</span> <span class="n">mapping_insert</span><span class="p">(</span><span class="n">p_bhdr</span><span class="o">-&gt;</span><span class="n">get_block_size</span><span class="p">());</span>
 <span class="n">insert_block</span><span class="p">(</span><span class="n">p_bhdr</span><span class="p">,</span> <span class="n">p_tlsf_pool</span><span class="p">,</span> <span class="n">fl</span><span class="p">,</span> <span class="n">sl</span><span class="p">);</span>
 </code></pre></div>
-<h2 id="5-tlsf-raw-destroy">5.<code>tlsf_raw_destroy</code><a href="#5-tlsf-raw-destroy" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
+<h2 id="5-tlsf-raw-destroy">5.<code>tlsf_raw_destroy</code></h2>
 <div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="n">tlsf_raw_t</span><span class="o">*</span> <span class="n">p_tlsf</span> <span class="o">=</span> <span class="p">(</span><span class="n">tlsf_raw_t</span><span class="o">*</span><span class="p">)</span><span class="n">p_pool</span><span class="p">;</span>
 <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">p_tlsf</span><span class="o">-&gt;</span><span class="n">has_signature</span><span class="p">())</span>
 <span class="p">{</span>
@@ -611,54 +577,53 @@ $$
 </code></pre></div>
 <p>TLSF構造体のシグニチャーを無効化します。それだけです。</p>
 
-<h1 id="改善点">改善点<a href="#改善点" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h1>
+<h1 id="改善点">改善点</h1>
 
-<h3 id="ビットシフトアルゴリズムがまだ完全に理解できてない">・ビットシフトアルゴリズムがまだ完全に理解できてない<a href="#ビットシフトアルゴリズムがまだ完全に理解できてない" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
+<h3 id="ビットシフトアルゴリズムがまだ完全に理解できてない">・ビットシフトアルゴリズムがまだ完全に理解できてない</h3>
 
 <p>First-IndexとSecond-Indexの数値をビットマップ変数に更新するためのアルゴリズムが完全には理解できませんでした。テストケースを作って、どのようにフラグ値が変わるのかを詳しく調べてみたいですね。</p>
 
-<h3 id="まだscalableではない">・まだScalableではない<a href="#まだscalableではない" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
+<h3 id="まだscalableではない">・まだScalableではない</h3>
 
 <p>TLSFの特徴の一つである、メモリプールをくっつけて更に多くのメモリが確保出来るようにするための機能がまだ実装してませんでした。次の記事を書くときには今抜かれた機能まで付けて、それの説明までしたいです。</p>
 
-<h1 id="まとめ">まとめ<a href="#まとめ" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h1>
+<h1 id="まとめ">まとめ</h1>
 
 <p>最後までがんばります。（適当）</p>
 
 			</div>
-			<hr class="post-end">
-			<footer class="post-info">
-				<p>
-					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-tag meta-icon"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7" y2="7"></line></svg><span class="tag"><a href="https://liliilli.github.io/tags/untagged">untagged</a></span>
-				</p>
-				<p><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>8278 Words</p>
-				<p><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>2020-03-15 19:13 &#43;0900</p>
-			</footer>
 		</article>
-		<div class="post-nav thin">
-			<a class="next-post" href="https://liliilli.github.io/posts/dinput8/">
-				<span class="post-nav-label"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-left"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>&nbsp;Newer</span><br><span>DirectInput8 導入メモ</span>
-			</a>
-			<a class="prev-post" href="https://liliilli.github.io/posts/matrix_name/">
-				<span class="post-nav-label">Older&nbsp;<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-right"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg></span><br><span>行列変数のネーミングについて</span>
-			</a>
-		</div>
-		<div id="comments" class="thin">
-</div>
 	</main>
+<aside>
+	<div>
+		<div>
+			<h3>LATEST POSTS</h3>
+		</div>
+		<div>
+			<ul>
+				
+				<li><a href="/posts/shader_opti_memo/">Low Level Thinking in High Shader Languages</a></li>
+				
+				<li><a href="/posts/dinput8/">DirectInput8 導入メモ</a></li>
+				
+				<li><a href="/posts/tlsf_basic/">TLSF Allocatorを作ってみた</a></li>
+				
+				<li><a href="/posts/matrix_name/">行列変数のネーミングについて</a></li>
+				
+				<li><a href="/posts/dy_cmake/">自分でやるDyのCMakeListsファイル説明</a></li>
+				
+			</ul>
+		</div>
+	</div>
+</aside>
 
-	<footer id="site-footer" class="section-inner thin animated fadeIn faster">
-		<p>&copy; 2020 <a href="https://liliilli.github.io">neuliliilli</a> &#183; <a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC BY-NC 4.0</a></p>
-		<p>
-			Made with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> &#183; Theme <a href="https://github.com/Track3/hermit" target="_blank" rel="noopener">Hermit</a> &#183; <a href="https://liliilli.github.io/posts/index.xml" target="_blank" title="rss"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-rss"><path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1"></circle></svg></a>
-		</p>
-	</footer>
 
-
-
-	<script src="https://liliilli.github.io/js/bundle.min.4a9a0ac3d2217822c7865b4161e6c2a71de1d70492264337755427898dd718f6.js" integrity="sha256-SpoKw9IheCLHhltBYebCpx3h1wSSJkM3dVQniY3XGPY=" crossorigin="anonymous"></script>
-	
+	<footer>
+	<p>&copy; 2020 <a href="https://liliilli.github.io"><b>neuromantic</b></a>.
+	<a href="https://github.com/liliilli"><b>Github</b></a>.
+	<a href="https://twitter.com/NeuliliilliD"><b>Twitter</b></a>.
+	</p>
+</footer>
 
 </body>
-
 </html>

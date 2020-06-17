@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<style type=text/css>body{font-family:monospace;}</style>
+	<title>Low Level Thinking in High Shader Languages</title>
+	
+	
+	<link rel="stylesheet" href="/css/style.css">
+	
+</head>
+<body>
+	<header>
+	=================<br>
+	== <a href="https://liliilli.github.io">neuromantic</a> ==<br>
+	=================
+	<div style="float: right;"></div><br>
+	<p>
+	<nav>
+			<a href="/"><b>Start</b></a>.
+			
+			
+			<a href="/posts/"><b>Posts</b></a>.
+			
+			<a href="/about-hugo/"><b>About</b></a>.
+			
+	</nav>
+	</p>
+	
+</header>
+
+	
+	<main>
+		<article>
+			<h1>Low Level Thinking in High Shader Languages</h1>
+			<b><time>17.06.2020 12:00</time></b>
+		       
+
+			<div>
+				
+
+<p>これは参照項目のGDCのリンクを読んで適当にメモしたものです。詳しくは参照のリンクをご覧ください。</p>
+
+<h2 id="goal-of-this-presentation">Goal of this presentation</h2>
+
+<blockquote>
+<p>ローレベル思考はいまだに有効であることを見せる。</p>
+</blockquote>
+
+<h2 id="background">Background</h2>
+
+<p>今から（2020年）ほぼ20年前にはシェーダーに制限が多く、今のようにノードベースまたはHLSLなどの高級言語ではなく独自のアセンブリでコードを書かなければならなかった。</p>
+
+<p>そしてアセンブリが実際のHWにほぼ一対一対応しているため、最適化などは手動でやらざるを得なかったらしい。</p>
+<div class="highlight"><pre class="chroma"><code class="language-8086" data-lang="8086">def 	c0, 0.3f, 2.5f, 0, 0
+texld 	r0, t0
+sub 	r0, r0, c0.x
+mul		r0, r0, c0.y // こんな感じで…</code></pre></div>
+<p>ただし、こういったコードの書き方はHLSLまたはGLSLなどのシェーダー専用の高級言語の登場により、またある程度コンパイラーが自動で最適化をしてくれるようになったため、いらなくなった。</p>
+
+<p>最後にはノードベースも登場し、プログラマがコードを書くのではなく、アーティストがノードを組んでシェーダーを作るようになった。（めでたしめでたし）</p>
+
+<p>しかし、これはノードまたはHLSL言語が実際のHWに一対一対応していなくなった事になり、シェーダーの最適化などを正にコンパイラー様にお祈りするしかならなくなったのである。</p>
+
+<h2 id="why-bother">Why bother?</h2>
+
+<p>例をあげて説明してみる。</p>
+<div class="highlight"><pre class="chroma"><code class="language-hlsl" data-lang="hlsl">       // float3 float     float   float3       float    float
+return Diffuse * n_dot_l * atten * LightColor * shadow * ao;</code></pre></div>
+<p>と</p>
+<div class="highlight"><pre class="chroma"><code class="language-hlsl" data-lang="hlsl">return (n_dot_l * atten) * (shadow * ao) * (Diffuse * LightColor);</code></pre></div>
+<p>で生成されるバイトコードは結構違う。（ただし、これはコンパイラーのバージョンなどによって違うかもしれないが）</p>
+
+<p>順番変えと、同じタイプごとの掛け算をするように括弧を書いてあげただけだが、下のコードが明らかに速くなっていることが見られる。（画像は原文で）</p>
+
+<p>このようにローレベル思考でコードを書くことで、ALU（演算装置）の負荷が軽減される。そして新しいシェーダーレンダリング機能も考えさせられることになる。もしALUの負荷が50%から25%に軽減されたことに過ぎないとしても、クロック回転数の向上などの可能性がみられるので、最適化はやっておく方がいいのではかと。</p>
+
+<h2 id="but-the-compiler-will-optimized-it">But, the compiler will optimized it!</h2>
+
+<p>今時にはシェーダーのコンパイラーも結構鋭くなったけど、書いたコードの成された構造自体を破ってまで最適化を強行することはあんまりない。（上にように<code>Float3 * Float * Float3 * Float * Float3 * Float</code>を<code>Float * 3... * Float3 * 3...</code>することはなかなかないだろうと）</p>
+
+<p>もし破壊的な最適化をやるとしても、どの結果が起こってしまうかはわからないのである。</p>
+
+<p>たとえば…</p>
+<div class="highlight"><pre class="chroma"><code class="language-hlsl" data-lang="hlsl">float main(float x: TEXCOORD) : SV_TARGET
+{
+    return (x + 1.f) * 0.5f;
+}</code></pre></div>
+<p>上のコードはちゃんと最適化されてないらしい。（最適化されるとしたら、<code>MAD</code>命令になるが、単純に<code>ADD</code>と<code>MUL</code>に置換される）原文によると、PS3では特定状況の以外には上のようなコードが最適化されてないらしく、XBOX360ではなんとか最適化を行うが意図したものになってない可能性があるらしい。</p>
+
+<h2 id="why-not">Why not?</h2>
+
+<p>もし最適化を行うとしても、意図した結果とは違う画面レンダリングになる可能性もある。最悪<code>INF</code>とか<code>NaN</code>になってしまう可能性もあり、それで順番を変えたりする構造破壊の最適化はあんまりしないらしい。</p>
+
+<p>例えば、<code>sqrt(0.1f * (0.2f - x))</code>と<code>sqrt(0.02f - 0.1f * x)</code>のコードは違って、もし<code>x = 0.2f</code>だとしたら左は破綻せず0を返すが、右は破綻して<code>NaN</code>を返してしまう可能性がある。（IEEE-754のこと）</p>
+
+<p>コンパイラはランタイムで参照してないコードを消すこと、使用しないリソース、レジスター番号の割当などに向いて、依存性またはコード自体に成立されているルールなどを破るまで最適化することはしてない。</p>
+
+<h2 id="rules">Rules</h2>
+
+<p>原文ではD3D10+のシェーダーモデルと、そのシェーダーモデルが使っているIEEE-754-2008を基準としてルールを定めている。しかし、浮動小数点の<code>ULP</code>は0.5範囲以内ではなく、1.0ULP以内として切り上げるようになっている。また、浮動小数点の0周りの少数を表現する<code>denormalized number</code>も演算をするたびにフラッシュされる。（<code>MOV</code>はしないそうだ）</p>
+
+<p>また、HLSLコンパイラは<code>NaN</code>と<code>INF</code>になる恐れを考慮せず最適化を行う。なので、<code>isnan()</code>とか<code>isfinite()</code>をコード上で使うのはあんまり良くないそうだ。</p>
+
+<h2 id="universal-大体のhw-facts-about-hw">Universal（大体のHW）facts about HW</h2>
+
+<ul>
+<li>Multiply-Addは１個の命令で最適化できる。逆は<code>ADD =&gt; MUL</code>をするため、２個要る。</li>
+<li><code>abs</code>、<code>negate</code>、そして<code>saturate</code>は自由に使っていい。（ただし<code>MOV</code>命令が入ってしまうとＸ）</li>
+<li>当然だけど、ベクトルよりはスカラーがリソース負荷が軽い。</li>
+</ul>
+
+<h2 id="mad"><code>MAD</code></h2>
+
+<blockquote>
+<p><a href="https://docs.microsoft.com/en-us/previous-versions/windows/desktop/legacy/hh447183(v=vs.85">https://docs.microsoft.com/en-us/previous-versions/windows/desktop/legacy/hh447183(v=vs.85</a>)</p>
+</blockquote>
+
+<p>ある領域の数値をとある領域の数値へマッピングすることは理想的には<code>MAD</code>命令語一個で済ませるべき。もしかして<code>MAD</code>をやった後、クランプするとしたら<code>MAD_SAT</code>になるべきである。最悪クランプする領域が<code>[0, 1]</code>じゃないとしたら<code>MAD_SAT + MAD</code>にすべきである。</p>
+
+<p>例えば</p>
+
+<ol>
+<li><code>(x - start) * slope</code>は<code>x * slope + (-start * slope)</code>にすべき。</li>
+<li><code>(x - start) / (end - start)</code>は<code>x * (1.f / (end - start)) + (-start / (end - start))</code></li>
+
+<li><p>clampは出来る限りに<code>saturate</code>に…（原文を読むこと）</p></li>
+
+<li><p><code>x += a * b + c * d</code>は本来<code>MUL-MAD-ADD</code>になるが、最適化すると<code>x += a * b; x += c * d;</code>で<code>MAD-MAD</code>になれる。（ちょっと以外？）なぜなら、前の構文って<code>+=</code>がされる前に右辺の数式が先に演算されてしまうからだ。</p></li>
+</ol>
+
+<h2 id="division-with-rcp">Division with <code>RCP</code></h2>
+
+<p><code>a / b</code>のような割り算コードは<code>rcp()</code>関数またはアセンブリ命令を使って実装するほうが速いコードになる可能性が高い。中身では<code>DIV</code>割り算命令を使うことがあるが、明示的に使うと最適化されるかもしれない。</p>
+
+<ol>
+<li><code>a / (x + b)</code>→<code>rcp((x + b) / a)</code>→<code>rcp(x * (1 / a) + (b / a))</code></li>
+<li><code>(x + a) / x</code>→<code>1.0f + a * rcp(x)</code></li>
+</ol>
+
+<h2 id="madness">MADness</h2>
+
+<p>原文を読むこと。明示的に最適化されてないコードをMADを使って最適化している。アセンブリで６行のコードが１行になることがわかる。</p>
+
+<h2 id="modifiers">Modifiers</h2>
+
+<p><code>MOV</code>を使うコードを書かない異常、コストはほぼ０である。<code>abs/neg</code>は既に実際している変数からのインプットだけを持ち、<code>saturate</code>は演算によって生成されたテンポラリの数値をインプットとして持たなければ最適化は失敗する。</p>
+<div class="highlight"><pre class="chroma"><code class="language-hlsl" data-lang="hlsl">float main(float2 a : TEXCOORD) : SV_TARGET
+{
+	return abs(a.x) * abs(a.y);
+}</code></pre></div>
+<p>と</p>
+<div class="highlight"><pre class="chroma"><code class="language-hlsl" data-lang="hlsl">float main(float2 a : TEXCOORD) : SV_TARGET
+{
+	return abs(a.x * a.y);
+}</code></pre></div>
+<p>は違うし、上のコードはMOVを使わないため、一つの命令で最適化出来る。そして負の符号（NEG）を使うときにも同じく扱わなければ最適化されない。</p>
+
+<p><code>saturate()</code>の場合には、明示的に最適化が出来るコードだったら演算した数値をそのまま関数に入れるべきである。また注意する点は<code>min()</code>と<code>max()</code>はコストが掛かるため、<code>min(x, 0)</code>または<code>max(x, 1)</code>でOKなときにも<code>saturate()</code>を使うべきであるところらしい。</p>
+
+<h2 id="hlsl-compiler-workaround">HLSL compiler workaround</h2>
+<div class="highlight"><pre class="chroma"><code class="language-hlsl" data-lang="hlsl">saturate(dot(a, a))</code></pre></div>
+<p>HLSLコンパイラは上のコードを<code>min(dot(a, a), 1.0f)</code>に変えてしまうところがある。これを防ぐためのいくつかの対策があるが、原文で説明するのは<code>precise</code>キーワードを使うものだ。</p>
+<div class="highlight"><pre class="chroma"><code class="language-hlsl" data-lang="hlsl">float main(float3 a : TEXCOORD0) : SV_TARGET
+{
+	return (precise float) saturate(dot(a, a));
+}</code></pre></div>
+<p><code>precise</code>キーワードはIEEE754の仕様を強制するようにして、<code>saturate()</code>は必ず0を返すようになる。ただし、<code>precise</code>を使って性能が向上されるのはここだけであって、普通に使うと性能が劣るそうだ。</p>
+
+<h2 id="built-in-functions">Built-in Functions</h2>
+
+<ul>
+<li><p><code>rcp()</code>、<code>rsqrt()</code>、<code>sqrt()</code>はDX10以上のハードウェアからはHW命令として組み込まれている。ただし、現状（2013年当時）のハードウェアでは<code>sqrt()</code>命令がないため、場合によっては<code>rcp(rsqrt())</code>と<code>x * rsqrt(x)</code>として使わなければならないらしい。</p></li>
+
+<li><p>各関数と同じ演算をするハードコードは場合によって最適化されてない可能性がありうる。</p></li>
+
+<li><p><code>exp2()</code>と<code>log2()</code>はだいたいのハードウェアに組み込まれているが、普通の<code>exp()</code>とか<code>log()</code>はそうじゃない場合が多かった。なので入れる数値が小さいと、普通の関数の代わりに<code>exp2(x * 1.442695f)</code>と<code>log2(x * 0.693147f)</code>を使う方が速い？らしい。</p></li>
+
+<li><p><code>pow(x, y)</code>関数は<code>exp2(log2(x) * y)</code>として実装されている。</p></li>
+
+<li><p><code>sign()</code>はHLSLとGLSLでの扱いが違うようだ。HLSLでは<code>sign()</code>を使わずにternary operator(?:)を使っても良いそうだが、GLSLではternary operator自体が分岐処理されてしまうため、<code>sign()</code>と同等な関数を適切に使いながらコードを書く必要があるらしい。</p></li>
+</ul>
+
+<blockquote>
+<p><a href="https://stackoverflow.com/a/41871876">https://stackoverflow.com/a/41871876</a></p>
+</blockquote>
+
+<ul>
+<li><code>sin()</code>、<code>cos()</code>、<code>sincos()</code>、<code>tan()</code>はある程度コストはあるが、よく使える。しかし、<code>asin()</code>などの逆三角関数を使うのは良くないらしい。さらにhyperbolic関数か<code>log10()</code>を使うのは厳禁。</li>
+</ul>
+
+<h3 id="mul-v-m-に最適化"><code>mul(v, m)</code>に最適化</h3>
+
+<p>普通の<code>mul(v, m)</code>ならば、インストラクションは<code>MUL-MAD-MAD-MAD</code>になる。ただし、掛け算しているインプット<code>m</code>行列がhomogeneous transformであれば、<code>m[3]</code>の掛け算をなくして<code>MAD-MAD-MAD</code>の形に変換することが出来る。</p>
+<div class="highlight"><pre class="chroma"><code class="language-hlsl" data-lang="hlsl">mul(v, m) when m[3] = float4(0, 0, 0, 1),
+mul(v, m) = v.x * m[0] + (v.y * m[1] + (v.z * m[2] + m[3]))</code></pre></div>
+<p>最適化した画像ではインストラクションのスロット（0,1,2,3）はハードウェアの制限のため減らなかったが、命令処理のためのレーンは相当空くことになり他の作業が同時に処理できることになる。</p>
+
+<h2 id="matrix-math">Matrix Math</h2>
+
+<p>マトリックス演算を使って、ベクトルのトランスフォームなどを集約して演算することが出来る。</p>
+
+<h2 id="scalar-math">Scalar Math</h2>
+
+<p>昔のハードウェアはほとんどベクトルベースだったため、ベクトルじゃない数値に関しての演算は内部でスカラーを処理するためのコストがあったらしい。（PS3・XBOX 360・D3D9）</p>
+
+<p>しかし最近のGPUに移行しつつ、Scalar（スカラ）の数値を処理するためのプロセッサーが搭載され、またVLIW（Very long instruction word）のような構造が採択されて単一数値の演算は普通のベクトル演算より速くなるようになった。</p>
+
+<p>ちなみにNVidiaはDX10+から、AMDGCNはDX11のHD7000代からスカラベースである。</p>
+
+<blockquote>
+<p>VLIWとはVery Long Instruction Wordの略語で、opcodeが複数あり同時実行可能ばインストラクションを入れて一つの命令にまとめて静的に実行させる仕組みである。（スーパスカラは動的）</p>
+</blockquote>
+
+<h2 id="scalar-vectorが混ざった演算">Scalar/Vectorが混ざった演算</h2>
+
+<ul>
+<li>ベクトルパートとスカラパートを出来る限り分離して演算させること。</li>
+<li><code>dot()</code>、<code>normalize()</code>、<code>reflect()</code>、<code>length()</code>、<code>distance()</code>などのベクトルからスカラ値に変換するコードを使う際にはコンパイラが前の演算で算出した値を再使用するように引数の順番などに気をつけて書くこと。</li>
+</ul>
+
+<h2 id="hidden-scalar-math">Hidden Scalar Math</h2>
+
+<p>スカラ演算を使わないように見える関数が実は関数の中でスカラ演算を使うことがある。</p>
+
+<ul>
+<li><code>normalize() = vec * rsqrt(dot(vec, vec))</code>であるため、スカラ演算が<code>dot()</code>からなってしまう。ベクトルとスカラ演算が混ざってしまうと性能低下の恐れがあるので、PS3みたいに<code>normalize()</code>がビルトインしていなければ、手作りもOKかも…</li>
+<li><code>reflect() = i - 2.0f * dot(i, n) * n</code>、<code>lerp()</code>もスカラ演算を行っている。</li>
+</ul>
+
+<p>実装されているスカラ演算をどうやって使いこなすかとすると…</p>
+<div class="highlight"><pre class="chroma"><code class="language-hlsl" data-lang="hlsl">float3 main(float3 vec : TEXCOORD0) : SV_TARGET
+{
+	//return 50.f * normalize(vec);
+	return vec * (50.f * rsqrt(dot(vec, vec)));
+}</code></pre></div>
+<p>のように書けば、ある程度負荷が軽減できるらしい。（本文の画像ではインストラクションのスロットが変わってないが、2番スロットの<code>x</code>と<code>y</code>が使わなくなっている）</p>
+
+<h2 id="hidden-common-sub-expressions">Hidden common sub-expressions</h2>
+
+<p>別の関数の中身で同じ表現式を使うとしても、表現式に関与される別の表現式が違うとしたら、最適化されない可能性が高い。例えば、<code>normalize(vec)</code>と<code>length(vec)</code>は<code>dot(vec, vec)</code>を使っても、<code>rsqrt()</code>を使うか、それとも<code>sqrt()</code>を使うかが分かれてしまい、内積の関数での数値は再使用されない。</p>
+
+<p>本文では<code>rsqrt(dot())</code>を使って<code>normalize()</code>を最適化している。画像では2番めの命令で使ってるベクトルの要素が増えてるが、4番目一つの命令が消えたことがわかる。（ただし、ここまでして最適化したいのか…？測定してから最適化すべき。）</p>
+
+<p>ここで最後にさらに最適化を書くと、<code>saturate()</code>を使って<code>rsqrt(dot())</code>のnormFactorを<code>[0, 1]</code>に決めてノーマライズを書ける方法があるそうだ。これで分岐もなくなって、性能は速くなる。</p>
+
+<h2 id="evaluation-order">Evaluation Order</h2>
+
+<p>HLSLでの表現式の演算子の評価は左から右へとなる。なのでベクトル演算とスカラ演算を分離し、ベクトルはベクトルだけで、そしてスカラはスカラ値だけで演算させるようにすれば大体のコードは最適化される。</p>
+
+<p>上のMADだの色々と説明されてるが、一番簡単で性能の向上が出来る最適化は演算子の評価順を変えることである。</p>
+
+<p>またVLIWと昔のベクトルベースのハードウェアでは演算の最初と最後に演算順の依存性が高いらしく、例えば<code>a * b * c *d</code>のようなものでも<code>((a * b) * c) * d</code>として解釈されて無駄に命令が多くなることが多いらしい。解決策としては<code>(a * b) * (c * d)</code>のように依存性を破ることである。</p>
+
+<p>こうすることで、並列に演算を行うようになるそうだ。</p>
+
+<h2 id="real-world-testing">Real-world Testing</h2>
+
+<p>これと言ったことを活用して、実際のClustered Deferred Renderingを最適化してみた結果、15%遅くなるか、2倍ぐらい速くなったそうだ。ただし、最初からローレベルの最適化を念頭にしてコードを作成するのではなく、高級言語でハードウェアをよく理解した上で、最後に明示的なローレベル最適化を行うべきらしい。</p>
+
+<h2 id="補足">補足</h2>
+
+<blockquote>
+<p><a href="https://docs.microsoft.com/ja-jp/windows/win32/direct3dhlsl/dx-graphics-hlsl-if?redirectedfrom=MSDN">https://docs.microsoft.com/ja-jp/windows/win32/direct3dhlsl/dx-graphics-hlsl-if?redirectedfrom=MSDN</a></p>
+</blockquote>
+
+<ul>
+<li><p>HLSLではGLSLとは違って、<code>if</code>または<code>for</code>などの前に属性（Attribute）をつけることが出来る。<code>[branch]</code>、<code>[flatten]</code>、<code>[loop]</code>、<code>[unroll]</code>などが存在する。</p></li>
+
+<li><p>シェーダーの中じゃなくても出来る演算などはあえてシェーダーの中でやらないこと。</p></li>
+
+<li><p>などなど…</p></li>
+</ul>
+
+<h3 id="良いローレベルコードを書くためには">良いローレベルコードを書くためには？</h3>
+
+<ul>
+<li>GPUのHWインストラクションに慣れる。（D3Dのアセンブリなどを見るとか）</li>
+<li>HLSLとHWコードのマッピングに慣れる。（GPUShaderAnalyzer、NVShaderPerf、DXC、FXC）</li>
+<li>実際プロダクトに載せた時のシェーダーの負荷を計測する。</li>
+</ul>
+
+<h1 id="参照">参照</h1>
+
+<p><a href="https://www.gdcvault.com/play/1018182/Low-Level-Thinking-in-High">https://www.gdcvault.com/play/1018182/Low-Level-Thinking-in-High</a></p>
+
+<p><a href="https://ushiostarfish.hatenablog.com/entry/2019/08/12/210023">https://ushiostarfish.hatenablog.com/entry/2019/08/12/210023</a></p>
+
+<p><a href="https://stackoverflow.com/questions/4911400/shader-optimization-is-a-ternary-operator-equivalent-to-branching">https://stackoverflow.com/questions/4911400/shader-optimization-is-a-ternary-operator-equivalent-to-branching</a></p>
+
+<p><a href="https://www.anandtech.com/show/4455/amds-graphics-core-next-preview-amd-architects-for-compute/2">https://www.anandtech.com/show/4455/amds-graphics-core-next-preview-amd-architects-for-compute/2</a></p>
+
+<p><a href="https://gist.github.com/silvesthu/505cf0cbf284bb4b971f6834b8fec93d#gpu-optimization-for-gamedev">https://gist.github.com/silvesthu/505cf0cbf284bb4b971f6834b8fec93d#gpu-optimization-for-gamedev</a></p>
+
+			</div>
+		</article>
+	</main>
+<aside>
+	<div>
+		<div>
+			<h3>LATEST POSTS</h3>
+		</div>
+		<div>
+			<ul>
+				
+				<li><a href="/posts/shader_opti_memo/">Low Level Thinking in High Shader Languages</a></li>
+				
+				<li><a href="/posts/dinput8/">DirectInput8 導入メモ</a></li>
+				
+				<li><a href="/posts/tlsf_basic/">TLSF Allocatorを作ってみた</a></li>
+				
+				<li><a href="/posts/matrix_name/">行列変数のネーミングについて</a></li>
+				
+				<li><a href="/posts/dy_cmake/">自分でやるDyのCMakeListsファイル説明</a></li>
+				
+			</ul>
+		</div>
+	</div>
+</aside>
+
+
+	<footer>
+	<p>&copy; 2020 <a href="https://liliilli.github.io"><b>neuromantic</b></a>.
+	<a href="https://github.com/liliilli"><b>Github</b></a>.
+	<a href="https://twitter.com/NeuliliilliD"><b>Twitter</b></a>.
+	</p>
+</footer>
+
+</body>
+</html>
