@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<style type=text/css>body{font-family:monospace;}</style>
+	<title>SFINAEの活用、ざっくりメモ</title>
+	
+	
+	<link rel="stylesheet" href="/css/style.css">
+	
+</head>
+<body>
+	<header>
+	=================<br>
+	== <a href="https://liliilli.github.io">neuromantic</a> ==<br>
+	=================
+	<div style="float: right;"></div><br>
+	<p>
+	<nav>
+			<a href="/"><b>Start</b></a>.
+			
+			
+			<a href="/posts/"><b>Posts</b></a>.
+			
+			<a href="/about-hugo/"><b>About</b></a>.
+			
+	</nav>
+	</p>
+	
+</header>
+
+	
+	<main>
+		<article>
+			<h1>SFINAEの活用、ざっくりメモ</h1>
+			<b><time>17.06.2020 19:15</time></b>
+		       
+
+			<div>
+				
+
+<h1 id="sfinaeとは">SFINAEとは</h1>
+
+<p>SFINAEとはSubstitution Failure is not an error（SFINAE)の略語として、テンプレートパラメータの一致しないテンプレートに関して、一致してないもの自体がエラーにはならずに済むことを指す。</p>
+
+<p>C++では関数を<code>const</code>修飾子、または引数のリストを異なるようにしてオーバーロード（Overload）することは出来るようになり、テンプレートがついた関数などにも例外ではない。テンプレートがついている関数を呼ぼうとする時、コンパイラはテンプレートのあるオーバーロードされた関数に今入れようとしている引数を調べてタイプリストとリターンタイプがちゃんと合っているかを確認する。</p>
+
+<p>しかし、全く合ってない関数が判断されてしまうとしたら、普通の関数の場合コンパイラはエラーを吐き出さなければならない。しかし言語仕様では、テンプレートの対照であってないものはエラーの代わりにそもそも無かったことにすることにした。すなわち、切り替え（Substitution）が失敗（Failure）しても、エラーにならない（Is not an error)というのである。</p>
+
+<p>「C++ Templates The complete guide second edition」からの簡単（？）な例で説明すると…</p>
+<div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="n">N</span><span class="o">&gt;</span>
+<span class="kt">unsigned</span> <span class="kt">long</span> <span class="kt">long</span> <span class="n">len</span> <span class="p">(</span><span class="n">T</span><span class="p">(</span><span class="o">&amp;</span><span class="p">)[</span><span class="n">N</span><span class="p">])</span> <span class="c1">// ...1
+</span><span class="c1"></span><span class="p">{</span>
+  <span class="k">return</span> <span class="n">N</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+<span class="k">typename</span> <span class="n">T</span><span class="o">::</span><span class="n">size_type</span> <span class="n">len</span> <span class="p">(</span><span class="n">T</span> <span class="k">const</span><span class="o">&amp;</span> <span class="n">t</span><span class="p">)</span> <span class="c1">// ...2
+</span><span class="c1"></span><span class="p">{</span>
+  <span class="k">return</span> <span class="n">t</span><span class="p">.</span><span class="n">size</span><span class="p">();</span>
+<span class="p">}</span>
+</code></pre></div>
+<ol>
+<li>意図通りならCスタイルの配列（Decayされていないもの）を受け取って、要素の数を返す。</li>
+<li>Cスタイルの配列ではない場合には、<code>.size()</code>メンバー関数がある任意タイプ<code>T</code>の引数を受け取り、それの<code>.size()</code>を呼び出す。（注意！）</li>
+</ol>
+
+<p>優しい世界ならこういったコードが通れる。</p>
+<div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="kt">int</span> <span class="n">a</span><span class="p">[</span><span class="mi">10</span><span class="p">];</span>
+<span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">len</span><span class="p">(</span><span class="n">a</span><span class="p">);</span>         <span class="c1">// 10
+</span><span class="c1"></span><span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">len</span><span class="p">(</span><span class="s">&#34;temp&#34;</span><span class="p">);</span>    <span class="c1">// 5
+</span><span class="c1"></span>
+<span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">v</span><span class="p">;</span>
+<span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">len</span><span class="p">(</span><span class="n">v</span><span class="p">);</span>         <span class="c1">// .size() is called inside.
+</span></code></pre></div>
+<p>ただし、破綻しちゃうと</p>
+<div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="kt">int</span><span class="o">*</span> <span class="n">p</span><span class="p">;</span>
+<span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">len</span><span class="p">(</span><span class="n">p</span><span class="p">);</span> <span class="c1">// ERROR ...3
+</span><span class="c1"></span>
+<span class="n">std</span><span class="o">::</span><span class="n">allocator</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">x</span><span class="p">;</span>
+<span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">len</span><span class="p">(</span><span class="n">x</span><span class="p">);</span> <span class="c1">// ERROR ...4
+</span></code></pre></div>
+<p>になる。「３」の場合はCスタイル配列でもなく、そして「２」の<code>typename T::size_type</code>が満たされてないため、どっちでも適用することができず完全に失敗してビルドエラーが出ちゃう。「４」の場合には「２」の引数とリターンタイプは通ったが、中身で<code>.size()</code>が見つからなかったため、完全失敗しエラーが出てしまう。</p>
+
+<p>これをある程度解決（泥臭い方法）するためには、テンプレート対照の最後候補として<code>...</code>をオーバーロードする方法がある。</p>
+<div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="kt">unsigned</span> <span class="kt">long</span> <span class="kt">long</span> <span class="nf">len</span><span class="p">(...)</span> <span class="p">{</span> <span class="k">return</span> <span class="mi">0</span><span class="p">;</span> <span class="p">}</span>
+</code></pre></div>
+<p>すれば<code>int* p</code>の方は通るが、<code>std::allocator&lt;int&gt; x</code>の方はまだビルドが通らない。なぜなら<a href="https://en.cppreference.com/w/cpp/language/overload_resolution">Overload Resolution</a>によって最後の可変長引数を取る関数は最後の候補となり、<code>std::allocator&lt;int&gt; x</code>は「２」のテンプレートに一番当てはまって、その関数を無理やり呼び出そうとしているからだ。</p>
+
+<p>正常に（なんとか）ビルドを通すにはどうすればいいかとすると、C++11から追加された<code>&lt;type_trait&gt;</code>にある<code>std::enable_if&lt;expr, return_type&gt;::type</code>（または<code>std::enable_if_t&lt;&gt;</code>）を使ってOverloading Resolutionに「２」が当たってしまうことが防ぐことが出来る。</p>
+
+<h2 id="解決法">解決法</h2>
+
+<p>コードを書く前に、<code>std::thread</code>のコンストラクタを検討してみる。<code>std::thread</code>のコンストラクタも特定タイプが入る時にOverload Resolutionをされることを避けるため、SFINAEを使っている。</p>
+<div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="k">namespace</span> <span class="n">std</span>
+<span class="p">{</span>
+  <span class="k">class</span> <span class="nc">thread</span>
+  <span class="p">{</span>
+    <span class="k">public</span><span class="o">:</span>
+    <span class="k">template</span> <span class="o">&lt;</span>
+      <span class="k">typename</span> <span class="n">F</span><span class="p">,</span> <span class="k">typename</span><span class="p">...</span> <span class="n">ARGS</span><span class="p">,</span> 
+      <span class="k">typename</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">enable_if_t</span><span class="o">&lt;!</span><span class="n">std</span><span class="o">::</span><span class="n">is_same_v</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">decay_t</span><span class="o">&lt;</span><span class="n">F</span><span class="o">&gt;</span><span class="p">,</span> <span class="kr">thread</span><span class="o">&gt;&gt;&gt;</span>
+    <span class="k">explicit</span> <span class="kr">thread</span><span class="p">(</span><span class="n">F</span><span class="o">&amp;&amp;</span> <span class="n">f</span><span class="p">,</span> <span class="n">ARGS</span><span class="o">&amp;&amp;</span><span class="p">...</span> <span class="n">args</span><span class="p">);</span>
+  <span class="p">};</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>最後の型引数で<code>std::enable_if</code>を使って<code>F</code>のDecayされた型が<code>std::thread</code>である時このコンストラクタへの引数置換と失敗とし、Overload Resolutionをしないようにしていることがわかる。</p>
+
+<p>コンストラクタの場合にはリターンタイプが無いため、普通は上のように最後の型引数でSFINAE構文を書く。普通の関数の場合にはリターンタイプに<code>decltype()</code>を一緒に使って条件付きのSFINAEをさせることが出来る。</p>
+
+<p><code>std::enable_if</code>を使って上のビルドが通らなかったコードを修正すれば、</p>
+<div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="p">,</span> <span class="k">typename</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">enable_if_t</span><span class="o">&lt;</span><span class="n">has_function_size</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;::</span><span class="n">value</span><span class="o">&gt;&gt;</span>
+<span class="k">typename</span> <span class="n">T</span><span class="o">::</span><span class="n">size_type</span> <span class="n">len</span><span class="p">(</span><span class="n">T</span> <span class="k">const</span><span class="o">&amp;</span> <span class="n">t</span><span class="p">)</span> <span class="c1">// ...2
+</span><span class="c1"></span><span class="p">{</span>
+  <span class="k">return</span> <span class="n">t</span><span class="p">.</span><span class="n">size</span><span class="p">();</span>
+<span class="p">}</span>
+
+<span class="c1">// Or
+</span><span class="c1">// template &lt;typename T, std::enable_if_t&lt;has_function_size&lt;T&gt;::value, int&gt; = 0&gt;
+</span></code></pre></div>
+<p>になる。ただ<code>has_function_size&lt;T&gt;</code>は<code>&lt;type_trait&gt;</code>には無いもので、SFINAE（＋黒魔術）を使って実装しなければならない。</p>
+
+<blockquote>
+<p>ちなみにSFINAE自体はC++11から使えるものではない。C++03の場合にはboostの使用または直接<code>&lt;type_trait&gt;</code>の要素を実装することである程度使いこなせる。</p>
+</blockquote>
+
+<p><code>std::enable_if&lt;&gt;</code>は下のコードのように実装できる。(from <a href="https://en.cppreference.com/w/cpp/types/enable_if">en.cppreference</a>)</p>
+<div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="k">template</span> <span class="o">&lt;</span><span class="kt">bool</span> <span class="n">EXPR</span><span class="p">,</span> <span class="k">class</span> <span class="nc">T</span> <span class="o">=</span> <span class="kt">void</span><span class="o">&gt;</span> <span class="k">struct</span> <span class="nc">enable_if</span> <span class="p">{};</span>
+<span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">T</span><span class="o">&gt;</span> <span class="k">struct</span> <span class="nc">enable_if</span><span class="o">&lt;</span><span class="nb">true</span><span class="p">,</span> <span class="n">T</span><span class="o">&gt;</span> <span class="p">{</span> <span class="k">using</span> <span class="n">type</span> <span class="o">=</span> <span class="n">T</span><span class="p">;</span> <span class="p">};</span>
+</code></pre></div>
+<h2 id="注意すべき点">注意すべき点</h2>
+
+<blockquote>
+<p><a href="https://en.cppreference.com/w/cpp/types/enable_if">https://en.cppreference.com/w/cpp/types/enable_if</a></p>
+</blockquote>
+
+<p>関数テンプレート（コンストラクタ含め）のデフォルト引数はオーバーロードされたテンプレートたちの引数リストに含まれないため、同じ定義だと解釈されてビルドエラーが出る場合がある。その時には<code>typename = std::enable_if...</code>の代わりに、<code>std::enable_if_t&lt;...&gt; = type()</code>として使ってビルドが通るらしい。</p>
+
+<p>（未だにちょっと分かりづらい部分ではある…）</p>
+
+<p>＋ちなみにSFINAE活用は関数、メンバー関数だけではなく普通の構造体にも適用できる。（個人的には構造体を使ってSFINAEを使うことが少し多かった気がする…）</p>
+
+<h1 id="活用">活用</h1>
+
+<blockquote>
+<p>ここからはC++17以上の内容も含まれる可能性があります。</p>
+</blockquote>
+
+<h2 id="typelist">Typelist</h2>
+
+<p>タイプのリストをコンパイルタイムで生成し、様々なSFINAE黒魔術＋メタプログラミングをしやすくする。みんな大好きの「Modern C++ Design : Generic Programing and Design Patterns Applied」本（略してMCD）にも最初に出てきたものでもある。</p>
+
+<p>ただ変わったところはMCDはC++11以前に書いた本で、可変長型引数（Parameter PackまたはVariadic Template）文法がサポートしてないため、数の制限があった。しかしC++11以降ではコンパイラが許容するかぎりの個数でリストが作れる。</p>
+<div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">ITEM</span><span class="p">,</span> <span class="k">typename</span> <span class="n">TYPELIST_TYPE</span><span class="o">&gt;</span>
+<span class="k">struct</span> <span class="nc">typelist_t</span> <span class="k">final</span>
+<span class="p">{</span>
+    <span class="k">using</span> <span class="n">item_type</span> <span class="o">=</span> <span class="n">ITEM</span><span class="p">;</span>            <span class="c1">/// Stored actual type.
+</span><span class="c1"></span>    <span class="k">using</span> <span class="n">list_type</span> <span class="o">=</span> <span class="n">TYPELIST_TYPE</span><span class="p">;</span>   <span class="c1">/// Another typelist type.
+</span><span class="c1"></span><span class="p">};</span>
+
+<span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">ITEM</span><span class="o">&gt;</span>
+<span class="k">struct</span> <span class="nc">typelist_tail_t</span> <span class="k">final</span>
+<span class="p">{</span>
+    <span class="k">using</span> <span class="n">item_type</span> <span class="o">=</span> <span class="n">ITEM</span><span class="p">;</span>            <span class="c1">/// Stored actual type.
+</span><span class="c1"></span><span class="p">};</span>
+
+<span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span><span class="p">...</span> <span class="n">ARGS</span><span class="o">&gt;</span>
+<span class="k">using</span> <span class="n">make_list</span> <span class="o">=</span> <span class="k">typename</span> <span class="n">details</span><span class="o">::</span><span class="n">factory_entry</span><span class="o">&lt;</span><span class="k">sizeof</span><span class="p">...(</span><span class="n">ARGS</span><span class="p">),</span> <span class="n">ARGS</span><span class="p">...</span><span class="o">&gt;::</span><span class="n">type</span><span class="p">;</span>
+</code></pre></div>
+<p><code>typelist_t</code>と<code>typelist_tail_t</code>はタイプを保存するためのタイプである。厳密にはSpecialization（特殊化）を行って、タイプが入ったコンパイルタイムだけ使えるタイプを一つ作るためのテンプレートである。（ランタイムにどう使えるかは検証してない）</p>
+
+<p><code>make_list</code>でタイプを入れると、渡したタイプの長さによって<code>typelist&lt;....&gt;</code>が生成されるか、失敗タイプ（<code>sizeof...(ARGS) == 0</code>の時）が返される。例えば、</p>
+<div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="k">static_assert</span><span class="p">(</span>
+  <span class="n">std</span><span class="o">::</span><span class="n">is_same_v</span><span class="o">&lt;</span>
+    <span class="n">make_list</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span> <span class="kt">char</span> <span class="k">const</span><span class="o">*</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&gt;</span><span class="p">,</span> <span class="c1">// &lt;= input 
+</span><span class="c1"></span>    <span class="n">typelist_t</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span> <span class="n">typelist_t</span><span class="o">&lt;</span><span class="kt">char</span> <span class="k">const</span><span class="o">*</span><span class="p">,</span> <span class="n">typelist_tail_t</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&gt;&gt;</span> <span class="c1">// &lt;= same
+</span><span class="c1"></span><span class="o">&gt;</span><span class="p">);</span>
+<span class="k">static_assert</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">is_same_v</span><span class="o">&lt;</span><span class="n">make_list</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">typelist_tail_t</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;&gt;</span><span class="p">);</span>
+<span class="k">static_assert</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">is_same_v</span><span class="o">&lt;</span><span class="n">make_list</span><span class="o">&lt;&gt;</span><span class="p">,</span> <span class="cm">/* FAILURE TYPE */</span><span class="o">&gt;</span><span class="p">);</span>
+</code></pre></div>
+<p>になる。</p>
+
+<p><code>factory_entry</code>の中では次のコードでSFINAEを使いこなしたリストを生成する。</p>
+<div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">ARG</span><span class="p">,</span> <span class="k">typename</span><span class="p">...</span> <span class="n">ARGS</span><span class="o">&gt;</span> 
+<span class="k">struct</span> <span class="nc">factory</span> <span class="k">final</span>
+<span class="p">{</span>
+    <span class="k">using</span> <span class="n">type</span> <span class="o">=</span> <span class="n">typelist_t</span><span class="o">&lt;</span><span class="n">ARG</span><span class="p">,</span> <span class="k">typename</span> <span class="n">factory</span><span class="o">&lt;</span><span class="n">ARGS</span><span class="p">...</span><span class="o">&gt;::</span><span class="n">type</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">ARG</span><span class="o">&gt;</span> 
+<span class="k">struct</span> <span class="nc">factory</span><span class="o">&lt;</span><span class="n">ARG</span><span class="o">&gt;</span> <span class="k">final</span>
+<span class="p">{</span>
+    <span class="k">using</span> <span class="n">type</span> <span class="o">=</span> <span class="n">typelist_tail_t</span><span class="o">&lt;</span><span class="n">ARG</span><span class="o">&gt;::</span><span class="n">type</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="k">template</span> <span class="o">&lt;</span><span class="n">usize</span> <span class="n">sz</span><span class="p">,</span> <span class="k">typename</span><span class="p">...</span> <span class="n">ARGS</span><span class="o">&gt;</span> 
+<span class="k">struct</span> <span class="nc">factory_entry</span> <span class="k">final</span>
+<span class="p">{</span>
+    <span class="k">using</span> <span class="n">type</span> <span class="o">=</span> <span class="k">typename</span> <span class="n">std</span><span class="o">::</span><span class="n">conditonal</span><span class="o">&lt;</span><span class="p">(</span><span class="n">sz</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">),</span> <span class="k">typename</span> <span class="n">factory</span><span class="o">&lt;</span><span class="n">ARGS</span><span class="p">...</span><span class="o">&gt;::</span><span class="n">type</span><span class="p">,</span> <span class="n">null_t</span><span class="o">&gt;::</span><span class="n">type</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="k">template</span> <span class="o">&lt;&gt;</span> 
+<span class="k">struct</span> <span class="nc">factory_entry</span><span class="o">&lt;</span><span class="mi">0</span><span class="o">&gt;</span> <span class="k">final</span> <span class="p">{</span> <span class="k">using</span> <span class="n">type</span> <span class="o">=</span> <span class="n">null_t</span><span class="p">;</span> <span class="p">};</span>
+</code></pre></div>
+<h2 id="enum-class-bitmask">enum class bitmask</h2>
+
+<blockquote>
+<p><a href="http://blog.bitwigglers.org/using-enum-classes-as-type-safe-bitmasks/">http://blog.bitwigglers.org/using-enum-classes-as-type-safe-bitmasks/</a></p>
+
+<p><a href="https://stackoverflow.com/questions/26936640/how-to-implement-is-enum-class-type-trait">https://stackoverflow.com/questions/26936640/how-to-implement-is-enum-class-type-trait</a></p>
+</blockquote>
+
+<p>C++03までの<code>enum</code>はunderlying typeと同一視されるところがあって<code>|</code>または<code>&amp;</code>のようなマスキング演算子が普通に使えた。しかしC++11からの<code>enum class</code>は普通の方法ではそれが出来ず、やるとしたらオペレーターの関数をオーバーロードしていちいちつくらなければならなかったりする。</p>
+
+<p>しかしこれもテンプレートの特殊化と<code>std::enable_if_t&lt;&gt;</code>を使ったSFINAEで、マスキング出来るように指定した<code>enum class</code>のタイプに対してビットマスクすることが出来る。</p>
+<div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+<span class="k">struct</span> <span class="nc">is_enum_class</span> <span class="k">final</span>
+<span class="p">{</span>
+<span class="k">private</span><span class="o">:</span>
+    <span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">U</span><span class="p">,</span> <span class="k">typename</span> <span class="n">V</span> <span class="o">=</span> <span class="kt">void</span><span class="o">&gt;</span>
+    <span class="k">struct</span> <span class="nc">__test</span> <span class="o">:</span> <span class="n">std</span><span class="o">::</span><span class="n">false_type</span> <span class="p">{};</span> <span class="c1">// enum classは足し算が出来ないのでココへ落ちる
+</span><span class="c1"></span>    <span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">U</span><span class="o">&gt;</span>
+    <span class="k">struct</span> <span class="nc">__test</span><span class="o">&lt;</span><span class="n">U</span><span class="p">,</span> <span class="k">decltype</span><span class="p">((</span><span class="kt">void</span><span class="p">)</span> <span class="o">+</span> <span class="n">T</span><span class="p">{}))</span><span class="o">&gt;</span> <span class="o">:</span> <span class="n">std</span><span class="o">::</span><span class="n">true_type</span> <span class="p">{};</span>
+  
+<span class="k">public</span><span class="o">:</span>
+    <span class="k">static</span> <span class="k">constexpr</span> <span class="kt">bool</span> <span class="n">value</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">integral_constant</span><span class="o">&lt;</span>
+        <span class="kt">bool</span><span class="p">,</span> 
+        <span class="o">!</span><span class="n">__test</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;::</span><span class="n">value</span> <span class="o">&amp;&amp;</span> <span class="n">std</span><span class="o">::</span><span class="n">is_enum_v</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;&gt;::</span><span class="n">value</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">E</span><span class="p">,</span> <span class="k">typename</span> <span class="o">=</span> <span class="kt">void</span><span class="o">&gt;</span>
+<span class="k">struct</span> <span class="nc">enable_bitmask_ops_t</span>
+<span class="p">{</span>
+    <span class="k">static</span> <span class="k">constexpr</span> <span class="kt">bool</span> <span class="n">sk_is_enabled</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">E</span><span class="o">&gt;</span>
+<span class="k">constexpr</span> <span class="kt">bool</span> <span class="n">gk_enable_bitmask_ops</span> <span class="o">=</span> <span class="n">enable_bitmask_ops_t</span><span class="o">&lt;</span><span class="n">E</span><span class="o">&gt;::</span><span class="n">sk_is_enabled</span><span class="p">;</span>
+
+<span class="cp">#define DY_ENABLE_ENUM_BITMASK_OP(E) \
+</span><span class="cp">  template &lt;&gt; \
+</span><span class="cp">  struct ::enable_bitmask_ops_t&lt;E, std::enable_if_t&lt;is_enum_class&lt;E&gt;::value&gt;&gt; \
+</span><span class="cp">  { static constexpr bool sk_is_enabled = true; };
+</span></code></pre></div>
+<p><code>enable_bitmask_ops_t</code>は<code>enum class</code>がビットマスクをするためのフラグを持った構造体である。<code>DY_ENABLE_ENUM_BITMASK_OP</code>で該当タイプを入れて特殊化してビットマスクが使えるようにする。</p>
+
+<p>一番上の<code>is_enum_class</code>は特殊化された<code>T</code>が<code>enum class</code>なのかを判断する構造体で、中の<code>__test</code>構造体は<code>T</code>が入るときに同時に特殊化されないように別途の<code>U</code>などの識別子を使っている。</p>
+
+<p>そしてビットマスクのためのオペレーター関数をオーバーロードして使えば終わり。</p>
+<div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">E</span><span class="o">&gt;</span>
+<span class="k">constexpr</span> <span class="n">std</span><span class="o">::</span><span class="n">enable_if_t</span><span class="o">&lt;</span><span class="n">gk_enable_bitmask_ops</span><span class="o">&lt;</span><span class="n">E</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">E</span><span class="o">&gt;</span>
+<span class="k">operator</span><span class="o">|</span><span class="p">(</span><span class="n">E</span> <span class="n">lhs</span><span class="p">,</span> <span class="n">E</span> <span class="n">rhs</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">using</span> <span class="n">underlying</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">underlying_type_t</span><span class="o">&lt;</span><span class="n">E</span><span class="o">&gt;</span><span class="p">;</span>
+    <span class="k">return</span> <span class="k">static_cast</span><span class="o">&lt;</span><span class="n">E</span><span class="o">&gt;</span> <span class="p">(</span><span class="k">static_cast</span><span class="o">&lt;</span><span class="n">underlying</span><span class="o">&gt;</span><span class="p">(</span><span class="n">lhs</span><span class="p">)</span> <span class="o">|</span> <span class="k">static_cast</span><span class="o">&lt;</span><span class="n">underlying</span><span class="o">&gt;</span><span class="p">(</span><span class="n">rhs</span><span class="p">));</span>
+<span class="p">}</span>
+
+<span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">E</span><span class="o">&gt;</span>
+<span class="k">constexpr</span> <span class="n">std</span><span class="o">::</span><span class="n">enable_if_t</span><span class="o">&lt;</span><span class="n">gk_enable_bitmask_ops</span><span class="o">&lt;</span><span class="n">E</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">E</span><span class="o">&gt;</span>
+<span class="k">operator</span><span class="o">&amp;</span><span class="p">(</span><span class="n">E</span> <span class="n">lhs</span><span class="p">,</span> <span class="n">E</span> <span class="n">rhs</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">using</span> <span class="n">underlying</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">underlying_type_t</span><span class="o">&lt;</span><span class="n">E</span><span class="o">&gt;</span><span class="p">;</span>
+    <span class="k">return</span> <span class="k">static_cast</span><span class="o">&lt;</span><span class="n">E</span><span class="o">&gt;</span> <span class="p">(</span><span class="k">static_cast</span><span class="o">&lt;</span><span class="n">underlying</span><span class="o">&gt;</span><span class="p">(</span><span class="n">lhs</span><span class="p">)</span> <span class="o">&amp;</span> <span class="k">static_cast</span><span class="o">&lt;</span><span class="n">underlying</span><span class="o">&gt;</span><span class="p">(</span><span class="n">rhs</span><span class="p">));</span>
+<span class="p">}</span>
+
+<span class="c1">// ...
+</span></code></pre></div>
+<h2 id="extended-type-traits">Extended type_traits</h2>
+
+<p>SFINAEを<code>decltype()</code>と一緒に悪用してtype_traitsを拡張させることも出来る。全部乗せるとスクロールバーが爆発するので、一つだけ取り出して「クラスが<code>swap(T&amp;, T&amp;)</code>または<code>T::swap(T&amp;)</code>を持っているかを確認するtraits」のコードだけを見てみる。</p>
+<div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="p">,</span> <span class="k">typename</span> <span class="n">U</span><span class="o">&gt;</span>
+<span class="k">struct</span> <span class="nc">is_swappable</span> <span class="k">final</span>
+<span class="p">{</span>
+<span class="k">private</span><span class="o">:</span>
+    <span class="k">using</span> <span class="n">_F</span> <span class="o">=</span> <span class="o">::</span><span class="n">dy</span><span class="o">::</span><span class="n">_chk_compile_details</span><span class="o">::</span><span class="n">_F</span><span class="p">;</span> <span class="c1">// FAILURE TYPE
+</span><span class="c1"></span>
+    <span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span><span class="p">,</span> <span class="k">typename</span><span class="o">&gt;</span>
+    <span class="k">static</span> <span class="k">auto</span> <span class="n">out_fn</span><span class="p">(...)</span> <span class="o">-&gt;</span> <span class="n">_F</span><span class="p">;</span> <span class="c1">// 4 (FAILURE CASE)
+</span><span class="c1"></span>
+    <span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">V</span><span class="p">,</span> <span class="k">typename</span> <span class="n">W</span><span class="o">&gt;</span>
+    <span class="k">static</span> <span class="k">auto</span> <span class="n">out_fn</span><span class="p">(</span><span class="kt">int</span><span class="o">*</span><span class="p">)</span> <span class="c1">// 3 (swap(T&amp;, T&amp;) is exist)
+</span><span class="c1"></span>        <span class="o">-&gt;</span>
+        <span class="k">decltype</span><span class="p">(</span>
+            <span class="n">swap</span><span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="n">V</span><span class="o">*</span><span class="p">)(</span><span class="mi">0</span><span class="p">),</span> <span class="o">*</span><span class="p">(</span><span class="n">W</span><span class="o">*</span><span class="p">)(</span><span class="mi">0</span><span class="p">)),</span>
+            <span class="k">typename</span> <span class="n">std</span><span class="o">::</span><span class="n">enable_if_t</span><span class="o">&lt;</span><span class="k">noexcept</span><span class="p">(</span><span class="n">swap</span><span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="n">V</span><span class="o">*</span><span class="p">)(</span><span class="mi">0</span><span class="p">),</span> <span class="o">*</span><span class="p">(</span><span class="n">W</span><span class="o">*</span><span class="p">)(</span><span class="mi">0</span><span class="p">))),</span> <span class="kt">int</span><span class="o">&gt;</span><span class="p">()</span>
+        <span class="p">);</span>
+    
+    <span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">V</span><span class="p">,</span> <span class="k">typename</span> <span class="n">W</span><span class="o">&gt;</span>
+    <span class="k">static</span> <span class="k">auto</span> <span class="n">in_fn</span><span class="p">(...)</span> <span class="o">-&gt;</span> <span class="k">decltype</span><span class="p">(</span><span class="n">out_fn</span><span class="o">&lt;</span><span class="n">V</span><span class="p">,</span> <span class="n">W</span><span class="o">&gt;</span><span class="p">(</span><span class="k">nullptr</span><span class="p">));</span> <span class="c1">// 2
+</span><span class="c1"></span>
+    <span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">V</span><span class="p">,</span> <span class="k">typename</span> <span class="n">W</span><span class="o">&gt;</span>
+    <span class="k">static</span> <span class="k">auto</span> <span class="n">in_fn</span><span class="p">(</span><span class="kt">int</span><span class="o">*</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="k">decltype</span><span class="p">((</span><span class="o">*</span><span class="p">(</span><span class="n">V</span><span class="o">*</span><span class="p">)(</span><span class="mi">0</span><span class="p">)).</span><span class="n">swap</span><span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="n">W</span><span class="o">*</span><span class="p">)(</span><span class="mi">0</span><span class="p">)));</span> <span class="c1">// 1 (T.swap(T&amp;) is exist)
+</span><span class="c1"></span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="k">static</span> <span class="k">constexpr</span> <span class="kt">bool</span> <span class="n">value</span> <span class="o">=</span> <span class="o">!</span><span class="n">std</span><span class="o">::</span><span class="n">is_same_v</span><span class="o">&lt;</span><span class="k">decltype</span><span class="p">(</span><span class="n">in_fn</span><span class="o">&lt;</span><span class="n">T</span><span class="p">,</span> <span class="n">U</span><span class="o">&gt;</span><span class="p">(</span><span class="k">nullptr</span><span class="p">)),</span> <span class="n">_F</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="p">};</span>
+</code></pre></div>
+<p>コメントの１から４までそりあがる感じで読めばそれこそコンパイラのOverload Resolutionの順番なんだけど、ぶっちゃけ何かなんだかわからないんで下に別途で解説をしたい。（もうざっくりではないような…）</p>
+
+<p>まず１から４の関数は中身を持たない。持たなくても普通にコンパイルは通る。なぜならあくまでもコンパイルタイムでだけ呼ばれて、ランタイムでは要らない関数であるからでだ。１と２の関数（<code>in_fn</code>）と３，４の関数（<code>out_fn</code>）はそれぞれテンプレートSFINAE特殊化の単位組となる。</p>
+
+<p>最初は１，２番目の関数から検証を行う。<code>in_fn</code>関数の役目は<code>T.swap(U&amp;)</code>があるかを確認することであって、リターンタイプで<code>decltype()</code>を使ってSFINAEを駆使する。もし<code>T.swap(U&amp;)</code>メンバー関数がなければ、１の関数の特殊化は失敗して２が選択される。（<code>...</code>引数はOverload Resolutionで最後に選ばれるようになっている）</p>
+
+<p>もしswapメンバー関数の検索に失敗したら、次は<code>out_fn</code>関数テンプレート組で<code>swap(T&amp;, U&amp;)</code>を探す。３番目のテンプレートでは<code>decltype()</code>と中にコンマ演算子を使って、<code>decltype</code>の中の表現式リストを上から下へ次々へと検証する。もし途中で失敗したら、そのテンプレートの特殊化は失敗して４番目が選択され、最終的にswap関数が無かったことになる。</p>
+
+<p>連続した表現式を持つ<code>decltype()</code>は最後の表現式で生み出されるタイプが最終タイプとなる。</p>
+
+<h1 id="終わりに">終わりに</h1>
+
+<p>以上、テンプレートを使って実装してみた機能などを振り返ってみた。正直まだ色々とあって、全部書きたいけど体力が持たないし、みんな読みながら眠ってしそうで…（自分も）それにC++20になるとconcepts（＋requires）があるんで、環境が完全にC++20以上に移ったらSFINAEみたいなやつはあんまり書かなくてもいいと思う。（いやそう願いたい）</p>
+
+			</div>
+		</article>
+	</main>
+<aside>
+	<div>
+		<div>
+			<h3>LATEST POSTS</h3>
+		</div>
+		<div>
+			<ul>
+				
+				<li><a href="/posts/sfinae_afaid/">SFINAEの活用、ざっくりメモ</a></li>
+				
+				<li><a href="/posts/shader_opti_memo/">Low Level Thinking in High Shader Languages</a></li>
+				
+				<li><a href="/posts/dinput8/">DirectInput8 導入メモ</a></li>
+				
+				<li><a href="/posts/tlsf_basic/">TLSF Allocatorを作ってみた</a></li>
+				
+				<li><a href="/posts/matrix_name/">行列変数のネーミングについて</a></li>
+				
+			</ul>
+		</div>
+	</div>
+</aside>
+
+
+	<footer>
+	<p>&copy; 2020 <a href="https://liliilli.github.io"><b>neuromantic</b></a>.
+	<a href="https://github.com/liliilli"><b>Github</b></a>.
+	<a href="https://twitter.com/NeuliliilliD"><b>Twitter</b></a>.
+	</p>
+</footer>
+
+</body>
+</html>

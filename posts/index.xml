@@ -7,10 +7,19 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright>
-    <lastBuildDate>Wed, 17 Jun 2020 12:00:15 +0900</lastBuildDate>
+    <lastBuildDate>Wed, 17 Jun 2020 19:15:18 +0900</lastBuildDate>
     
 	<atom:link href="https://liliilli.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>SFINAEの活用、ざっくりメモ</title>
+      <link>https://liliilli.github.io/posts/sfinae_afaid/</link>
+      <pubDate>Wed, 17 Jun 2020 19:15:18 +0900</pubDate>
+      
+      <guid>https://liliilli.github.io/posts/sfinae_afaid/</guid>
+      <description>SFINAEとは SFINAEとはSubstitution Failure is not an error（SFINAE)の略語として、テンプレートパラメータの一致しないテ</description>
+    </item>
     
     <item>
       <title>Low Level Thinking in High Shader Languages</title>
@@ -91,15 +100,6 @@
       
       <guid>https://liliilli.github.io/posts/shadertoy_pbr/</guid>
       <description>実は2週前に、ShaderToyというウェブでGLSLがかけて、それをレンダリングすることができるサイトで、上のシェーダーを書いてました。前</description>
-    </item>
-    
-    <item>
-      <title>Chained-Group Allocationパターンについてメモ</title>
-      <link>https://liliilli.github.io/posts/chained-group-allocation/</link>
-      <pubDate>Sat, 09 Nov 2019 22:15:34 +0900</pubDate>
-      
-      <guid>https://liliilli.github.io/posts/chained-group-allocation/</guid>
-      <description>https://www.plflib.org/chained_group_allocation_pattern.htm を見て、分かったことをメモしたいと思います。 Abstract Chanined-Group Allocationパターンは、ダブルリンクリストを拡張して、書くノードは付加的な情報を持</description>
     </item>
     
   </channel>
