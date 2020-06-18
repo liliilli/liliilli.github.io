@@ -7,10 +7,19 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright>
-    <lastBuildDate>Wed, 17 Jun 2020 19:15:18 +0900</lastBuildDate>
+    <lastBuildDate>Thu, 18 Jun 2020 10:27:48 +0900</lastBuildDate>
     
 	<atom:link href="https://liliilli.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Low-level shader optimization for next-gen and D3D11のメモ</title>
+      <link>https://liliilli.github.io/posts/shader_opti_memo_2/</link>
+      <pubDate>Thu, 18 Jun 2020 10:27:48 +0900</pubDate>
+      
+      <guid>https://liliilli.github.io/posts/shader_opti_memo_2/</guid>
+      <description>メモの基になる原文は2014年GDCで発表されたもので、翻訳ミスによる間違いがある可能性があります。また、GCN（AMD）アーキテクチャの重</description>
+    </item>
     
     <item>
       <title>SFINAEの活用、ざっくりメモ</title>
@@ -91,15 +100,6 @@
       
       <guid>https://liliilli.github.io/posts/cpp_concept/</guid>
       <description>C++のConceptを簡略説明 C++2a（20）から追加する文法の一つであるconceptは、あるタイプの制約条件を記すことができる識別子</description>
-    </item>
-    
-    <item>
-      <title>ShaderToyでPBRを書いてから、自ら解説してみた。</title>
-      <link>https://liliilli.github.io/posts/shadertoy_pbr/</link>
-      <pubDate>Sat, 16 Nov 2019 19:51:58 +0900</pubDate>
-      
-      <guid>https://liliilli.github.io/posts/shadertoy_pbr/</guid>
-      <description>実は2週前に、ShaderToyというウェブでGLSLがかけて、それをレンダリングすることができるサイトで、上のシェーダーを書いてました。前</description>
     </item>
     
   </channel>
