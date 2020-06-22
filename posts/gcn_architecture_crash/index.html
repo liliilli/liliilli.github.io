@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<meta name="theme-color" content="#494f5c">
+	<meta name="msapplication-TileColor" content="#494f5c">
+<meta itemprop="name" content="AMD GCNアーキテクチャ文書を読んでメモ">
+<meta itemprop="description" content="用語 略語 説明 VS Vertex Shader PS Pixel Shader (Fragment Shader) VLIW Very Long Instruction Word FLOPS FLoating point Operations Per Second GCN Graphics Core Next CU Compute Unit EU Export Unit ISA Instruction Set Architecture SIMD Single Instruction Multiple Data ALU Arithmetic Logic Unit AGU Address Generation Unit SALU Scalar Arithmetic Logic Unit VALU Vector Arithmetic Logic Unit APU Accelated Processing Unit PC Program Counter IB">
+
+
+<meta itemprop="datePublished" content="2020-06-19T12:16:09&#43;09:00" />
+<meta itemprop="dateModified" content="2020-06-19T17:53:40&#43;09:00" />
+<meta itemprop="wordCount" content="8668">
+
+
+
+<meta itemprop="keywords" content="" />
+<meta property="og:title" content="AMD GCNアーキテクチャ文書を読んでメモ" />
+<meta property="og:description" content="用語 略語 説明 VS Vertex Shader PS Pixel Shader (Fragment Shader) VLIW Very Long Instruction Word FLOPS FLoating point Operations Per Second GCN Graphics Core Next CU Compute Unit EU Export Unit ISA Instruction Set Architecture SIMD Single Instruction Multiple Data ALU Arithmetic Logic Unit AGU Address Generation Unit SALU Scalar Arithmetic Logic Unit VALU Vector Arithmetic Logic Unit APU Accelated Processing Unit PC Program Counter IB" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://liliilli.github.io/posts/gcn_architecture_crash/" />
+<meta property="article:published_time" content="2020-06-19T12:16:09+09:00" />
+<meta property="article:modified_time" content="2020-06-19T17:53:40+09:00" />
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="AMD GCNアーキテクチャ文書を読んでメモ"/>
+<meta name="twitter:description" content="用語 略語 説明 VS Vertex Shader PS Pixel Shader (Fragment Shader) VLIW Very Long Instruction Word FLOPS FLoating point Operations Per Second GCN Graphics Core Next CU Compute Unit EU Export Unit ISA Instruction Set Architecture SIMD Single Instruction Multiple Data ALU Arithmetic Logic Unit AGU Address Generation Unit SALU Scalar Arithmetic Logic Unit VALU Vector Arithmetic Logic Unit APU Accelated Processing Unit PC Program Counter IB"/>
+
+	<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+	<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+	<link rel="manifest" href="/site.webmanifest">
+	<link rel="mask-icon" href="/safari-pinned-tab.svg" color="">
+	<link rel="shortcut icon" href="/favicon.ico">
+
+	<title>AMD GCNアーキテクチャ文書を読んでメモ</title>
+	<link rel="stylesheet" href="https://liliilli.github.io/css/style.min.5ee5e7976cd09872c64e40a582206543f6aa38c69a8c43898aadc70040344b92.css" integrity="sha256-XuXnl2zQmHLGTkClgiBlQ/aqOMaajEOJiq3HAEA0S5I=" crossorigin="anonymous">
+	
+</head>
+
+<body id="page">
+	
+	<header id="site-header" class="animated slideInUp faster">
+		<div class="hdr-wrapper section-inner">
+			<div class="hdr-left">
+				<div class="site-branding">
+					<a href="https://liliilli.github.io">neuromantic</a>
+				</div>
+				<nav class="site-nav hide-in-mobile">
+					
+				<a href="https://liliilli.github.io/posts/">Posts</a>
+				<a href="https://liliilli.github.io/about-hugo/">About</a>
+
+				</nav>
+			</div>
+			<div class="hdr-right hdr-icons">
+				<span class="hdr-social hide-in-mobile"><a href="https://twitter.com/NeuliliilliD" target="_blank" rel="noopener me" title="Twitter"><svg xmlns="http://www.w3.org/2000/svg" class="feather" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg></a><a href="https://github.com/liliilli" target="_blank" rel="noopener me" title="Github"><svg xmlns="http://www.w3.org/2000/svg" class="feather" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg></a></span><button id="menu-btn" class="hdr-btn" title="Menu"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-menu"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg></button>
+			</div>
+		</div>
+	</header>
+	<div id="mobile-menu" class="animated fast">
+		<ul>
+			<li><a href="https://liliilli.github.io/posts/">Posts</a></li>
+			<li><a href="https://liliilli.github.io/about-hugo/">About</a></li>
+		</ul>
+	</div>
+
+
+	<main class="site-main section-inner animated fadeIn faster">
+		<article class="thin">
+			<header class="post-header">
+				<div class="post-meta"><span>Jun 19, 2020</span></div>
+				<h1>AMD GCNアーキテクチャ文書を読んでメモ</h1>
+			</header>
+			<div class="content">
+				
+
+<h2 id="用語">用語<a href="#用語" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
+
+<table>
+<thead>
+<tr>
+<th>略語</th>
+<th>説明</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>VS</td>
+<td>Vertex Shader</td>
+</tr>
+
+<tr>
+<td>PS</td>
+<td>Pixel Shader (Fragment Shader)</td>
+</tr>
+
+<tr>
+<td>VLIW</td>
+<td>Very Long Instruction Word</td>
+</tr>
+
+<tr>
+<td>FLOPS</td>
+<td>FLoating point Operations Per Second</td>
+</tr>
+
+<tr>
+<td>GCN</td>
+<td>Graphics Core Next</td>
+</tr>
+
+<tr>
+<td>CU</td>
+<td>Compute Unit</td>
+</tr>
+
+<tr>
+<td>EU</td>
+<td>Export Unit</td>
+</tr>
+
+<tr>
+<td>ISA</td>
+<td>Instruction Set Architecture</td>
+</tr>
+
+<tr>
+<td>SIMD</td>
+<td>Single Instruction Multiple Data</td>
+</tr>
+
+<tr>
+<td>ALU</td>
+<td>Arithmetic Logic Unit</td>
+</tr>
+
+<tr>
+<td>AGU</td>
+<td>Address Generation Unit</td>
+</tr>
+
+<tr>
+<td>SALU</td>
+<td>Scalar Arithmetic Logic Unit</td>
+</tr>
+
+<tr>
+<td>VALU</td>
+<td>Vector Arithmetic Logic Unit</td>
+</tr>
+
+<tr>
+<td>APU</td>
+<td>Accelated Processing Unit</td>
+</tr>
+
+<tr>
+<td>PC</td>
+<td>Program Counter</td>
+</tr>
+
+<tr>
+<td>IB</td>
+<td>Instruction Buffer</td>
+</tr>
+
+<tr>
+<td>LRU</td>
+<td>Least Recently Used</td>
+</tr>
+
+<tr>
+<td>VGRP</td>
+<td>Vector General Purpose Register</td>
+</tr>
+
+<tr>
+<td>LDS</td>
+<td>Local Data Share</td>
+</tr>
+
+<tr>
+<td>GDS</td>
+<td>Global Data Share</td>
+</tr>
+
+<tr>
+<td>TMU</td>
+<td>Texture Mapping Unit</td>
+</tr>
+
+<tr>
+<td>TLB</td>
+<td>Translation Lookaside Buffer</td>
+</tr>
+
+<tr>
+<td>HSA</td>
+<td>Heterogeneous System Architecture</td>
+</tr>
+
+<tr>
+<td>DMA</td>
+<td>Direct Memory Access</td>
+</tr>
+
+<tr>
+<td>IOMMU</td>
+<td>I/O MMU (I/O Memory Management Unit)</td>
+</tr>
+
+<tr>
+<td>ACE</td>
+<td>Asynchronous Compute Engines</td>
+</tr>
+</tbody>
+</table>
+
+<h2 id="本文-amd-graphics-cores-next-white-paper">本文 (AMD GRAPHICS CORES NEXT White Paper)<a href="#本文-amd-graphics-cores-next-white-paper" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
+
+<p>p2）最初は完全な固定関数として使うようにデザインされたが、時間が経ってVSとPSの登場、そしてAMDでは並列処理を効率化させるためVLIW5とVLIW4構造のデザインを開発し性能を上げてきた。</p>
+
+<p>これで2013年まで出た最高級グラボのTFLOPSは4TFLOPS（テラFLOPS）を超えて、モバイルも1TFLOPSを超えるようになる。</p>
+
+<p>VLIW4デザインから一新されたGCNはCUのデザインを変えて性能を向上をした。</p>
+
+<h3 id="compute-unit-overview">Compute Unit Overview<a href="#compute-unit-overview" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
+
+<p>p3）CUはGCNアーキテクチャでの基本的な演算ブロックだ。以前に使っていたISAも新しくされて、コンパイラそして開発者にもわかりやすい形となり、性能の安定性を確保している。</p>
+
+<p>GCN以前のVLIWシリーズのシェーダー配列は複数のSIMDエンジンとして構成され、また各SIMDエンジンは16個のALUで構成されていた。各ALUは4、5個の独立した命令をVLIWに入れてまとめた形で処理することが出来た。（前はVLIW-4、後はVLIW-5）各SIMDエンジンはWavefrontという、64個の命令処理ができるもの（作業スレッド）を持ち、同時に1個のWavefrontを実行することが出来る。このデザインは特定したパイプラインでは高効率で動くが、ピクセルのフォーマットが多様化されて、またパイプラインが複雑になるにつれそれぞれ独立されて並列に実行できる命令をVLIWに組むことが難しくなって効率を上げにくくなった。</p>
+
+<p>GCNでは各CUが4個の分離された頂点処理のためのSIMDを持って、各SIMDは同一な命令を処理する16個の作業スレッドを持っている。ただ、前のデザインみたいにまとまって1個のWavefrontになるのではなく、それぞれ別のWavefrontになれる。なのでもっと並列化が出来る。</p>
+
+<p>効率化のためにGCNの各SIMDたちは<code>private</code>と<code>shared</code>のリソースを持ったり、共有している。命令バッファリング（Instruction Buffering）、VALUとレジスタなどはPrivateとして各SIMDに内蔵されている。Front-End、分岐ユニット、データキャッシュはSIMDの間で共有されている。</p>
+
+<p>p4）GCNのCUの画像があるのでよく見ること。</p>
+
+<p>またGCNで改善されたものは、メモリのCoherent Cachingがサポートされたことだ。GCNが登場づするまでGPUはメモリのCoherent（一貫性）を管理しない（すなわち外部メモリ変更による更新をしない）読み取り専用のキャッシュに依存しなければならなかった。なのでGPU中で複数のコアがやり取りをするためには、プログラマまたはコンパイラが明示的に同期化をしなければならなかった。デザイン的には簡単になるが、共有しているデータの同期化による性能低下があったのである。GCNは最初から汎用データがコア間共有されながら処理されることを念頭に置きながらデザインされた。そのためのCache Coherency ProtocolはGPUのL2キャッシュを通してデータを更新するようにし、性能向上と電力消費量の低下をした。</p>
+
+<p>Coherencyと同時にGCNは仮想メモリも導入した。この仮想メモリはx86アーキテクチャをサポートする。これでCPUとGPUの間でデータを共有することが簡略化され、そして一つのポインターアドレスでCPUとGPUが参照出来るようになったそうだ。これでAMDのAPUでも効率の向上をしたらしい。</p>
+
+<h3 id="cu-front-end">CU Front-End<a href="#cu-front-end" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
+
+<p>p5）GCNの各SIMDは40-bitのPCと、10Wavefront分のIBを持つ。というとCUは4個のSIMDを持つのでIBだけで40Wavefrontsを持つことになる。そしてGCNは32個のCUを持つため、最終的には同時に81,920個の作業スレッドが働くことになる。</p>
+
+<p>4個までのCUが一つの組になり、32KBの4-way associativeのL1命令キャッシュとL2キャッシュを共有している。<em>[3]を見ること</em> キャッシュラインはx86と同じく64Bytesで、64bitsの命令を8個収めることが出来る。キャッシュが全部埋まったら、LRUによって新しい命令が入ることになる。</p>
+
+<p>L1の命令キャッシュは4個のBankを持ち[4]、4個のCUに対して32Bytesの命令読出し（Fetch）を維持することが出来る。ただ、命令読出しは世代（age）、スケジューリングの優先順位、WaveのIBの活用によってSIMDたちの中で無作為にされる。</p>
+
+<p>命令がWavefrontのバッファたちの中で発行されると、CUはRound-robin方式で4個のSIMDから一つを選び、10個のWavefrontから5個までの命令をEUへ実行するようにする。ただ<code>NOP</code>のような特殊な命令は他のユニットに任せることなくWavefrontから直接命令処理をする。また、CUはバリア命令を追跡するため16個のバッファリングを維持することができ、これによってWavefrontをSynchronizeさせる。</p>
+
+<p>CUの末端部（Front-end）は「分岐（Branch）、SALU、VALU、スカラメモリ、ベクトルメモリ、そしてローカルデータシェアー、グローバルデータシェアー」の命令を処理する。しかし命令実行パイプラインに多くのSIMDが取り付くことを防ぐため、SIMDごとに同時に各タイプの一つの命令しか発行できないようになっている。また、命令順に実行するようにするため、各命令は違うWavefrontから発行されるようになっている。</p>
+
+<p>CUは1サイクルに5個までの命令を、2つのレジスタファイル（Register File）を使って、6個までのベクトル演算装置とスカラ演算装置へ実行できる。VALUは汎用目的のグラフィック、またはコンピューター処理のために適合していて、SALUは分岐処理に適合している。</p>
+
+<h3 id="scalar-execution-and-control-flow">Scalar Execution and Control Flow<a href="#scalar-execution-and-control-flow" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
+
+<p>GCNで新しく実装されたスカラ（Scalar）パイプラインは、性能と電力効率で必須的な存在となっている。特に分岐処理をすることによって、GPUで分岐しょりをすることによる遅延などを防ぎ、性能低下をある程度防止する。</p>
+
+<p>各CUは8KBのスカラレジスタファイル（Scalar Register File）を持ち、各SIMDが使えるために512個のブロックとして分かれている。また、スカラレジスタはSIMDの10個のWavefrontで共有される。Wavefrontはシステムの状態を保持する一部分を除き、112個のレジスタが割当できる。これをユーザーレジスタ（User Register）という。</p>
+
+<p>レジスタは普段は32-bitsの値を保持できるが、連続で使ったら64-bitsまでの値を保持できる。例えば比較分岐をする時、比較した際の結果ビットをwavefrontの64個分更新するためには64-bitsのレジスタ（2個分）に必要となる。</p>
+
+<p>1つ目でスカラパイプラインは16-bitsのオフセットを使って分岐（Conditional Branch）をハンドルしている。また、インターラプトと特定タイプの同期化をする時にも使われている。インターラプトはブレークポイントを貼ってデバッグをする際に使える新しい機能だ。</p>
+
+<p>p6）2つ目ではAGUの役割<code>[5]</code>も果たしている。GCNのALUは64-bitsの長さを持つが、これで分岐処理によるジャンプ、関数呼び出しとリターンがもっとしやすくなっている。AGUによって移動する命令アドレスはPCで切り替わるかそれに値する処理がされている。</p>
+
+<p>また分岐予測もSALUによって管理される。</p>
+
+<p>スカラのL1キャッシュは読み取り専用だ。SALUが使われている所って大体分岐処理であるため、メモリに何かを書く状況がないためだ。このL1キャッシュは命令L1メモリキャッシュとほぼ構造が同じで、16KBのキャッシュは同様に4-way associativeであって、LRUアルゴリズムと64Bytesのラインを持つ。また4個のCUによって共有されて、L2キャッシュがあることも同じだ。そして各CUで1サイクルに16BytesのThroughputを持つ。</p>
+
+<h3 id="vector-execution">Vector Execution<a href="#vector-execution" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
+
+<p>既存のVLIWは一つのSIMDを持ち、その中に独立で演算される命令が組み込まれて実行される仕組みになっている。しかしこの構造はコンパイラがどのぐらいコードから生み出される命令を並行にばら撒いて実行させるようにするかによって性能が大きく違うことと、コード自体が並列化されにくいとしたら絶対的に性能が落ちることになる短所がある。</p>
+
+<p>GDNアーキテクチャはWavefrontから予測できない並列化を避けるようにし、ちょうど良いぐらいの並列化をドライバーなどがやるようにして、性能の安定性を追求する。こうすることで汎用目的の処理でも性能が劣ることがあんまりなくなった。</p>
+
+<h3 id="vector-registers">Vector Registers<a href="#vector-registers" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
+
+<p>ベクトル演算のためのレジスタも4つの独立されたブロックに分かれている。以前のVLIW構造では一つのSIMDにあらゆる命令がまざって入るため、どでかく効率が悪いレジスタにしなければならなかった。</p>
+
+<p>VGRPsは32-bits長さの64個のレーンを持つ。隣接したVGRPsは64ビットまたは128ビットに相当する値を構成されるために使えることもある。各SIMDはVGRPsのために64KBのパーティションを提供しているので、CU1個のVGRPsの数は同一である。（256個のVGRPs組が存在して、一つは32-bits＊64＝256Bytes？）</p>
+
+<h3 id="vector-alus">Vector ALUs<a href="#vector-alus" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
+
+<p>p7）各SIMDは16個のレーンで構成され、IEEE-754単精度浮動小数点数と倍精度浮動小数点数を支援する。また、性能低下の無いdenormals（アンダーフローされる浮動小数点の数前の数）などもサポートする。SIMDの各レーンは24-bitの整数演算、また単精度の積和演算・融合積和演算<code>[6]</code>（fused multiply-add）ができる。積和演算は<code>MAD</code>のような形として、<code>a := b * c + a</code>になる。融合積和とは、<code>b * c</code>をする時浮動小数点の値を丸めずに1命令で行い誤差をへらすことだ。</p>
+
+<p>24-bitsの整数のMAD演算は作業グループの中でアドレスを演算する時に有用に使われる。一つのSIMDの64個の作業スレッドがVALUの演算を行うには4 Cyclesがかかる。</p>
+
+<p>GCNは<code>SAD</code>と<code>quad-SAD</code>を追加し<code>[7]</code>、映像または画像処理の性能を向上しようとした。SADは画像がどれだけ似ているかを検出する時に使われるアルゴリズムで、画像の中で異なるブロックの中の互いのピクセルの絶対差を求め最後に全部合わせて似ているかの指標として使う。またRGBA 8-Bitsの色が入った画像でもSADが出来るようにquad-SADを追加した。</p>
+
+<p>これを使ってCUはクロックごとに256個のピクセルの処理ができた。こういったものはビデオ検索、または動作認識などに使われるそうだ。</p>
+
+<p>倍精度と32-Bitsの整数処理は処理効率が劣る。倍精度浮動小数点の場合、単精度より1/2から1/16まで性能が落ちる可能性がある。またドライバーなどのサポートによって性能が違うかもしれない。</p>
+
+<h3 id="local-data-share-atomics">Local Data Share &amp; Atomics<a href="#local-data-share-atomics" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
+
+<p>LDSというメモリ領域はグラフィックレンダリングでの補完または作業グループ（Work-group）の同期化のためにほぼ第3のRegister Fileとして扱わなければならない。（重要）GCNのLDSは16または32個のBanksを持って、64KBに拡張された。各Bankは32-Bits長さのエントリーが512個並んでいる。</p>
+
+<p>LDSの用途としてレンダリングの方ではテクスチャーデータの補完などに使われる。その時に同時データ接近による衝突は起こらない。Compute Shaderの場合にはWork-Groupsの中で共有されたデータなどを読み込んだり書き込んだりする時にLDSが使われる。これによってデータの接近によるキャッシュの汚染が避けるようになった。</p>
+
+<h3 id="export">Export<a href="#export" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
+
+<p>EUはCUからGDS（Global Data Share）そして固定関数のグラフィックHWへの窓口だ。CUで演算が終わった時、一般的に結果はグラフィックパイプラインのほかのユニットへ転送される。EUはプログラミング可能なステージから得た結果をテセレーションまたはRasterization、Back-endなどに書き込む役割をする。</p>
+
+<p>GDSはLDSとは基本的には同じものだが、全体CUが共有しているのですべてのWavefrontの間の同期化を制御する。</p>
+
+<h3 id="vertor-memory">Vertor Memory<a href="#vertor-memory" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
+
+<p>各CUの各SIMDsは1クロックに128個の単精度浮動小数点数の演算が出来る。既存のVLIW-4からGCNに移行してキャッシュの構造で一番変わったのはグラフィック描画に特化されたデザインから汎用レンダリングまたはx86のプロセッサーと互換ができるようプログラミングな構造になったことだ。代表的なものがCUで、GCN全般のシステムまで拡張している。</p>
+
+<p>p9）Figure 5を見ること。</p>
+
+<p>上にもあったが、L1データキャッシュは16KB、4-way associative、64Bytesライン、そしてLRUアルゴリズムを持つ。またL2データそして他のキャッシュとのデータと同じ（Coherent）データ内容を持つ。</p>
+
+<p>データL1（L1D）はDirtyマスクがついた「Write-through」<code>[8]</code>（メモリとキャッシュへの書き込みが同時に終わる）そして「Write-allocate」（Write-missの際に下のデータブロックが上のキャッシュにOverwrite）を採択している。~（＋ということは実際にはWrite-throughではなく、Write-backなのでは…？）~<code>[9]</code>64Wavefrontに該当するキャッシュラインは命令が終わるとL2へOverwriteされる。またL1のキャッシュラインがDirtyかではないかによってL2へ放出されるかないかが分かれる。</p>
+
+<p>AGU（Address Generation Unit）が連続したアドレス（0x0, 0x4, 0x8…）を計算したらデータL1のキャッシュタグ（Cache-Tag）をたどる。それでCache hitが発生したら64Bytesのラインを全部読み取る。もしデータがすべて連続されていて一つのキャッシュラインに収まることが出来たら（With fully coalesced requests,）実際使ってるWavefrontは1/4ぐらいになる。読まれたキャッシュラインはvGRPsかLDSに保存される。</p>
+
+<p>L1データへの書き込みはちょっと複雑で、データ自体が適切なフォーマットに変換しなければならないし、また書き込むアドレスもL1キャッシュへのHit、L2キャッシュへまで書き込むために癒合（Coalesced）される必要があるそうだ。もしCache missが発生したらL2それともそれに準ずるメモリでブロックを探す。</p>
+
+<p>効率を上げるためにグラフィックレンダリングではある構造を再使用（？）している。まずAGUは1サイクルに4個のテクスチャアドレスを受け取り、nearest neighborsで16個のサンプリングアドレスを返す。このサンプリングアドレスがL1データに接近し読み取ったデータをTMUから圧縮開放する。そしてフィルターによってフォーマットに合わせた4個の補完されたテクセルがベクトルのRegister Fileに保存される。</p>
+
+<h3 id="l2-cache-coherency-and-memory">L2 Cache、Coherency and Memory<a href="#l2-cache-coherency-and-memory" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
+
+<p>p10）L2キャッシュはGCNGPUのcoherencyを維持する中核だ。L2キャッシュはCUまたはCUたちの間で共有されているL1命令とデータ、そしてスカラキャッシュのbackstop（補助？盗み取り？）役をしている。L2キャッシュはいくつかのブロックなどに分離されて、CUからCrossbarを通してメモリへアクセスされるようになっている。</p>
+
+<blockquote>
+<p>Figure 6を見ること。</p>
+</blockquote>
+
+<p>L1と同様にL2も仮想アドレスをサポートしているのでTLBは要らない。（なんかVirtualだとしたらPhysicalに変換するためにTLBが要るかもと思ったらそうでもなかった…）<code>[11]</code> そしてL2は16-way associativeでL1と同じく64Bytesキャッシュライン、LRUアルゴリズムを持つ。しかしL1とは違ってここでは「Write-Back」「Write-Allocate」ポリシーを使う。小さく小分けされたL2メモリブロックは64~128KBの空間を持つ。</p>
+
+<p>L2キャッシュがCoherentすることにより、それぞれ違うWavefrontの間の同期化またはアトミック操作（Atomic Operation）が実行できるように適合な場になった。もちろんWavefrontの中のみならLDSだけでアトミック操作することが可能である。しかし違うWavefrontの間に同期化をすべきならL2キャッシュを使わなければならない。L2スライスは1サイクル、1キャッシュラインに16個のアトミック操作をする事ができる。</p>
+
+<p>理論上ではL1データは作業グループの中でのメモリ一貫性を保つ。Wavefrontが開放される時、または同期化のためのバリアーが解かれた時データがL2にかかれてWavefront間のL2メモリ一貫性が維持される。</p>
+
+<p>またこのキャッシュ構造はx86のマイクロプロセッサーと互換するようにデザインされた。GCN仮想メモリシステムはx86アドレス空間のための基本ページ単位である4KBのページをサポートしている。またキャッシュラインが64Bytesであることもx86のプロセッサーと互換するためだそうだ。</p>
+
+<p>メモリコントローラーは64-Bits長さで2つの独立したGDDR5またはDDR3の32-Bitsメモリチャンネルで構成されている。</p>
+
+<h3 id="programming-model">Programming Model<a href="#programming-model" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
+
+<p>p11）GCNの新しいISAはHSAを基にしている。HSAとはハードウェアに拘らないアーキテクチャとして（決まった仕様はあるので完全独立ではない）CPUとGPUがコミュニケーションする仕様だ。HSAはHSAIL（Intermediate Language）というバーチャルISAを使って最終的にはHWの機械語にコンパイルするようにしている。<code>[12]</code></p>
+
+<h3 id="system-architecture">System Architecture<a href="#system-architecture" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
+
+<p>GCNは双方向のDMAエンジンを搭載し、PCI Express™ 3.0を使ってデータを双方向に転送することが出来る。またGCNはIOMMUを搭載し、x86のアドレスをGPUへマッピングすること簡単に出来る。ということはGCNのDMAエンジンはGPUとCPUのメモリページへの接近が追加オーバーヘッドなしで行われる。</p>
+
+<p>GCNのCommand Processorはドライバーから高級言語のAPIを読み取り、各パイプラインへマッピングする役割を持っている。GCNでは主に2つのパイプラインで構成されている。一つはACEと呼ばれるもので、Compute Shaderを管理している。Graphics Command Processorは従来のシェーダーと固定関数を管理する。ACEとGCPは一緒に各シェーダーステージのためのCommand Streamを持ち、GCN仕様のHWでマルチタスキングを行う。</p>
+
+<p>そのマルチタスキングのためにGCNでは仮想メモリが実装された。ということでGPUのVRAMの中で複数のアプリケーションのメモリが安全に共存できる。</p>
+
+<p>ACEsはCompute Shaderに対してスケジューリングとリソースの割当を担当する。各ACEはキャッシュまたはメモリからコマンとを持ってきて、スケジューリングのためのTask queueを形成する。各タスク（Task）は優先順位を持っており、ドライバーからそれらを制御している。</p>
+
+<p>各サイクルでACEは作業グループと一つのWavefrontを作り依存性が無い限り無作為に動作する。</p>
+
+<p>またACEsは普通はそれぞれ独立に動くが、64KB~128KBのGDS、メモリまたはキャッシュ接近によって同期化されることがある。それにより各ACEsはTask Graphを形成し、お互いに依存性を持つようになる。なので実際にはACEsはグラフィックスパイプラインの特定ステージ、それとも他のACEに依存されるかするようになり、途中で止まったり違うTask queueの依存性を持たないACEが動いたりする。</p>
+
+<h3 id="graphics-architecture">Graphics Architecture<a href="#graphics-architecture" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
+
+<p>Graphics Command Processorは従来のグラフィックスパイプラインを構想している。GCNのピクセルパイプラインはスクリーン空間を分割して独立したタイルとしてレンダリングする。各ラスタライザは1サイクルに一つの三角形を分析し、最大16ピクセルを生み出す。</p>
+
+<p>またGCNでは各グラフィックパイプラインは並列に動く。これはACEsと同じであるし、すなわち依存性も生まれる。</p>
+
+<h2 id="参照">参照<a href="#参照" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
+
+<p><a href="https://www.techpowerup.com/gpu-specs/docs/amd-gcn1-architecture.pdf">AMD GRAPHICS CORES NEXT White Paper</a></p>
+
+<p><a href="https://www.slideshare.net/DevCentralAMD/gs4106-the-amd-gcn-architecture-a-crash-course-by-layla-mah">GS-4106 The AMD GCN Architecture - A Crash Course, by Layla Mah</a></p>
+
+<p><a href="http://csillustrated.berkeley.edu/PDFs/handouts/cache-3-associativity-handout.pdf">[3] Cache Associativity</a></p>
+
+<p><a href="https://en.wikipedia.org/wiki/Memory_bank">[4] Memory Bank</a></p>
+
+<p><a href="https://en.wikipedia.org/wiki/Address_generation_unit">[5] Address Generation Unit</a></p>
+
+<p><a href="[https://en.wikipedia.org/wiki/Multiply%E2%80%93accumulate_operation#Fused_multiply%E2%80%93add](https://en.wikipedia.org/wiki/Multiply–accumulate_operation#Fused_multiply–add)">[6] Multiply-accumulate operation</a></p>
+
+<p><a href="https://www.google.com/search?q=sum+of+absolute+difference&amp;oq=sum+of+absol&amp;aqs=chrome.0.0j69i57j0l6.2572j0j4&amp;sourceid=chrome&amp;ie=UTF-8">[7] Sum of absolute difference</a></p>
+
+<p><a href="https://en.wikipedia.org/wiki/Cache_(computing)">[8] Cache_(Computing) Writing policies</a></p>
+
+<p><a href="http://web.cs.iastate.edu/~prabhu/Tutorial/CACHE/interac.html">[9] Interaction Policies with Main Memory</a></p>
+
+<p><a href="https://stackoverflow.com/questions/5041328/in-cuda-what-is-memory-coalescing-and-how-is-it-achieved">[10] In CUDA, what is memory coalescing, and how is it achieved?</a></p>
+
+<p><a href="https://en.wikipedia.org/wiki/Translation_lookaside_buffer">[11] Translation Lookaside Buffer</a></p>
+
+<p><a href="https://pc.watch.impress.co.jp/docs/column/kaigai/547768.html">[12] AMD GPUとモバイルGPUにで同じプログラムを走らせるHSA構想</a></p>
+
+			</div>
+			<hr class="post-end">
+			<footer class="post-info">
+				<p><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>8668 Words</p>
+				<p><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>2020-06-19 12:16 &#43;0900</p>
+			</footer>
+		</article>
+		<div class="post-nav thin">
+			<a class="prev-post" href="https://liliilli.github.io/posts/week25_2020/">
+				<span class="post-nav-label">Older&nbsp;<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-right"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg></span><br><span>最近簡単に読んだポスト</span>
+			</a>
+		</div>
+		<div id="comments" class="thin">
+</div>
+	</main>
+
+	<footer id="site-footer" class="section-inner thin animated fadeIn faster">
+		<p>&copy; 2020 <a href="https://liliilli.github.io">jongmin yun - neu.</a> &#183; <a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC BY-NC 4.0</a></p>
+		<p>
+			Made with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> &#183; Theme <a href="https://github.com/Track3/hermit" target="_blank" rel="noopener">Hermit</a> &#183; <a href="https://liliilli.github.io/posts/index.xml" target="_blank" title="rss"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-rss"><path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1"></circle></svg></a>
+		</p>
+	</footer>
+
+
+
+	<script src="https://liliilli.github.io/js/bundle.min.4a9a0ac3d2217822c7865b4161e6c2a71de1d70492264337755427898dd718f6.js" integrity="sha256-SpoKw9IheCLHhltBYebCpx3h1wSSJkM3dVQniY3XGPY=" crossorigin="anonymous"></script>
+	
+
+</body>
+
+</html>

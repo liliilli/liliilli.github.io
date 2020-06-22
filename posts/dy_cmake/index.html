@@ -1,49 +1,83 @@
 <!DOCTYPE html>
 <html lang="en-us">
+
 <head>
 	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<style type=text/css>body{font-family:monospace;}</style>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<meta name="theme-color" content="#494f5c">
+	<meta name="msapplication-TileColor" content="#494f5c">
+<meta itemprop="name" content="自分でやるDyのCMakeListsファイル説明">
+<meta itemprop="description" content="はじめに 自分の個人プロジェクトのDyという、ゲームエンジンプロジェクトがあって、たまに時間がある時開発をしています。ですけど今は表じゃなく裏">
+
+
+<meta itemprop="datePublished" content="2020-03-08T11:48:19&#43;09:00" />
+<meta itemprop="dateModified" content="2020-03-08T19:18:31&#43;09:00" />
+<meta itemprop="wordCount" content="6758">
+
+
+
+<meta itemprop="keywords" content="untagged," />
+<meta property="og:title" content="自分でやるDyのCMakeListsファイル説明" />
+<meta property="og:description" content="はじめに 自分の個人プロジェクトのDyという、ゲームエンジンプロジェクトがあって、たまに時間がある時開発をしています。ですけど今は表じゃなく裏" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://liliilli.github.io/posts/dy_cmake/" />
+<meta property="article:published_time" content="2020-03-08T11:48:19+09:00" />
+<meta property="article:modified_time" content="2020-03-08T19:18:31+09:00" />
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="自分でやるDyのCMakeListsファイル説明"/>
+<meta name="twitter:description" content="はじめに 自分の個人プロジェクトのDyという、ゲームエンジンプロジェクトがあって、たまに時間がある時開発をしています。ですけど今は表じゃなく裏"/>
+
+	<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+	<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+	<link rel="manifest" href="/site.webmanifest">
+	<link rel="mask-icon" href="/safari-pinned-tab.svg" color="">
+	<link rel="shortcut icon" href="/favicon.ico">
+
 	<title>自分でやるDyのCMakeListsファイル説明</title>
-	
-	
-	<link rel="stylesheet" href="/css/style.css">
+	<link rel="stylesheet" href="https://liliilli.github.io/css/style.min.5ee5e7976cd09872c64e40a582206543f6aa38c69a8c43898aadc70040344b92.css" integrity="sha256-XuXnl2zQmHLGTkClgiBlQ/aqOMaajEOJiq3HAEA0S5I=" crossorigin="anonymous">
 	
 </head>
-<body>
-	<header>
-	=================<br>
-	== <a href="https://liliilli.github.io">neuromantic</a> ==<br>
-	=================
-	<div style="float: right;"></div><br>
-	<p>
-	<nav>
-			<a href="/"><b>Start</b></a>.
-			
-			
-			<a href="/posts/"><b>Posts</b></a>.
-			
-			<a href="/about-hugo/"><b>About</b></a>.
-			
-	</nav>
-	</p>
-	
-</header>
 
+<body id="page">
 	
-	<main>
-		<article>
-			<h1>自分でやるDyのCMakeListsファイル説明</h1>
-			<b><time>08.03.2020 11:48</time></b>
-		       
-		           <a href="/tags/untagged">untagged</a>
-        	       
+	<header id="site-header" class="animated slideInUp faster">
+		<div class="hdr-wrapper section-inner">
+			<div class="hdr-left">
+				<div class="site-branding">
+					<a href="https://liliilli.github.io">neuromantic</a>
+				</div>
+				<nav class="site-nav hide-in-mobile">
+					
+				<a href="https://liliilli.github.io/posts/">Posts</a>
+				<a href="https://liliilli.github.io/about-hugo/">About</a>
 
-			<div>
+				</nav>
+			</div>
+			<div class="hdr-right hdr-icons">
+				<span class="hdr-social hide-in-mobile"><a href="https://twitter.com/NeuliliilliD" target="_blank" rel="noopener me" title="Twitter"><svg xmlns="http://www.w3.org/2000/svg" class="feather" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg></a><a href="https://github.com/liliilli" target="_blank" rel="noopener me" title="Github"><svg xmlns="http://www.w3.org/2000/svg" class="feather" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg></a></span><button id="menu-btn" class="hdr-btn" title="Menu"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-menu"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg></button>
+			</div>
+		</div>
+	</header>
+	<div id="mobile-menu" class="animated fast">
+		<ul>
+			<li><a href="https://liliilli.github.io/posts/">Posts</a></li>
+			<li><a href="https://liliilli.github.io/about-hugo/">About</a></li>
+		</ul>
+	</div>
+
+
+	<main class="site-main section-inner animated fadeIn faster">
+		<article class="thin">
+			<header class="post-header">
+				<div class="post-meta"><span>Mar 8, 2020</span></div>
+				<h1>自分でやるDyのCMakeListsファイル説明</h1>
+			</header>
+			<div class="content">
 				
 
-<h1 id="はじめに">はじめに</h1>
+<h1 id="はじめに">はじめに<a href="#はじめに" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h1>
 
 <p>自分の個人プロジェクトの<code>Dy</code>という、ゲームエンジンプロジェクトがあって、たまに時間がある時開発をしています。ですけど今は表じゃなく裏で色々と構造上の問題の修正とか、会社で勉強になったところを適用しつつ<code>git</code>を使用せずにこっそりとやったのです。（伏線）</p>
 
@@ -53,9 +87,9 @@
 
 <p>ここからは真下の全文を最初から読み通して、リマインド用としてどんな要素を使ってコードを書いたかを説明したいと思います。</p>
 
-<h1 id="説明">説明</h1>
+<h1 id="説明">説明<a href="#説明" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h1>
 
-<h2 id="function-find-platform">・function(_find_platform)</h2>
+<h2 id="function-find-platform">・function(_find_platform)<a href="#function-find-platform" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
 <div class="highlight"><pre class="chroma"><code class="language-cmake" data-lang="cmake"><span class="nb">function</span><span class="p">(</span><span class="s">_find_platform</span> <span class="s">IVerbose</span> <span class="s">OPlatform</span><span class="p">)</span></code></pre></div>
 <blockquote>
 <p><a href="https://cmake.org/cmake/help/v3.14/manual/cmake.1.html#build-tool-mode">https://cmake.org/cmake/help/v3.14/manual/cmake.1.html#build-tool-mode</a><br>
@@ -76,7 +110,7 @@
 
 <p>文字列を<code>OPlatform</code>変数に入れときます。関数から外側からの変数引数に値を更新する場合には<code>PARENT_SCOPE</code>を使います。もし、どの分岐にも当たらなかったら変数の値は未定です。（<code>-NOTFOUND</code>かもしれませんね）</p>
 <div class="highlight"><pre class="chroma"><code class="language-cmake" data-lang="cmake"><span class="nb">set</span><span class="p">(</span><span class="o">${</span><span class="nv">OPlatform</span><span class="o">}</span> <span class="s2">&#34;WIN&#34;</span> <span class="s">PARENT_SCOPE</span><span class="p">)</span></code></pre></div>
-<h2 id="function-check-supported-platform-iplatformkey-oissupported">・function(_check_supported_platform IPlatformKey OIsSupported)</h2>
+<h2 id="function-check-supported-platform-iplatformkey-oissupported">・function(_check_supported_platform IPlatformKey OIsSupported)<a href="#function-check-supported-platform-iplatformkey-oissupported" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
 
 <p><code>function(_find_platform)</code>から取得したキーを検証し、ビルドできるプラットフォームなのかを確認してくれます。まず、<code>if</code>で<code>IPlatformKey</code>変数を検証する時には以下のようにします。</p>
 <div class="highlight"><pre class="chroma"><code class="language-cmake" data-lang="cmake"><span class="nb">if</span> <span class="p">(</span><span class="s2">&#34;${IPlatformKey}&#34;</span> <span class="s">STREQUAL</span> <span class="s2">&#34;WIN&#34;</span><span class="p">)</span></code></pre></div>
@@ -84,11 +118,11 @@
 
 <p>関数は別の言語のように早めにリターンすることも出来ます。<code>return()</code>を使いましょう。</p>
 
-<h2 id="function-is-windows-obool">・function(_is_windows OBool)</h2>
+<h2 id="function-is-windows-obool">・function(_is_windows OBool)<a href="#function-is-windows-obool" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
 
 <p>プラットフォームがウィンドウズかを確認してくれます。中身は単純に<code>_find_platform</code>関数の呼び出しとウィンドウズなのかを検証する分岐を書いたことに過ぎません。</p>
 
-<h2 id="function-find-winsdk-iverbose-odir-olibdir-oincdir">・function(_find_winsdk IVerbose &hellip; ODir OLibDir OIncDir)</h2>
+<h2 id="function-find-winsdk-iverbose-odir-olibdir-oincdir">・function(_find_winsdk IVerbose &hellip; ODir OLibDir OIncDir)<a href="#function-find-winsdk-iverbose-odir-olibdir-oincdir" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
 
 <blockquote>
 <p><a href="https://github.com/rpavlik/cmake-modules/blob/master/FindWindowsSDK.cmake">https://github.com/rpavlik/cmake-modules/blob/master/FindWindowsSDK.cmake</a></p>
@@ -99,13 +133,13 @@
 </span><span class="err"></span><span class="c"># ... DO SOMETHING
 </span><span class="c"></span><span class="nb">get_windowssdk_library_dirs</span><span class="p">(</span><span class="o">${</span><span class="nv">_in_ODir</span><span class="o">}</span> <span class="s">_in_OLibDir</span><span class="p">)</span><span class="err">
 </span><span class="err"></span><span class="nb">get_windowssdk_include_dirs</span><span class="p">(</span><span class="o">${</span><span class="nv">_in_ODir</span><span class="o">}</span> <span class="s">_in_OIncDir</span><span class="p">)</span></code></pre></div>
-<h2 id="macro-dy-setup-build-settings">・macro(dy_setup_build_settings)</h2>
+<h2 id="macro-dy-setup-build-settings">・macro(dy_setup_build_settings)<a href="#macro-dy-setup-build-settings" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
 
 <p>基本的なビルド設定を書いてくれます。ソースファイルの取得、IncludeとかInlineフォルダーの検知、C++バージョンの設定、属性（Property）の設定とビルドオプションを付けること等をやってくれます。</p>
 
 <p>関数とは違ってマクロなため、各種要素のスコープ管理処理が若干ややこしくなります。</p>
 
-<h3 id="cmake-build-type">CMAKE_BUILD_TYPE</h3>
+<h3 id="cmake-build-type">CMAKE_BUILD_TYPE<a href="#cmake-build-type" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
 
 <blockquote>
 <p><a href="https://cmake.org/cmake/help/v3.0/variable/CMAKE_BUILD_TYPE.html">https://cmake.org/cmake/help/v3.0/variable/CMAKE_BUILD_TYPE.html</a></p>
@@ -115,7 +149,7 @@
 
 <p>そしてこの文字列は<code>CMAKE_CXX_FLAGS_&lt;CONFIG&gt;</code>の<code>&lt;CONFIG&gt;</code>にも影響を及ぶそうです。ビルドモードによって<code>CMAKE_CXX_FLAGS_Debug</code>、<code>_Release</code>になれるらしいです。僕の書いたコードではこの<code>&lt;CONFIG&gt;</code>を後で見る*Generator Expression*を制御する時に使います。</p>
 <div class="highlight"><pre class="chroma"><code class="language-cmake" data-lang="cmake"><span class="nb">message</span><span class="p">(</span><span class="s">STATUS</span> <span class="s2">&#34;${PROJECT_NAME} is built with ${CMAKE_BUILD_TYPE} mode.&#34;</span><span class="p">)</span></code></pre></div>
-<h3 id="cc-ファイルリストの取得-フィルタリング"><code>.cc</code>ファイルリストの取得、フィルタリング</h3>
+<h3 id="cc-ファイルリストの取得-フィルタリング"><code>.cc</code>ファイルリストの取得、フィルタリング<a href="#cc-ファイルリストの取得-フィルタリング" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
 
 <p>以前の<code>CMakeLists.txt</code>ファイルでは、各プロジェクトごとに一々ソースファイルを登録しなければなりませんでした。</p>
 <div class="highlight"><pre class="chroma"><code class="language-cmake" data-lang="cmake"><span class="nb">target_sources</span><span class="p">(</span><span class="o">${</span><span class="nv">PROJECT_NAME</span><span class="o">}</span>
@@ -161,7 +195,7 @@
 </span><span class="err"></span>		<span class="nb">target_sources</span><span class="p">(</span><span class="o">${</span><span class="nv">PROJECT_NAME</span><span class="o">}</span> <span class="s">PRIVATE</span> <span class="s2">&#34;Src/${SrcItem}&#34;</span><span class="p">)</span><span class="err">
 </span><span class="err"></span>	<span class="nb">endif</span><span class="p">()</span><span class="err">
 </span><span class="err"></span><span class="nb">endforeach</span><span class="p">()</span></code></pre></div>
-<h3 id="inc-inlフォルダーの確認-取得">Inc、Inlフォルダーの確認・取得</h3>
+<h3 id="inc-inlフォルダーの確認-取得">Inc、Inlフォルダーの確認・取得<a href="#inc-inlフォルダーの確認-取得" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
 
 <blockquote>
 <p><a href="https://cmake.org/cmake/help/latest/command/if.html#condition-syntax">https://cmake.org/cmake/help/latest/command/if.html#condition-syntax</a></p>
@@ -174,7 +208,7 @@
 </span><span class="err"></span><span class="nb">if</span> <span class="p">(</span><span class="s">EXISTS</span> <span class="s2">&#34;${CMAKE_CURRENT_SOURCE_DIR}/Inl&#34;</span><span class="p">)</span><span class="err">
 </span><span class="err"></span>	<span class="nb">target_include_directories</span><span class="p">(</span><span class="o">${</span><span class="nv">PROJECT_NAME</span><span class="o">}</span> <span class="s">PUBLIC</span> <span class="s">Inl</span><span class="p">)</span><span class="err">
 </span><span class="err"></span><span class="nb">endif</span><span class="p">()</span></code></pre></div>
-<h3 id="windows専用include-ライブラリー追加">Windows専用Include・ライブラリー追加</h3>
+<h3 id="windows専用include-ライブラリー追加">Windows専用Include・ライブラリー追加<a href="#windows専用include-ライブラリー追加" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
 
 <p>cmakeを使っているOSがWindowsならば、Windowsから提供している昨日などを使うためにIncludeとLibraryのパスを指定する必要があります。なので追加でSDKのインクルードパスとライブラリーパスを指定するようしてます。</p>
 
@@ -191,7 +225,7 @@
 	<span class="p">)</span></code></pre></div>
 <p>ちなみに僕のプロジェクトではマルチバイト文字ではなく、ユニコード文字を使います。</p>
 
-<h3 id="propertyの適用">Propertyの適用</h3>
+<h3 id="propertyの適用">Propertyの適用<a href="#propertyの適用" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
 
 <blockquote>
 <p><a href="https://cmake.org/cmake/help/latest/command/set_target_properties.html">https://cmake.org/cmake/help/latest/command/set_target_properties.html</a><br><a href="https://cmake.org/cmake/help/latest/manual/cmake-properties.7.html#target-properties">https://cmake.org/cmake/help/latest/manual/cmake-properties.7.html#target-properties</a></p>
@@ -209,7 +243,7 @@
 	<span class="s">LIBRARY_OUTPUT_DIRECTORY</span> <span class="s2">&#34;${CMAKE_CURRENT_SOURCE_DIR}/lib/${CMAKE_BUILD_TYPE}&#34;</span>
 	<span class="s">RUNTIME_OUTPUT_DIRECTORY</span> <span class="s2">&#34;${CMAKE_CURRENT_SOURCE_DIR}/bin/${CMAKE_BUILD_TYPE}&#34;</span>
 <span class="p">)</span></code></pre></div>
-<h3 id="コンパイルオプション">コンパイルオプション</h3>
+<h3 id="コンパイルオプション">コンパイルオプション<a href="#コンパイルオプション" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
 
 <p>最後にプロジェクトをビルドする時のフラグを入れます。ただし、コンパイラごとにフラグに入れ方が違うため、<code>CMAKE_CXX_COMPILER_ID</code>全域変数を参照してコンパイラごとのフラグを入れる分岐を作ります。</p>
 <div class="highlight"><pre class="chroma"><code class="language-cmake" data-lang="cmake"><span class="nb">if</span> <span class="p">((</span>	<span class="c"># MSVC or Clang-Cl (Simulated MSVC on Clang)
@@ -247,7 +281,7 @@
 <span class="p">)</span> <span class="err">
 </span><span class="err"></span><span class="nb">set</span><span class="p">(</span><span class="s">ComOpts_MsvcDebug</span> <span class="s">/Od</span> <span class="o">${</span><span class="nv">ComOpts_MsvcCommon</span><span class="o">}</span><span class="p">)</span><span class="err">
 </span><span class="err"></span><span class="nb">set</span><span class="p">(</span><span class="s">ComOpts_MsvcRelease</span> <span class="s">/O2</span> <span class="o">${</span><span class="nv">ComOpts_MsvcCommon</span><span class="o">}</span><span class="p">)</span></code></pre></div>
-<h1 id="プロジェクトごとのcmakelists-txt">プロジェクトごとのCMakeLists.txt</h1>
+<h1 id="プロジェクトごとのcmakelists-txt">プロジェクトごとのCMakeLists.txt<a href="#プロジェクトごとのcmakelists-txt" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h1>
 
 <p>各プロジェクトでは下だけを書くことで終わります。</p>
 <div class="highlight"><pre class="chroma"><code class="language-cmake" data-lang="cmake"><span class="nb">cmake_minimum_required</span><span class="p">(</span><span class="s">VERSION</span> <span class="s">3.12</span><span class="p">)</span><span class="err">
@@ -266,9 +300,9 @@
 </span><span class="err"></span><span class="nb">dy_setup_build_settings</span><span class="p">()</span></code></pre></div>
 <p>ほとんどは<code>dy_setup_build_settings</code>マクロが設定してくれます。はい、おわり。</p>
 
-<h1 id="反省点">反省点</h1>
+<h1 id="反省点">反省点<a href="#反省点" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h1>
 
-<h3 id="unity-buildまたは類似unityの導入">Unity Buildまたは類似Unityの導入？</h3>
+<h3 id="unity-buildまたは類似unityの導入">Unity Buildまたは類似Unityの導入？<a href="#unity-buildまたは類似unityの導入" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
 
 <p>今は<code>file(GLOB_RECURSE)</code>でソースファイルをまとめてターゲットにバインディングしているようにしてますが、やるなら<code>file</code>コマンドをより活用して一時のUnityビルドファイルを作り、そこにリストをインクルードするコードをCmake側から書いてUnityファイルだけビルド通るようにすることも良さそうじゃないかな～と思いました。</p>
 
@@ -276,13 +310,13 @@
 
 <p>後で試してみて、上手く出来たらコード改良して切り換えたいです。</p>
 
-<h3 id="d3d12ライブラリ導入の制御が足りない">D3D12ライブラリ導入の制御が足りない</h3>
+<h3 id="d3d12ライブラリ導入の制御が足りない">D3D12ライブラリ導入の制御が足りない<a href="#d3d12ライブラリ導入の制御が足りない" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
 
 <p>現在のコードでは、WindowsならD3D12も自動に入れるようにしています。ですが、D3D12のライブラリは基本的にはWindows10以上のみ対応しているらしく、以前のWindowsOSでは当然ビルドエラーが出ちゃうか、意図してない挙動になれると思います。</p>
 
 <p>なんで、解決策として<code>option</code>コマンドなどでD3D12を入れるかないかを設定するようにし、OSのプラットフォームを詳しく区別させてWin10ではなければD3D12のインポートを解除するようにしつつ、フラグの<code>true/false</code>によって洗濯的にライブラリを入れるようにコードを修正すれば良いんじゃないかなと思いますね。</p>
 
-<h3 id="add-subdirectoryではなく-importで出来るのでは">add_subdirectoryではなく、IMPORTで出来るのでは？</h3>
+<h3 id="add-subdirectoryではなく-importで出来るのでは">add_subdirectoryではなく、IMPORTで出来るのでは？<a href="#add-subdirectoryではなく-importで出来るのでは" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
 
 <blockquote>
 <p><a href="https://www.youtube.com/watch?v=y7ndUhdQuU8">https://www.youtube.com/watch?v=y7ndUhdQuU8</a><br><a href="https://www.youtube.com/watch?v=y9kSr5enrSk">https://www.youtube.com/watch?v=y9kSr5enrSk</a></p>
@@ -290,11 +324,11 @@
 
 <p><code>add_subdirectory</code>ではなく、<code>IMPORT</code>でプロジェクトを関連させたりビルドさせたりすることが出来るらしいけど、詳しくは存じないです。単純に勘違いしたかもしれませんね…</p>
 
-<h3 id="警告メッセージをむりやり抑えてしまった">警告メッセージをむりやり抑えてしまった</h3>
+<h3 id="警告メッセージをむりやり抑えてしまった">警告メッセージをむりやり抑えてしまった<a href="#警告メッセージをむりやり抑えてしまった" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
 
 <p>Cmake＋Clang-Clでは<code>/MP</code>（マルチプロセッサで並列ビルドを行う）フラグが通じないみたいです。<code>/W4 /WX</code>まで付けたせいでエラーが出まくって、一応<code>-Wno</code>フラグでなんとか警告として扱うように抑えましたが、ちょっと気に食わないですね。</p>
 
-<h1 id="全文">全文</h1>
+<h1 id="全文">全文<a href="#全文" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h1>
 <div class="highlight"><pre class="chroma"><code class="language-cmake" data-lang="cmake"><span class="nb">cmake_minimum_required</span><span class="p">(</span><span class="s">VERSION</span> <span class="s">3.12</span><span class="p">)</span><span class="err">
 </span><span class="err"></span><span class="nb">project</span><span class="p">(</span><span class="s">Dy</span> <span class="s">CXX</span><span class="p">)</span><span class="err">
 </span><span class="err">
@@ -582,38 +616,39 @@
 </span><span class="err"></span><span class="nb">add_subdirectory</span><span class="p">(</span><span class="s">TestPrj</span><span class="p">)</span><span class="err">
 </span><span class="err"></span><span class="nb">add_subdirectory</span><span class="p">(</span><span class="s">ThirdParty</span><span class="p">)</span></code></pre></div>
 			</div>
+			<hr class="post-end">
+			<footer class="post-info">
+				<p>
+					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-tag meta-icon"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7" y2="7"></line></svg><span class="tag"><a href="https://liliilli.github.io/tags/untagged">untagged</a></span>
+				</p>
+				<p><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>6758 Words</p>
+				<p><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>2020-03-08 11:48 &#43;0900</p>
+			</footer>
 		</article>
+		<div class="post-nav thin">
+			<a class="next-post" href="https://liliilli.github.io/posts/matrix_name/">
+				<span class="post-nav-label"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-left"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>&nbsp;Newer</span><br><span>行列変数のネーミングについて</span>
+			</a>
+			<a class="prev-post" href="https://liliilli.github.io/posts/cmake_memo/">
+				<span class="post-nav-label">Older&nbsp;<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-right"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg></span><br><span>CMakeのメモまとめ</span>
+			</a>
+		</div>
+		<div id="comments" class="thin">
+</div>
 	</main>
-<aside>
-	<div>
-		<div>
-			<h3>LATEST POSTS</h3>
-		</div>
-		<div>
-			<ul>
-				
-				<li><a href="/posts/shader_opti_memo_2/">Low-level shader optimization for next-gen and D3D11のメモ</a></li>
-				
-				<li><a href="/posts/sfinae_afaid/">SFINAEの活用、ざっくりメモ</a></li>
-				
-				<li><a href="/posts/shader_opti_memo/">Low Level Thinking in High Shader Languages</a></li>
-				
-				<li><a href="/posts/dinput8/">DirectInput8 導入メモ</a></li>
-				
-				<li><a href="/posts/tlsf_basic/">TLSF Allocatorを作ってみた</a></li>
-				
-			</ul>
-		</div>
-	</div>
-</aside>
+
+	<footer id="site-footer" class="section-inner thin animated fadeIn faster">
+		<p>&copy; 2020 <a href="https://liliilli.github.io">jongmin yun - neu.</a> &#183; <a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC BY-NC 4.0</a></p>
+		<p>
+			Made with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> &#183; Theme <a href="https://github.com/Track3/hermit" target="_blank" rel="noopener">Hermit</a> &#183; <a href="https://liliilli.github.io/posts/index.xml" target="_blank" title="rss"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-rss"><path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1"></circle></svg></a>
+		</p>
+	</footer>
 
 
-	<footer>
-	<p>&copy; 2020 <a href="https://liliilli.github.io"><b>neuromantic</b></a>.
-	<a href="https://github.com/liliilli"><b>Github</b></a>.
-	<a href="https://twitter.com/NeuliliilliD"><b>Twitter</b></a>.
-	</p>
-</footer>
+
+	<script src="https://liliilli.github.io/js/bundle.min.4a9a0ac3d2217822c7865b4161e6c2a71de1d70492264337755427898dd718f6.js" integrity="sha256-SpoKw9IheCLHhltBYebCpx3h1wSSJkM3dVQniY3XGPY=" crossorigin="anonymous"></script>
+	
 
 </body>
+
 </html>

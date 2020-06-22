@@ -1,55 +1,91 @@
 <!DOCTYPE html>
 <html lang="en-us">
+
 <head>
 	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<style type=text/css>body{font-family:monospace;}</style>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<meta name="theme-color" content="#494f5c">
+	<meta name="msapplication-TileColor" content="#494f5c">
+<meta itemprop="name" content="Low-level shader optimization for next-gen and D3D11のメモ">
+<meta itemprop="description" content="メモの基になる原文は2014年GDCで発表されたもので、翻訳ミスによる間違いがある可能性があります。また、GCN（AMD）アーキテクチャの重">
+
+
+<meta itemprop="datePublished" content="2020-06-18T10:27:48&#43;09:00" />
+<meta itemprop="dateModified" content="2020-06-18T19:42:58&#43;09:00" />
+<meta itemprop="wordCount" content="7646">
+
+
+
+<meta itemprop="keywords" content="" />
+<meta property="og:title" content="Low-level shader optimization for next-gen and D3D11のメモ" />
+<meta property="og:description" content="メモの基になる原文は2014年GDCで発表されたもので、翻訳ミスによる間違いがある可能性があります。また、GCN（AMD）アーキテクチャの重" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://liliilli.github.io/posts/shader_opti_memo_2/" />
+<meta property="article:published_time" content="2020-06-18T10:27:48+09:00" />
+<meta property="article:modified_time" content="2020-06-18T19:42:58+09:00" />
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Low-level shader optimization for next-gen and D3D11のメモ"/>
+<meta name="twitter:description" content="メモの基になる原文は2014年GDCで発表されたもので、翻訳ミスによる間違いがある可能性があります。また、GCN（AMD）アーキテクチャの重"/>
+
+	<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+	<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+	<link rel="manifest" href="/site.webmanifest">
+	<link rel="mask-icon" href="/safari-pinned-tab.svg" color="">
+	<link rel="shortcut icon" href="/favicon.ico">
+
 	<title>Low-level shader optimization for next-gen and D3D11のメモ</title>
-	
-	
-	<link rel="stylesheet" href="/css/style.css">
+	<link rel="stylesheet" href="https://liliilli.github.io/css/style.min.5ee5e7976cd09872c64e40a582206543f6aa38c69a8c43898aadc70040344b92.css" integrity="sha256-XuXnl2zQmHLGTkClgiBlQ/aqOMaajEOJiq3HAEA0S5I=" crossorigin="anonymous">
 	
 </head>
-<body>
-	<header>
-	=================<br>
-	== <a href="https://liliilli.github.io">neuromantic</a> ==<br>
-	=================
-	<div style="float: right;"></div><br>
-	<p>
-	<nav>
-			<a href="/"><b>Start</b></a>.
-			
-			
-			<a href="/posts/"><b>Posts</b></a>.
-			
-			<a href="/about-hugo/"><b>About</b></a>.
-			
-	</nav>
-	</p>
-	
-</header>
 
+<body id="page">
 	
-	<main>
-		<article>
-			<h1>Low-level shader optimization for next-gen and D3D11のメモ</h1>
-			<b><time>18.06.2020 10:27</time></b>
-		       
+	<header id="site-header" class="animated slideInUp faster">
+		<div class="hdr-wrapper section-inner">
+			<div class="hdr-left">
+				<div class="site-branding">
+					<a href="https://liliilli.github.io">neuromantic</a>
+				</div>
+				<nav class="site-nav hide-in-mobile">
+					
+				<a href="https://liliilli.github.io/posts/">Posts</a>
+				<a href="https://liliilli.github.io/about-hugo/">About</a>
 
-			<div>
+				</nav>
+			</div>
+			<div class="hdr-right hdr-icons">
+				<span class="hdr-social hide-in-mobile"><a href="https://twitter.com/NeuliliilliD" target="_blank" rel="noopener me" title="Twitter"><svg xmlns="http://www.w3.org/2000/svg" class="feather" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg></a><a href="https://github.com/liliilli" target="_blank" rel="noopener me" title="Github"><svg xmlns="http://www.w3.org/2000/svg" class="feather" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg></a></span><button id="menu-btn" class="hdr-btn" title="Menu"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-menu"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg></button>
+			</div>
+		</div>
+	</header>
+	<div id="mobile-menu" class="animated fast">
+		<ul>
+			<li><a href="https://liliilli.github.io/posts/">Posts</a></li>
+			<li><a href="https://liliilli.github.io/about-hugo/">About</a></li>
+		</ul>
+	</div>
+
+
+	<main class="site-main section-inner animated fadeIn faster">
+		<article class="thin">
+			<header class="post-header">
+				<div class="post-meta"><span>Jun 18, 2020</span></div>
+				<h1>Low-level shader optimization for next-gen and D3D11のメモ</h1>
+			</header>
+			<div class="content">
 				
 
 <p>メモの基になる<a href="https://www.gdcvault.com/browse/gdc-14/play/1020352">原文</a>は2014年GDCで発表されたもので、翻訳ミスによる間違いがある可能性があります。また、GCN（AMD）アーキテクチャの重点的に扱っているので、NVIDIAなどのハードウェアについては挙動が違うかもしれません。</p>
 
 <hr />
 
-<h1 id="本文">本文</h1>
+<h1 id="本文">本文<a href="#本文" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h1>
 
 <p><a href="https://liliilli.github.io/posts/shader_opti_memo/">Low Level Thinking in High Shader Languages</a>の原文が出てから１年後、2014年に現世代（Xbox One、PS4）で搭載されたGCNアーキテクチャの登場、DirectX11の本格的な使用（当時SteamでのD3D11使用割合が70%）によって以前までの最適化も新しく考えなかればならなくなったそうだ。</p>
 
-<h2 id="introduction-more-lessons">Introduction ~ More Lessons</h2>
+<h2 id="introduction-more-lessons">Introduction ~ More Lessons<a href="#introduction-more-lessons" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
 
 <ul>
 <li>Xbox One（Durango）、PS4（Orbis）はAMDのスーパーSIMDのGCNを使っている。（GCNの前まではVLIWを使い回していた）＋次世代もAMDのNAVI（GCN1.5として分類されるらしい）を使ってるので基本的な骨子は変わらないのでは…と</li>
@@ -66,7 +102,7 @@
 <li><p>高級言語での最適化はローレベルの最適化に影響をする。</p></li>
 </ul>
 
-<h2 id="a-look-at-modern-hardware-sampling-a-cubemap">A look at modern hardware ~ Sampling a cubemap</h2>
+<h2 id="a-look-at-modern-hardware-sampling-a-cubemap">A look at modern hardware ~ Sampling a cubemap<a href="#a-look-at-modern-hardware-sampling-a-cubemap" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
 
 <p>キューブマップから３次元UVWでサンプリングをするコードがあるとして、</p>
 <div class="highlight"><pre class="chroma"><code class="language-hlsl" data-lang="hlsl">TextureCube Cube;
@@ -84,7 +120,7 @@ float4 main(float3 tex_coord: TEXCOORD) : SV_Target
 
 <p>画像ではベクトル演算が15個、スカラ演算が6個、テクスチャに接近して色をとり、またそれを返す命令がそれぞれ1個で色々と膨らんでいることがわかる。</p>
 
-<h2 id="hardware-evolution">Hardware evolution</h2>
+<h2 id="hardware-evolution">Hardware evolution<a href="#hardware-evolution" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
 
 <p>固定関数（Fixed Function）のためのユニットがALUに編入されつつある傾向が持続しているそうだ。<code>D3D11_FILTER</code>（ミップマップのフィルタリング）で線形補間などをすることもD3D11からはALUに任せているらしい。（またハードウェアによって挙動は違うかもしれない）</p>
 
@@ -108,7 +144,7 @@ float4 main(float3 tex_coord: TEXCOORD) : SV_Target
 
 <p>しかしGraphics pipelineはCompute Shaderとは違ってパイプライン制御のための状態を保持しなければならないため、並列に演算させることは出来ないらしい。（RDNA2とかAmpereではどうなのかな）</p>
 
-<h2 id="null-shader-not-so-null-shader-anymore">NULL shader ~ Not so NULL shader anymore</h2>
+<h2 id="null-shader-not-so-null-shader-anymore">NULL shader ~ Not so NULL shader anymore<a href="#null-shader-not-so-null-shader-anymore" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
 <div class="highlight"><pre class="chroma"><code class="language-hlsl" data-lang="hlsl">float4 main(float4 tex_coord: TEXCOORD0) : SV_Target
 {
 	return tex_coord;
@@ -128,7 +164,7 @@ float4 main(float3 tex_coord: TEXCOORD) : SV_Target
 <p><a href="https://www.dictionary.com/browse/freebees">https://www.dictionary.com/browse/freebees</a></p>
 </blockquote>
 
-<h2 id="shader-inputs">Shader inputs</h2>
+<h2 id="shader-inputs">Shader inputs<a href="#shader-inputs" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
 
 <p>シェーダーを実行するスケジューラでは書くシェーダーステージごとにコストがないリソースを用意している。上のPSコードで使った<code>SV_Position</code>もその一部である。</p>
 
@@ -165,7 +201,7 @@ float4 main(float3 tex_coord: TEXCOORD) : SV_Target
 <div class="highlight"><pre class="chroma"><code class="language-hlsl" data-lang="hlsl">return face ? normal : -normal;
 // or...
 return asfloat(BitFieldInsert(face, asuint(normal), asuint(-normal)));</code></pre></div>
-<h2 id="gcn-instructions">GCN instructions</h2>
+<h2 id="gcn-instructions">GCN instructions<a href="#gcn-instructions" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
 
 <p>GCNアーキテクチャは以前のVLIWのようなものすごく長い命令を持たなく、32bitまたは64bitの命令だけを持つようになっている。そして命令一つに一つのスカラレジスタだけ読み込みできるようになったため、<code>MAD</code>が効率が悪くなる可能性ができてしまう。</p>
 
@@ -242,13 +278,13 @@ return x * 0.5f + 1.5f // x is scalar =&gt; v_madak_f32 v0, 0.5(l), v0, 0x3fc000
 // v_mov_b32 v1, s1
 // 3 of v_mad_f32
 // and v_mac_f32 end...</code></pre></div>
-<h2 id="vectorization">Vectorization</h2>
+<h2 id="vectorization">Vectorization<a href="#vectorization" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
 
 <p>昔GPUのアーキテクチャ自体がSuper-ScalarまたはVLIWベースではなかった時には、ベクトル演算の力を借りて<code>return 1.0f - dot(v.xy, v.xy)</code>みたいにむりやり最適化を催そうとしたが、今のGPUはだいたいSuper-ScalarまたはモバイルさえもVLIWベースであるため、やらない方がむしろ最適化されやすい。</p>
 
-<h2 id="rops">ROPs</h2>
+<h2 id="rops">ROPs<a href="#rops" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
 
-<h3 id="ropとは">ROPとは？</h3>
+<h3 id="ropとは">ROPとは？<a href="#ropとは" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
 
 <blockquote>
 <p><a href="https://en.wikipedia.org/wiki/Render_output_unit">https://en.wikipedia.org/wiki/Render_output_unit</a></p>
@@ -266,7 +302,7 @@ return x * 0.5f + 1.5f // x is scalar =&gt; v_madak_f32 v0, 0.5(l), v0, 0x3fc000
 
 <p>とにかくなんとかかんとか大体のフレームバッファはRGBA8であるため（HDRなどは例外）、普通の状況ではROPsボトルネックになってしまう。出来ればメモリのボトルネックにする方が良いので、演算速度を上げるにはCompute Shaderをものすごく使うのが良いらしい。</p>
 
-<h2 id="branching-registers">Branching ~ Registers</h2>
+<h2 id="branching-registers">Branching ~ Registers<a href="#branching-registers" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
 
 <p>GCNでの分岐の処理は基本的に一番遅いレーンに合わせることと、ThenとElseの分岐を全部試してみるという骨子からあんまり変わっていないが、速いので速度が落ちることがあんまりないそうだ。分岐の処理はスカラ演算ユニットで処理される。</p>
 
@@ -302,7 +338,7 @@ for (each) { WorkB(); }
 // not for (each) { WorkA(); WorkB(); }</code></pre></div>
 <p>そしてこの最適化はCPUの方でも通用されるのだが、変数データの寿命を最大限に短くすること。また、<code>#ifdef</code>を積極的に活用してランタイムの分岐よりはシェーダープログラムを作る際に静的に分岐して性能の低下を防ぐようにすること。最悪<a href="https://www.gamedev.net/forums/topic/659145-what-is-a-uber-shader/">Uber-shader</a>の中にマクロ分岐を仕込んでレンダリングさせるほうが良い。</p>
 
-<h2 id="things-shader-author-should-stop-doing">Things shader author should stop doing</h2>
+<h2 id="things-shader-author-should-stop-doing">Things shader author should stop doing<a href="#things-shader-author-should-stop-doing" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
 
 <p>やるなスペシャル</p>
 
@@ -311,7 +347,7 @@ for (each) { WorkB(); }
 <li><code>normal = Normal.Sample(...) * 2.0f - 1.0f</code></li>
 </ul>
 
-<h1 id="参考">参考</h1>
+<h1 id="参考">参考<a href="#参考" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h1>
 
 <p><a href="https://gpuopen.com/wp-content/uploads/2017/03/GDC2017-Advanced-Shader-Programming-On-GCN.pdf">GDC2017-Advanced-Shader-Programming-On-GCN</a></p>
 
@@ -320,38 +356,36 @@ for (each) { WorkB(); }
 <p><a href="https://developer.amd.com/wordpress/media/2012/12/AMD_Southern_Islands_Instruction_Set_Architecture.pdf">AMD Southern Island Instruction Set Architecture</a></p>
 
 			</div>
+			<hr class="post-end">
+			<footer class="post-info">
+				<p><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>7646 Words</p>
+				<p><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>2020-06-18 10:27 &#43;0900</p>
+			</footer>
 		</article>
+		<div class="post-nav thin">
+			<a class="next-post" href="https://liliilli.github.io/posts/week25_2020/">
+				<span class="post-nav-label"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-left"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>&nbsp;Newer</span><br><span>最近簡単に読んだポスト</span>
+			</a>
+			<a class="prev-post" href="https://liliilli.github.io/posts/sfinae_afaid/">
+				<span class="post-nav-label">Older&nbsp;<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-right"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg></span><br><span>SFINAEの活用、ざっくりメモ</span>
+			</a>
+		</div>
+		<div id="comments" class="thin">
+</div>
 	</main>
-<aside>
-	<div>
-		<div>
-			<h3>LATEST POSTS</h3>
-		</div>
-		<div>
-			<ul>
-				
-				<li><a href="/posts/shader_opti_memo_2/">Low-level shader optimization for next-gen and D3D11のメモ</a></li>
-				
-				<li><a href="/posts/sfinae_afaid/">SFINAEの活用、ざっくりメモ</a></li>
-				
-				<li><a href="/posts/shader_opti_memo/">Low Level Thinking in High Shader Languages</a></li>
-				
-				<li><a href="/posts/dinput8/">DirectInput8 導入メモ</a></li>
-				
-				<li><a href="/posts/tlsf_basic/">TLSF Allocatorを作ってみた</a></li>
-				
-			</ul>
-		</div>
-	</div>
-</aside>
+
+	<footer id="site-footer" class="section-inner thin animated fadeIn faster">
+		<p>&copy; 2020 <a href="https://liliilli.github.io">jongmin yun - neu.</a> &#183; <a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC BY-NC 4.0</a></p>
+		<p>
+			Made with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> &#183; Theme <a href="https://github.com/Track3/hermit" target="_blank" rel="noopener">Hermit</a> &#183; <a href="https://liliilli.github.io/posts/index.xml" target="_blank" title="rss"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-rss"><path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1"></circle></svg></a>
+		</p>
+	</footer>
 
 
-	<footer>
-	<p>&copy; 2020 <a href="https://liliilli.github.io"><b>neuromantic</b></a>.
-	<a href="https://github.com/liliilli"><b>Github</b></a>.
-	<a href="https://twitter.com/NeuliliilliD"><b>Twitter</b></a>.
-	</p>
-</footer>
+
+	<script src="https://liliilli.github.io/js/bundle.min.4a9a0ac3d2217822c7865b4161e6c2a71de1d70492264337755427898dd718f6.js" integrity="sha256-SpoKw9IheCLHhltBYebCpx3h1wSSJkM3dVQniY3XGPY=" crossorigin="anonymous"></script>
+	
 
 </body>
+
 </html>

@@ -1,49 +1,83 @@
 <!DOCTYPE html>
 <html lang="en-us">
+
 <head>
 	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<style type=text/css>body{font-family:monospace;}</style>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<meta name="theme-color" content="#494f5c">
+	<meta name="msapplication-TileColor" content="#494f5c">
+<meta itemprop="name" content="C&#43;&#43;2aのconceptsを使ってみた。">
+<meta itemprop="description" content="C&#43;&#43;のConceptを簡略説明 C&#43;&#43;2a（20）から追加する文法の一つであるconceptは、あるタイプの制約条件を記すことができる識別子">
+
+
+<meta itemprop="datePublished" content="2019-11-21T20:33:04&#43;09:00" />
+<meta itemprop="dateModified" content="2019-11-21T21:46:17&#43;09:00" />
+<meta itemprop="wordCount" content="1486">
+
+
+
+<meta itemprop="keywords" content="c&#43;&#43;," />
+<meta property="og:title" content="C&#43;&#43;2aのconceptsを使ってみた。" />
+<meta property="og:description" content="C&#43;&#43;のConceptを簡略説明 C&#43;&#43;2a（20）から追加する文法の一つであるconceptは、あるタイプの制約条件を記すことができる識別子" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://liliilli.github.io/posts/cpp_concept/" />
+<meta property="article:published_time" content="2019-11-21T20:33:04+09:00" />
+<meta property="article:modified_time" content="2019-11-21T21:46:17+09:00" />
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="C&#43;&#43;2aのconceptsを使ってみた。"/>
+<meta name="twitter:description" content="C&#43;&#43;のConceptを簡略説明 C&#43;&#43;2a（20）から追加する文法の一つであるconceptは、あるタイプの制約条件を記すことができる識別子"/>
+
+	<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+	<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+	<link rel="manifest" href="/site.webmanifest">
+	<link rel="mask-icon" href="/safari-pinned-tab.svg" color="">
+	<link rel="shortcut icon" href="/favicon.ico">
+
 	<title>C&#43;&#43;2aのconceptsを使ってみた。</title>
-	
-	
-	<link rel="stylesheet" href="/css/style.css">
+	<link rel="stylesheet" href="https://liliilli.github.io/css/style.min.5ee5e7976cd09872c64e40a582206543f6aa38c69a8c43898aadc70040344b92.css" integrity="sha256-XuXnl2zQmHLGTkClgiBlQ/aqOMaajEOJiq3HAEA0S5I=" crossorigin="anonymous">
 	
 </head>
-<body>
-	<header>
-	=================<br>
-	== <a href="https://liliilli.github.io">neuromantic</a> ==<br>
-	=================
-	<div style="float: right;"></div><br>
-	<p>
-	<nav>
-			<a href="/"><b>Start</b></a>.
-			
-			
-			<a href="/posts/"><b>Posts</b></a>.
-			
-			<a href="/about-hugo/"><b>About</b></a>.
-			
-	</nav>
-	</p>
-	
-</header>
 
+<body id="page">
 	
-	<main>
-		<article>
-			<h1>C&#43;&#43;2aのconceptsを使ってみた。</h1>
-			<b><time>21.11.2019 20:33</time></b>
-		       
-		           <a href="/tags/c&#43;&#43;">c&#43;&#43;</a>
-        	       
+	<header id="site-header" class="animated slideInUp faster">
+		<div class="hdr-wrapper section-inner">
+			<div class="hdr-left">
+				<div class="site-branding">
+					<a href="https://liliilli.github.io">neuromantic</a>
+				</div>
+				<nav class="site-nav hide-in-mobile">
+					
+				<a href="https://liliilli.github.io/posts/">Posts</a>
+				<a href="https://liliilli.github.io/about-hugo/">About</a>
 
-			<div>
+				</nav>
+			</div>
+			<div class="hdr-right hdr-icons">
+				<span class="hdr-social hide-in-mobile"><a href="https://twitter.com/NeuliliilliD" target="_blank" rel="noopener me" title="Twitter"><svg xmlns="http://www.w3.org/2000/svg" class="feather" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg></a><a href="https://github.com/liliilli" target="_blank" rel="noopener me" title="Github"><svg xmlns="http://www.w3.org/2000/svg" class="feather" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg></a></span><button id="menu-btn" class="hdr-btn" title="Menu"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-menu"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg></button>
+			</div>
+		</div>
+	</header>
+	<div id="mobile-menu" class="animated fast">
+		<ul>
+			<li><a href="https://liliilli.github.io/posts/">Posts</a></li>
+			<li><a href="https://liliilli.github.io/about-hugo/">About</a></li>
+		</ul>
+	</div>
+
+
+	<main class="site-main section-inner animated fadeIn faster">
+		<article class="thin">
+			<header class="post-header">
+				<div class="post-meta"><span>Nov 21, 2019</span></div>
+				<h1>C&#43;&#43;2aのconceptsを使ってみた。</h1>
+			</header>
+			<div class="content">
 				
 
-<h1 id="c-のconceptを簡略説明">C++のConceptを簡略説明</h1>
+<h1 id="c-のconceptを簡略説明">C++のConceptを簡略説明<a href="#c-のconceptを簡略説明" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h1>
 
 <p>C++2a（20）から追加する文法の一つである<code>concept</code>は、あるタイプの制約条件を記すことができる識別子です。制約条件というのは<code>Constraints</code>と呼びますが、あくまでも付与された<code>concept</code>を満足するための一連の条件組だと言えます。以下はある<code>concept</code>を宣言するコードです。</p>
 <div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
@@ -80,7 +114,7 @@
 </span><span class="c1">// コンパイルエラーが出ます。
 </span><span class="c1"></span><span class="k">const</span> <span class="n">floating_point</span> <span class="k">auto</span> <span class="n">val3</span> <span class="o">=</span> <span class="n">go5</span><span class="p">(</span><span class="mf">1.2f</span><span class="p">,</span> <span class="mf">3.4f</span><span class="p">);</span>
 </code></pre></div>
-<h1 id="もっと詳しく知りたい方へ">もっと詳しく知りたい方へ</h1>
+<h1 id="もっと詳しく知りたい方へ">もっと詳しく知りたい方へ<a href="#もっと詳しく知りたい方へ" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h1>
 
 <p>上の説明は、<code>concept</code>と<code>requires</code>、そして条件構文でできることの一部しか紹介していません。詳しく知りたい型には以下の文書をお読みいただけましたら嬉しいです。</p>
 
@@ -88,7 +122,7 @@
 
 <p>また、C++のコードがウェブで作成できるCompiler Explorerというサイトで、gcc (trunk)またはclang (concepts)を選択しましたら<code>concept</code>が実装されたバージョンでコードが組めることが出来ます。</p>
 
-<h1 id="full-code">Full code</h1>
+<h1 id="full-code">Full code<a href="#full-code" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h1>
 <div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="cp">#include</span> <span class="cpf">&lt;type_traits&gt;</span><span class="cp">
 </span><span class="cp"></span>
 <span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">Float</span><span class="o">&gt;</span>
@@ -183,38 +217,39 @@
 <span class="p">}</span>
 </code></pre></div>
 			</div>
+			<hr class="post-end">
+			<footer class="post-info">
+				<p>
+					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-tag meta-icon"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7" y2="7"></line></svg><span class="tag"><a href="https://liliilli.github.io/tags/c&#43;&#43;">c&#43;&#43;</a></span>
+				</p>
+				<p><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>1486 Words</p>
+				<p><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>2019-11-21 20:33 &#43;0900</p>
+			</footer>
 		</article>
+		<div class="post-nav thin">
+			<a class="next-post" href="https://liliilli.github.io/posts/hugo_memo/">
+				<span class="post-nav-label"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-left"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>&nbsp;Newer</span><br><span>Hugoブログを使いこなせるためのメモ</span>
+			</a>
+			<a class="prev-post" href="https://liliilli.github.io/posts/shadertoy_pbr/">
+				<span class="post-nav-label">Older&nbsp;<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-right"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg></span><br><span>ShaderToyでPBRを書いてから、自ら解説してみた。</span>
+			</a>
+		</div>
+		<div id="comments" class="thin">
+</div>
 	</main>
-<aside>
-	<div>
-		<div>
-			<h3>LATEST POSTS</h3>
-		</div>
-		<div>
-			<ul>
-				
-				<li><a href="/posts/shader_opti_memo_2/">Low-level shader optimization for next-gen and D3D11のメモ</a></li>
-				
-				<li><a href="/posts/sfinae_afaid/">SFINAEの活用、ざっくりメモ</a></li>
-				
-				<li><a href="/posts/shader_opti_memo/">Low Level Thinking in High Shader Languages</a></li>
-				
-				<li><a href="/posts/dinput8/">DirectInput8 導入メモ</a></li>
-				
-				<li><a href="/posts/tlsf_basic/">TLSF Allocatorを作ってみた</a></li>
-				
-			</ul>
-		</div>
-	</div>
-</aside>
+
+	<footer id="site-footer" class="section-inner thin animated fadeIn faster">
+		<p>&copy; 2020 <a href="https://liliilli.github.io">jongmin yun - neu.</a> &#183; <a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC BY-NC 4.0</a></p>
+		<p>
+			Made with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> &#183; Theme <a href="https://github.com/Track3/hermit" target="_blank" rel="noopener">Hermit</a> &#183; <a href="https://liliilli.github.io/posts/index.xml" target="_blank" title="rss"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-rss"><path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1"></circle></svg></a>
+		</p>
+	</footer>
 
 
-	<footer>
-	<p>&copy; 2020 <a href="https://liliilli.github.io"><b>neuromantic</b></a>.
-	<a href="https://github.com/liliilli"><b>Github</b></a>.
-	<a href="https://twitter.com/NeuliliilliD"><b>Twitter</b></a>.
-	</p>
-</footer>
+
+	<script src="https://liliilli.github.io/js/bundle.min.4a9a0ac3d2217822c7865b4161e6c2a71de1d70492264337755427898dd718f6.js" integrity="sha256-SpoKw9IheCLHhltBYebCpx3h1wSSJkM3dVQniY3XGPY=" crossorigin="anonymous"></script>
+	
 
 </body>
+
 </html>

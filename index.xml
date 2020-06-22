@@ -7,10 +7,28 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright>
-    <lastBuildDate>Thu, 18 Jun 2020 10:27:48 +0900</lastBuildDate>
+    <lastBuildDate>Fri, 19 Jun 2020 12:16:09 +0900</lastBuildDate>
     
 	<atom:link href="https://liliilli.github.io/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>AMD GCNアーキテクチャ文書を読んでメモ</title>
+      <link>https://liliilli.github.io/posts/gcn_architecture_crash/</link>
+      <pubDate>Fri, 19 Jun 2020 12:16:09 +0900</pubDate>
+      
+      <guid>https://liliilli.github.io/posts/gcn_architecture_crash/</guid>
+      <description>用語 略語 説明 VS Vertex Shader PS Pixel Shader (Fragment Shader) VLIW Very Long Instruction Word FLOPS FLoating point Operations Per Second GCN Graphics Core Next CU Compute Unit EU Export Unit ISA Instruction Set Architecture SIMD Single Instruction Multiple Data ALU Arithmetic Logic Unit AGU Address Generation Unit SALU Scalar Arithmetic Logic Unit VALU Vector Arithmetic Logic Unit APU Accelated Processing Unit PC Program Counter IB</description>
+    </item>
+    
+    <item>
+      <title>最近簡単に読んだポスト</title>
+      <link>https://liliilli.github.io/posts/week25_2020/</link>
+      <pubDate>Fri, 19 Jun 2020 11:39:40 +0900</pubDate>
+      
+      <guid>https://liliilli.github.io/posts/week25_2020/</guid>
+      <description>Avoid double negation, unless&amp;hellip; !!x == xのような構文を使わないこと。代わりにenabledに終わる（何かが有効化されたか？）ように関数またはフラグなどを作って渡すこと</description>
+    </item>
     
     <item>
       <title>Low-level shader optimization for next-gen and D3D11のメモ</title>
@@ -82,24 +100,6 @@
       
       <guid>https://liliilli.github.io/posts/cmake_memo/</guid>
       <description>https://cliutils.gitlab.io/modern-cmake/chapters/intro/dodonot.html https://gist.github.com/mbinna/c61dbb39bca0e4fb7d1f73b0d66a4fd1 Do&amp;rsquo;s and Don&amp;rsquo;ts CMakeで避けるべきのパターン https://cliutils.gitlab.io/modern-cmake/chapters/intro/dodonot.html https://gist.github.com/mbinna/c61dbb39bca0e4fb7d1f73b0d66a4fd1 link_directories、include_librariesなどのグローバル関数を使わ</description>
-    </item>
-    
-    <item>
-      <title>Hugoブログを使いこなせるためのメモ</title>
-      <link>https://liliilli.github.io/posts/hugo_memo/</link>
-      <pubDate>Tue, 03 Mar 2020 23:10:28 +0900</pubDate>
-      
-      <guid>https://liliilli.github.io/posts/hugo_memo/</guid>
-      <description>すごく久しぶりにHugoのブログを使おうとしましたが、ブログに記事を書くどころかHugoの使い方すらすっかり忘れてしまいました。だもんで自分</description>
-    </item>
-    
-    <item>
-      <title>C&#43;&#43;2aのconceptsを使ってみた。</title>
-      <link>https://liliilli.github.io/posts/cpp_concept/</link>
-      <pubDate>Thu, 21 Nov 2019 20:33:04 +0900</pubDate>
-      
-      <guid>https://liliilli.github.io/posts/cpp_concept/</guid>
-      <description>C++のConceptを簡略説明 C++2a（20）から追加する文法の一つであるconceptは、あるタイプの制約条件を記すことができる識別子</description>
     </item>
     
   </channel>

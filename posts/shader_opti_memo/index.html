@@ -1,55 +1,91 @@
 <!DOCTYPE html>
 <html lang="en-us">
+
 <head>
 	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<style type=text/css>body{font-family:monospace;}</style>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<meta name="theme-color" content="#494f5c">
+	<meta name="msapplication-TileColor" content="#494f5c">
+<meta itemprop="name" content="Low Level Thinking in High Shader Languages">
+<meta itemprop="description" content="これは参照項目のGDCのリンクを読んで適当にメモしたものです。詳しくは参照のリンクをご覧ください。 Goal of this presentation ローレベル思考はいまだに有効である">
+
+
+<meta itemprop="datePublished" content="2020-06-17T12:00:15&#43;09:00" />
+<meta itemprop="dateModified" content="2020-06-17T19:08:03&#43;09:00" />
+<meta itemprop="wordCount" content="5835">
+
+
+
+<meta itemprop="keywords" content="" />
+<meta property="og:title" content="Low Level Thinking in High Shader Languages" />
+<meta property="og:description" content="これは参照項目のGDCのリンクを読んで適当にメモしたものです。詳しくは参照のリンクをご覧ください。 Goal of this presentation ローレベル思考はいまだに有効である" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://liliilli.github.io/posts/shader_opti_memo/" />
+<meta property="article:published_time" content="2020-06-17T12:00:15+09:00" />
+<meta property="article:modified_time" content="2020-06-17T19:08:03+09:00" />
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Low Level Thinking in High Shader Languages"/>
+<meta name="twitter:description" content="これは参照項目のGDCのリンクを読んで適当にメモしたものです。詳しくは参照のリンクをご覧ください。 Goal of this presentation ローレベル思考はいまだに有効である"/>
+
+	<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+	<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+	<link rel="manifest" href="/site.webmanifest">
+	<link rel="mask-icon" href="/safari-pinned-tab.svg" color="">
+	<link rel="shortcut icon" href="/favicon.ico">
+
 	<title>Low Level Thinking in High Shader Languages</title>
-	
-	
-	<link rel="stylesheet" href="/css/style.css">
+	<link rel="stylesheet" href="https://liliilli.github.io/css/style.min.5ee5e7976cd09872c64e40a582206543f6aa38c69a8c43898aadc70040344b92.css" integrity="sha256-XuXnl2zQmHLGTkClgiBlQ/aqOMaajEOJiq3HAEA0S5I=" crossorigin="anonymous">
 	
 </head>
-<body>
-	<header>
-	=================<br>
-	== <a href="https://liliilli.github.io">neuromantic</a> ==<br>
-	=================
-	<div style="float: right;"></div><br>
-	<p>
-	<nav>
-			<a href="/"><b>Start</b></a>.
-			
-			
-			<a href="/posts/"><b>Posts</b></a>.
-			
-			<a href="/about-hugo/"><b>About</b></a>.
-			
-	</nav>
-	</p>
-	
-</header>
 
+<body id="page">
 	
-	<main>
-		<article>
-			<h1>Low Level Thinking in High Shader Languages</h1>
-			<b><time>17.06.2020 12:00</time></b>
-		       
+	<header id="site-header" class="animated slideInUp faster">
+		<div class="hdr-wrapper section-inner">
+			<div class="hdr-left">
+				<div class="site-branding">
+					<a href="https://liliilli.github.io">neuromantic</a>
+				</div>
+				<nav class="site-nav hide-in-mobile">
+					
+				<a href="https://liliilli.github.io/posts/">Posts</a>
+				<a href="https://liliilli.github.io/about-hugo/">About</a>
 
-			<div>
+				</nav>
+			</div>
+			<div class="hdr-right hdr-icons">
+				<span class="hdr-social hide-in-mobile"><a href="https://twitter.com/NeuliliilliD" target="_blank" rel="noopener me" title="Twitter"><svg xmlns="http://www.w3.org/2000/svg" class="feather" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg></a><a href="https://github.com/liliilli" target="_blank" rel="noopener me" title="Github"><svg xmlns="http://www.w3.org/2000/svg" class="feather" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg></a></span><button id="menu-btn" class="hdr-btn" title="Menu"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-menu"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg></button>
+			</div>
+		</div>
+	</header>
+	<div id="mobile-menu" class="animated fast">
+		<ul>
+			<li><a href="https://liliilli.github.io/posts/">Posts</a></li>
+			<li><a href="https://liliilli.github.io/about-hugo/">About</a></li>
+		</ul>
+	</div>
+
+
+	<main class="site-main section-inner animated fadeIn faster">
+		<article class="thin">
+			<header class="post-header">
+				<div class="post-meta"><span>Jun 17, 2020</span></div>
+				<h1>Low Level Thinking in High Shader Languages</h1>
+			</header>
+			<div class="content">
 				
 
 <p>これは参照項目のGDCのリンクを読んで適当にメモしたものです。詳しくは参照のリンクをご覧ください。</p>
 
-<h2 id="goal-of-this-presentation">Goal of this presentation</h2>
+<h2 id="goal-of-this-presentation">Goal of this presentation<a href="#goal-of-this-presentation" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
 
 <blockquote>
 <p>ローレベル思考はいまだに有効であることを見せる。</p>
 </blockquote>
 
-<h2 id="background">Background</h2>
+<h2 id="background">Background<a href="#background" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
 
 <p>今から（2020年）ほぼ20年前にはシェーダーに制限が多く、今のようにノードベースまたはHLSLなどの高級言語ではなく独自のアセンブリでコードを書かなければならなかった。</p>
 
@@ -64,7 +100,7 @@ mul		r0, r0, c0.y // こんな感じで…</code></pre></div>
 
 <p>しかし、これはノードまたはHLSL言語が実際のHWに一対一対応していなくなった事になり、シェーダーの最適化などを正にコンパイラー様にお祈りするしかならなくなったのである。</p>
 
-<h2 id="why-bother">Why bother?</h2>
+<h2 id="why-bother">Why bother?<a href="#why-bother" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
 
 <p>例をあげて説明してみる。</p>
 <div class="highlight"><pre class="chroma"><code class="language-hlsl" data-lang="hlsl">       // float3 float     float   float3       float    float
@@ -77,7 +113,7 @@ return Diffuse * n_dot_l * atten * LightColor * shadow * ao;</code></pre></div>
 
 <p>このようにローレベル思考でコードを書くことで、ALU（演算装置）の負荷が軽減される。そして新しいシェーダーレンダリング機能も考えさせられることになる。もしALUの負荷が50%から25%に軽減されたことに過ぎないとしても、クロック回転数の向上などの可能性がみられるので、最適化はやっておく方がいいのではかと。</p>
 
-<h2 id="but-the-compiler-will-optimized-it">But, the compiler will optimized it!</h2>
+<h2 id="but-the-compiler-will-optimized-it">But, the compiler will optimized it!<a href="#but-the-compiler-will-optimized-it" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
 
 <p>今時にはシェーダーのコンパイラーも結構鋭くなったけど、書いたコードの成された構造自体を破ってまで最適化を強行することはあんまりない。（上にように<code>Float3 * Float * Float3 * Float * Float3 * Float</code>を<code>Float * 3... * Float3 * 3...</code>することはなかなかないだろうと）</p>
 
@@ -90,7 +126,7 @@ return Diffuse * n_dot_l * atten * LightColor * shadow * ao;</code></pre></div>
 }</code></pre></div>
 <p>上のコードはちゃんと最適化されてないらしい。（最適化されるとしたら、<code>MAD</code>命令になるが、単純に<code>ADD</code>と<code>MUL</code>に置換される）原文によると、PS3では特定状況の以外には上のようなコードが最適化されてないらしく、XBOX360ではなんとか最適化を行うが意図したものになってない可能性があるらしい。</p>
 
-<h2 id="why-not">Why not?</h2>
+<h2 id="why-not">Why not?<a href="#why-not" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
 
 <p>もし最適化を行うとしても、意図した結果とは違う画面レンダリングになる可能性もある。最悪<code>INF</code>とか<code>NaN</code>になってしまう可能性もあり、それで順番を変えたりする構造破壊の最適化はあんまりしないらしい。</p>
 
@@ -98,13 +134,13 @@ return Diffuse * n_dot_l * atten * LightColor * shadow * ao;</code></pre></div>
 
 <p>コンパイラはランタイムで参照してないコードを消すこと、使用しないリソース、レジスター番号の割当などに向いて、依存性またはコード自体に成立されているルールなどを破るまで最適化することはしてない。</p>
 
-<h2 id="rules">Rules</h2>
+<h2 id="rules">Rules<a href="#rules" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
 
 <p>原文ではD3D10+のシェーダーモデルと、そのシェーダーモデルが使っているIEEE-754-2008を基準としてルールを定めている。しかし、浮動小数点の<code>ULP</code>は0.5範囲以内ではなく、1.0ULP以内として切り上げるようになっている。また、浮動小数点の0周りの少数を表現する<code>denormalized number</code>も演算をするたびにフラッシュされる。（<code>MOV</code>はしないそうだ）</p>
 
 <p>また、HLSLコンパイラは<code>NaN</code>と<code>INF</code>になる恐れを考慮せず最適化を行う。なので、<code>isnan()</code>とか<code>isfinite()</code>をコード上で使うのはあんまり良くないそうだ。</p>
 
-<h2 id="universal-大体のhw-facts-about-hw">Universal（大体のHW）facts about HW</h2>
+<h2 id="universal-大体のhw-facts-about-hw">Universal（大体のHW）facts about HW<a href="#universal-大体のhw-facts-about-hw" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
 
 <ul>
 <li>Multiply-Addは１個の命令で最適化できる。逆は<code>ADD =&gt; MUL</code>をするため、２個要る。</li>
@@ -112,7 +148,7 @@ return Diffuse * n_dot_l * atten * LightColor * shadow * ao;</code></pre></div>
 <li>当然だけど、ベクトルよりはスカラーがリソース負荷が軽い。</li>
 </ul>
 
-<h2 id="mad"><code>MAD</code></h2>
+<h2 id="mad"><code>MAD</code><a href="#mad" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
 
 <blockquote>
 <p><a href="https://docs.microsoft.com/en-us/previous-versions/windows/desktop/legacy/hh447183(v=vs.85">https://docs.microsoft.com/en-us/previous-versions/windows/desktop/legacy/hh447183(v=vs.85</a>)</p>
@@ -131,7 +167,7 @@ return Diffuse * n_dot_l * atten * LightColor * shadow * ao;</code></pre></div>
 <li><p><code>x += a * b + c * d</code>は本来<code>MUL-MAD-ADD</code>になるが、最適化すると<code>x += a * b; x += c * d;</code>で<code>MAD-MAD</code>になれる。（ちょっと以外？）なぜなら、前の構文って<code>+=</code>がされる前に右辺の数式が先に演算されてしまうからだ。</p></li>
 </ol>
 
-<h2 id="division-with-rcp">Division with <code>RCP</code></h2>
+<h2 id="division-with-rcp">Division with <code>RCP</code><a href="#division-with-rcp" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
 
 <p><code>a / b</code>のような割り算コードは<code>rcp()</code>関数またはアセンブリ命令を使って実装するほうが速いコードになる可能性が高い。中身では<code>DIV</code>割り算命令を使うことがあるが、明示的に使うと最適化されるかもしれない。</p>
 
@@ -140,11 +176,11 @@ return Diffuse * n_dot_l * atten * LightColor * shadow * ao;</code></pre></div>
 <li><code>(x + a) / x</code>→<code>1.0f + a * rcp(x)</code></li>
 </ol>
 
-<h2 id="madness">MADness</h2>
+<h2 id="madness">MADness<a href="#madness" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
 
 <p>原文を読むこと。明示的に最適化されてないコードをMADを使って最適化している。アセンブリで６行のコードが１行になることがわかる。</p>
 
-<h2 id="modifiers">Modifiers</h2>
+<h2 id="modifiers">Modifiers<a href="#modifiers" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
 
 <p><code>MOV</code>を使うコードを書かない異常、コストはほぼ０である。<code>abs/neg</code>は既に実際している変数からのインプットだけを持ち、<code>saturate</code>は演算によって生成されたテンポラリの数値をインプットとして持たなければ最適化は失敗する。</p>
 <div class="highlight"><pre class="chroma"><code class="language-hlsl" data-lang="hlsl">float main(float2 a : TEXCOORD) : SV_TARGET
@@ -160,7 +196,7 @@ return Diffuse * n_dot_l * atten * LightColor * shadow * ao;</code></pre></div>
 
 <p><code>saturate()</code>の場合には、明示的に最適化が出来るコードだったら演算した数値をそのまま関数に入れるべきである。また注意する点は<code>min()</code>と<code>max()</code>はコストが掛かるため、<code>min(x, 0)</code>または<code>max(x, 1)</code>でOKなときにも<code>saturate()</code>を使うべきであるところらしい。</p>
 
-<h2 id="hlsl-compiler-workaround">HLSL compiler workaround</h2>
+<h2 id="hlsl-compiler-workaround">HLSL compiler workaround<a href="#hlsl-compiler-workaround" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
 <div class="highlight"><pre class="chroma"><code class="language-hlsl" data-lang="hlsl">saturate(dot(a, a))</code></pre></div>
 <p>HLSLコンパイラは上のコードを<code>min(dot(a, a), 1.0f)</code>に変えてしまうところがある。これを防ぐためのいくつかの対策があるが、原文で説明するのは<code>precise</code>キーワードを使うものだ。</p>
 <div class="highlight"><pre class="chroma"><code class="language-hlsl" data-lang="hlsl">float main(float3 a : TEXCOORD0) : SV_TARGET
@@ -169,7 +205,7 @@ return Diffuse * n_dot_l * atten * LightColor * shadow * ao;</code></pre></div>
 }</code></pre></div>
 <p><code>precise</code>キーワードはIEEE754の仕様を強制するようにして、<code>saturate()</code>は必ず0を返すようになる。ただし、<code>precise</code>を使って性能が向上されるのはここだけであって、普通に使うと性能が劣るそうだ。</p>
 
-<h2 id="built-in-functions">Built-in Functions</h2>
+<h2 id="built-in-functions">Built-in Functions<a href="#built-in-functions" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
 
 <ul>
 <li><p><code>rcp()</code>、<code>rsqrt()</code>、<code>sqrt()</code>はDX10以上のハードウェアからはHW命令として組み込まれている。ただし、現状（2013年当時）のハードウェアでは<code>sqrt()</code>命令がないため、場合によっては<code>rcp(rsqrt())</code>と<code>x * rsqrt(x)</code>として使わなければならないらしい。</p></li>
@@ -191,18 +227,18 @@ return Diffuse * n_dot_l * atten * LightColor * shadow * ao;</code></pre></div>
 <li><code>sin()</code>、<code>cos()</code>、<code>sincos()</code>、<code>tan()</code>はある程度コストはあるが、よく使える。しかし、<code>asin()</code>などの逆三角関数を使うのは良くないらしい。さらにhyperbolic関数か<code>log10()</code>を使うのは厳禁。</li>
 </ul>
 
-<h3 id="mul-v-m-に最適化"><code>mul(v, m)</code>に最適化</h3>
+<h3 id="mul-v-m-に最適化"><code>mul(v, m)</code>に最適化<a href="#mul-v-m-に最適化" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
 
 <p>普通の<code>mul(v, m)</code>ならば、インストラクションは<code>MUL-MAD-MAD-MAD</code>になる。ただし、掛け算しているインプット<code>m</code>行列がhomogeneous transformであれば、<code>m[3]</code>の掛け算をなくして<code>MAD-MAD-MAD</code>の形に変換することが出来る。</p>
 <div class="highlight"><pre class="chroma"><code class="language-hlsl" data-lang="hlsl">mul(v, m) when m[3] = float4(0, 0, 0, 1),
 mul(v, m) = v.x * m[0] + (v.y * m[1] + (v.z * m[2] + m[3]))</code></pre></div>
 <p>最適化した画像ではインストラクションのスロット（0,1,2,3）はハードウェアの制限のため減らなかったが、命令処理のためのレーンは相当空くことになり他の作業が同時に処理できることになる。</p>
 
-<h2 id="matrix-math">Matrix Math</h2>
+<h2 id="matrix-math">Matrix Math<a href="#matrix-math" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
 
 <p>マトリックス演算を使って、ベクトルのトランスフォームなどを集約して演算することが出来る。</p>
 
-<h2 id="scalar-math">Scalar Math</h2>
+<h2 id="scalar-math">Scalar Math<a href="#scalar-math" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
 
 <p>昔のハードウェアはほとんどベクトルベースだったため、ベクトルじゃない数値に関しての演算は内部でスカラーを処理するためのコストがあったらしい。（PS3・XBOX 360・D3D9）</p>
 
@@ -214,14 +250,14 @@ mul(v, m) = v.x * m[0] + (v.y * m[1] + (v.z * m[2] + m[3]))</code></pre></div>
 <p>VLIWとはVery Long Instruction Wordの略語で、opcodeが複数あり同時実行可能ばインストラクションを入れて一つの命令にまとめて静的に実行させる仕組みである。（スーパスカラは動的）</p>
 </blockquote>
 
-<h2 id="scalar-vectorが混ざった演算">Scalar/Vectorが混ざった演算</h2>
+<h2 id="scalar-vectorが混ざった演算">Scalar/Vectorが混ざった演算<a href="#scalar-vectorが混ざった演算" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
 
 <ul>
 <li>ベクトルパートとスカラパートを出来る限り分離して演算させること。</li>
 <li><code>dot()</code>、<code>normalize()</code>、<code>reflect()</code>、<code>length()</code>、<code>distance()</code>などのベクトルからスカラ値に変換するコードを使う際にはコンパイラが前の演算で算出した値を再使用するように引数の順番などに気をつけて書くこと。</li>
 </ul>
 
-<h2 id="hidden-scalar-math">Hidden Scalar Math</h2>
+<h2 id="hidden-scalar-math">Hidden Scalar Math<a href="#hidden-scalar-math" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
 
 <p>スカラ演算を使わないように見える関数が実は関数の中でスカラ演算を使うことがある。</p>
 
@@ -238,7 +274,7 @@ mul(v, m) = v.x * m[0] + (v.y * m[1] + (v.z * m[2] + m[3]))</code></pre></div>
 }</code></pre></div>
 <p>のように書けば、ある程度負荷が軽減できるらしい。（本文の画像ではインストラクションのスロットが変わってないが、2番スロットの<code>x</code>と<code>y</code>が使わなくなっている）</p>
 
-<h2 id="hidden-common-sub-expressions">Hidden common sub-expressions</h2>
+<h2 id="hidden-common-sub-expressions">Hidden common sub-expressions<a href="#hidden-common-sub-expressions" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
 
 <p>別の関数の中身で同じ表現式を使うとしても、表現式に関与される別の表現式が違うとしたら、最適化されない可能性が高い。例えば、<code>normalize(vec)</code>と<code>length(vec)</code>は<code>dot(vec, vec)</code>を使っても、<code>rsqrt()</code>を使うか、それとも<code>sqrt()</code>を使うかが分かれてしまい、内積の関数での数値は再使用されない。</p>
 
@@ -246,7 +282,7 @@ mul(v, m) = v.x * m[0] + (v.y * m[1] + (v.z * m[2] + m[3]))</code></pre></div>
 
 <p>ここで最後にさらに最適化を書くと、<code>saturate()</code>を使って<code>rsqrt(dot())</code>のnormFactorを<code>[0, 1]</code>に決めてノーマライズを書ける方法があるそうだ。これで分岐もなくなって、性能は速くなる。</p>
 
-<h2 id="evaluation-order">Evaluation Order</h2>
+<h2 id="evaluation-order">Evaluation Order<a href="#evaluation-order" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
 
 <p>HLSLでの表現式の演算子の評価は左から右へとなる。なのでベクトル演算とスカラ演算を分離し、ベクトルはベクトルだけで、そしてスカラはスカラ値だけで演算させるようにすれば大体のコードは最適化される。</p>
 
@@ -256,11 +292,11 @@ mul(v, m) = v.x * m[0] + (v.y * m[1] + (v.z * m[2] + m[3]))</code></pre></div>
 
 <p>こうすることで、並列に演算を行うようになるそうだ。</p>
 
-<h2 id="real-world-testing">Real-world Testing</h2>
+<h2 id="real-world-testing">Real-world Testing<a href="#real-world-testing" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
 
 <p>これと言ったことを活用して、実際のClustered Deferred Renderingを最適化してみた結果、15%遅くなるか、2倍ぐらい速くなったそうだ。ただし、最初からローレベルの最適化を念頭にしてコードを作成するのではなく、高級言語でハードウェアをよく理解した上で、最後に明示的なローレベル最適化を行うべきらしい。</p>
 
-<h2 id="補足">補足</h2>
+<h2 id="補足">補足<a href="#補足" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
 
 <blockquote>
 <p><a href="https://docs.microsoft.com/ja-jp/windows/win32/direct3dhlsl/dx-graphics-hlsl-if?redirectedfrom=MSDN">https://docs.microsoft.com/ja-jp/windows/win32/direct3dhlsl/dx-graphics-hlsl-if?redirectedfrom=MSDN</a></p>
@@ -274,7 +310,7 @@ mul(v, m) = v.x * m[0] + (v.y * m[1] + (v.z * m[2] + m[3]))</code></pre></div>
 <li><p>などなど…</p></li>
 </ul>
 
-<h3 id="良いローレベルコードを書くためには">良いローレベルコードを書くためには？</h3>
+<h3 id="良いローレベルコードを書くためには">良いローレベルコードを書くためには？<a href="#良いローレベルコードを書くためには" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
 
 <ul>
 <li>GPUのHWインストラクションに慣れる。（D3Dのアセンブリなどを見るとか）</li>
@@ -282,7 +318,7 @@ mul(v, m) = v.x * m[0] + (v.y * m[1] + (v.z * m[2] + m[3]))</code></pre></div>
 <li>実際プロダクトに載せた時のシェーダーの負荷を計測する。</li>
 </ul>
 
-<h1 id="参照">参照</h1>
+<h1 id="参照">参照<a href="#参照" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h1>
 
 <p><a href="https://www.gdcvault.com/play/1018182/Low-Level-Thinking-in-High">https://www.gdcvault.com/play/1018182/Low-Level-Thinking-in-High</a></p>
 
@@ -295,38 +331,36 @@ mul(v, m) = v.x * m[0] + (v.y * m[1] + (v.z * m[2] + m[3]))</code></pre></div>
 <p><a href="https://gist.github.com/silvesthu/505cf0cbf284bb4b971f6834b8fec93d#gpu-optimization-for-gamedev">https://gist.github.com/silvesthu/505cf0cbf284bb4b971f6834b8fec93d#gpu-optimization-for-gamedev</a></p>
 
 			</div>
+			<hr class="post-end">
+			<footer class="post-info">
+				<p><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>5835 Words</p>
+				<p><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>2020-06-17 12:00 &#43;0900</p>
+			</footer>
 		</article>
+		<div class="post-nav thin">
+			<a class="next-post" href="https://liliilli.github.io/posts/sfinae_afaid/">
+				<span class="post-nav-label"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-left"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>&nbsp;Newer</span><br><span>SFINAEの活用、ざっくりメモ</span>
+			</a>
+			<a class="prev-post" href="https://liliilli.github.io/posts/dinput8/">
+				<span class="post-nav-label">Older&nbsp;<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-right"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg></span><br><span>DirectInput8 導入メモ</span>
+			</a>
+		</div>
+		<div id="comments" class="thin">
+</div>
 	</main>
-<aside>
-	<div>
-		<div>
-			<h3>LATEST POSTS</h3>
-		</div>
-		<div>
-			<ul>
-				
-				<li><a href="/posts/shader_opti_memo_2/">Low-level shader optimization for next-gen and D3D11のメモ</a></li>
-				
-				<li><a href="/posts/sfinae_afaid/">SFINAEの活用、ざっくりメモ</a></li>
-				
-				<li><a href="/posts/shader_opti_memo/">Low Level Thinking in High Shader Languages</a></li>
-				
-				<li><a href="/posts/dinput8/">DirectInput8 導入メモ</a></li>
-				
-				<li><a href="/posts/tlsf_basic/">TLSF Allocatorを作ってみた</a></li>
-				
-			</ul>
-		</div>
-	</div>
-</aside>
+
+	<footer id="site-footer" class="section-inner thin animated fadeIn faster">
+		<p>&copy; 2020 <a href="https://liliilli.github.io">jongmin yun - neu.</a> &#183; <a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC BY-NC 4.0</a></p>
+		<p>
+			Made with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> &#183; Theme <a href="https://github.com/Track3/hermit" target="_blank" rel="noopener">Hermit</a> &#183; <a href="https://liliilli.github.io/posts/index.xml" target="_blank" title="rss"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-rss"><path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1"></circle></svg></a>
+		</p>
+	</footer>
 
 
-	<footer>
-	<p>&copy; 2020 <a href="https://liliilli.github.io"><b>neuromantic</b></a>.
-	<a href="https://github.com/liliilli"><b>Github</b></a>.
-	<a href="https://twitter.com/NeuliliilliD"><b>Twitter</b></a>.
-	</p>
-</footer>
+
+	<script src="https://liliilli.github.io/js/bundle.min.4a9a0ac3d2217822c7865b4161e6c2a71de1d70492264337755427898dd718f6.js" integrity="sha256-SpoKw9IheCLHhltBYebCpx3h1wSSJkM3dVQniY3XGPY=" crossorigin="anonymous"></script>
+	
 
 </body>
+
 </html>

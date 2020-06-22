@@ -1,55 +1,89 @@
 <!DOCTYPE html>
 <html lang="en-us">
+
 <head>
 	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<style type=text/css>body{font-family:monospace;}</style>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<meta name="theme-color" content="#494f5c">
+	<meta name="msapplication-TileColor" content="#494f5c">
+<meta itemprop="name" content="CMakeのメモまとめ">
+<meta itemprop="description" content="https://cliutils.gitlab.io/modern-cmake/chapters/intro/dodonot.html https://gist.github.com/mbinna/c61dbb39bca0e4fb7d1f73b0d66a4fd1 Do&rsquo;s and Don&rsquo;ts CMakeで避けるべきのパターン https://cliutils.gitlab.io/modern-cmake/chapters/intro/dodonot.html https://gist.github.com/mbinna/c61dbb39bca0e4fb7d1f73b0d66a4fd1 link_directories、include_librariesなどのグローバル関数を使わ">
+
+
+<meta itemprop="datePublished" content="2020-03-03T23:59:05&#43;09:00" />
+<meta itemprop="dateModified" content="2020-03-04T22:40:57&#43;09:00" />
+<meta itemprop="wordCount" content="2969">
+
+
+
+<meta itemprop="keywords" content="untagged," />
+<meta property="og:title" content="CMakeのメモまとめ" />
+<meta property="og:description" content="https://cliutils.gitlab.io/modern-cmake/chapters/intro/dodonot.html https://gist.github.com/mbinna/c61dbb39bca0e4fb7d1f73b0d66a4fd1 Do&rsquo;s and Don&rsquo;ts CMakeで避けるべきのパターン https://cliutils.gitlab.io/modern-cmake/chapters/intro/dodonot.html https://gist.github.com/mbinna/c61dbb39bca0e4fb7d1f73b0d66a4fd1 link_directories、include_librariesなどのグローバル関数を使わ" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://liliilli.github.io/posts/cmake_memo/" />
+<meta property="article:published_time" content="2020-03-03T23:59:05+09:00" />
+<meta property="article:modified_time" content="2020-03-04T22:40:57+09:00" />
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="CMakeのメモまとめ"/>
+<meta name="twitter:description" content="https://cliutils.gitlab.io/modern-cmake/chapters/intro/dodonot.html https://gist.github.com/mbinna/c61dbb39bca0e4fb7d1f73b0d66a4fd1 Do&rsquo;s and Don&rsquo;ts CMakeで避けるべきのパターン https://cliutils.gitlab.io/modern-cmake/chapters/intro/dodonot.html https://gist.github.com/mbinna/c61dbb39bca0e4fb7d1f73b0d66a4fd1 link_directories、include_librariesなどのグローバル関数を使わ"/>
+
+	<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+	<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+	<link rel="manifest" href="/site.webmanifest">
+	<link rel="mask-icon" href="/safari-pinned-tab.svg" color="">
+	<link rel="shortcut icon" href="/favicon.ico">
+
 	<title>CMakeのメモまとめ</title>
-	
-	
-	<link rel="stylesheet" href="/css/style.css">
+	<link rel="stylesheet" href="https://liliilli.github.io/css/style.min.5ee5e7976cd09872c64e40a582206543f6aa38c69a8c43898aadc70040344b92.css" integrity="sha256-XuXnl2zQmHLGTkClgiBlQ/aqOMaajEOJiq3HAEA0S5I=" crossorigin="anonymous">
 	
 </head>
-<body>
-	<header>
-	=================<br>
-	== <a href="https://liliilli.github.io">neuromantic</a> ==<br>
-	=================
-	<div style="float: right;"></div><br>
-	<p>
-	<nav>
-			<a href="/"><b>Start</b></a>.
-			
-			
-			<a href="/posts/"><b>Posts</b></a>.
-			
-			<a href="/about-hugo/"><b>About</b></a>.
-			
-	</nav>
-	</p>
-	
-</header>
 
+<body id="page">
 	
-	<main>
-		<article>
-			<h1>CMakeのメモまとめ</h1>
-			<b><time>03.03.2020 23:59</time></b>
-		       
-		           <a href="/tags/untagged">untagged</a>
-        	       
+	<header id="site-header" class="animated slideInUp faster">
+		<div class="hdr-wrapper section-inner">
+			<div class="hdr-left">
+				<div class="site-branding">
+					<a href="https://liliilli.github.io">neuromantic</a>
+				</div>
+				<nav class="site-nav hide-in-mobile">
+					
+				<a href="https://liliilli.github.io/posts/">Posts</a>
+				<a href="https://liliilli.github.io/about-hugo/">About</a>
 
-			<div>
+				</nav>
+			</div>
+			<div class="hdr-right hdr-icons">
+				<span class="hdr-social hide-in-mobile"><a href="https://twitter.com/NeuliliilliD" target="_blank" rel="noopener me" title="Twitter"><svg xmlns="http://www.w3.org/2000/svg" class="feather" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg></a><a href="https://github.com/liliilli" target="_blank" rel="noopener me" title="Github"><svg xmlns="http://www.w3.org/2000/svg" class="feather" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg></a></span><button id="menu-btn" class="hdr-btn" title="Menu"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-menu"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg></button>
+			</div>
+		</div>
+	</header>
+	<div id="mobile-menu" class="animated fast">
+		<ul>
+			<li><a href="https://liliilli.github.io/posts/">Posts</a></li>
+			<li><a href="https://liliilli.github.io/about-hugo/">About</a></li>
+		</ul>
+	</div>
+
+
+	<main class="site-main section-inner animated fadeIn faster">
+		<article class="thin">
+			<header class="post-header">
+				<div class="post-meta"><span>Mar 3, 2020</span></div>
+				<h1>CMakeのメモまとめ</h1>
+			</header>
+			<div class="content">
 				
 
 <p><a href="https://cliutils.gitlab.io/modern-cmake/chapters/intro/dodonot.html">https://cliutils.gitlab.io/modern-cmake/chapters/intro/dodonot.html</a></p>
 
 <p><a href="https://gist.github.com/mbinna/c61dbb39bca0e4fb7d1f73b0d66a4fd1">https://gist.github.com/mbinna/c61dbb39bca0e4fb7d1f73b0d66a4fd1</a></p>
 
-<h1 id="do-s-and-don-ts">Do&rsquo;s and Don&rsquo;ts</h1>
+<h1 id="do-s-and-don-ts">Do&rsquo;s and Don&rsquo;ts<a href="#do-s-and-don-ts" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h1>
 
-<h2 id="cmakeで避けるべきのパターン">CMakeで避けるべきのパターン</h2>
+<h2 id="cmakeで避けるべきのパターン">CMakeで避けるべきのパターン<a href="#cmakeで避けるべきのパターン" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
 
 <blockquote>
 <p><a href="https://cliutils.gitlab.io/modern-cmake/chapters/intro/dodonot.html">https://cliutils.gitlab.io/modern-cmake/chapters/intro/dodonot.html</a><br><a href="https://gist.github.com/mbinna/c61dbb39bca0e4fb7d1f73b0d66a4fd1">https://gist.github.com/mbinna/c61dbb39bca0e4fb7d1f73b0d66a4fd1</a></p>
@@ -67,7 +101,7 @@
 <li>リンキングする時には<code>PUBLIC/PRIVATE</code>の指定を忘れないこと。</li>
 </ul>
 
-<h2 id="cmakeでやればイイかもパターン">CMakeでやればイイかもパターン</h2>
+<h2 id="cmakeでやればイイかもパターン">CMakeでやればイイかもパターン<a href="#cmakeでやればイイかもパターン" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
 
 <ul>
 <li>Make <code>ALIAS</code> targets to keep usage consistent.</li>
@@ -76,9 +110,9 @@
 <li>ビルトインコマンドなどはだいたい文字の大小を区別してないが、出来れば少文字でやる方が良いらしい。</li>
 </ul>
 
-<h1 id="basics">Basics</h1>
+<h1 id="basics">Basics<a href="#basics" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h1>
 
-<h2 id="最低限バージョンを指定">最低限バージョンを指定</h2>
+<h2 id="最低限バージョンを指定">最低限バージョンを指定<a href="#最低限バージョンを指定" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
 <div class="highlight"><pre class="chroma"><code class="language-cmake" data-lang="cmake"><span class="nb">cmake_minimum_required</span><span class="p">(</span><span class="s">VERSION</span> <span class="s">3.1</span><span class="p">)</span></code></pre></div>
 <p><code>VERSION &lt;version&gt;</code>によってCMakeのコードをビルドする時の規定が決まる。一番最新のCMakeを持っているとしても上の<code>VERSION</code>の後について来る数値によってビルドが通るか否かが決まる。バージョンによるポリシー（規定・規則）の違いは<a href="https://cmake.org/cmake/help/latest/manual/cmake-policies.7.html">リンク</a>を見ること。</p>
 
@@ -99,12 +133,12 @@
 </span><span class="err"></span><span class="nb">else</span><span class="p">()</span><span class="err">
 </span><span class="err"></span>    <span class="nb">cmake_policy</span><span class="p">(</span><span class="s">VERSION</span> <span class="s">3.15</span><span class="p">)</span><span class="err">
 </span><span class="err"></span><span class="nb">endif</span><span class="p">()</span></code></pre></div>
-<h2 id="プロジェクトセッティング">プロジェクトセッティング</h2>
+<h2 id="プロジェクトセッティング">プロジェクトセッティング<a href="#プロジェクトセッティング" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
 <div class="highlight"><pre class="chroma"><code class="language-cmake" data-lang="cmake"><span class="nb">project</span><span class="p">(</span><span class="s">MyProject</span> 
 	<span class="s">VERSION</span> <span class="s">1.0</span> <span class="c"># `MyProject_Version`とか`PROJECT_VERSION`変数などに数値が更新される
 </span><span class="c"></span>    <span class="s">DESCRIPTION</span> <span class="s2">&#34;Very nice project&#34;</span> <span class="c"># 3.8以降から付けられる
 </span><span class="c"></span>    <span class="s">LANGUAGES</span> <span class="s">CXX</span><span class="p">)</span> <span class="err">#</span> <span class="err">基本</span> <span class="err">`C</span> <span class="err">CXX`で指定されている</span></code></pre></div>
-<h2 id="ターゲット-targets-をよく使うべき">ターゲット（Targets）をよく使うべき</h2>
+<h2 id="ターゲット-targets-をよく使うべき">ターゲット（Targets）をよく使うべき<a href="#ターゲット-targets-をよく使うべき" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
 <div class="highlight"><pre class="chroma"><code class="language-cmake" data-lang="cmake"><span class="nb">target_include_directories</span><span class="p">(</span><span class="s">&lt;target&gt;</span> <span class="s">PUBLIC</span> <span class="s">&lt;rel/abs_directory_path&gt;</span><span class="p">)</span></code></pre></div>
 <p><a href="https://cmake.org/cmake/help/latest/command/target_include_directories.html">target_include_directories</a>コマンドは<code>target</code>にディレクトリーのパスを関連付ける。</p>
 
@@ -117,9 +151,9 @@
 
 <p>ターゲットはそれぞれ<code>include_directories</code>とか<code>linked_libraries</code>などを持っているので、ターゲットの依存するスコープなどを制限したい場合に<code>PUBLIC</code>または<code>PRIVATE/INTERFACE</code>などを使うらしい。</p>
 
-<h1 id="変数とキャッシュ">変数とキャッシュ</h1>
+<h1 id="変数とキャッシュ">変数とキャッシュ<a href="#変数とキャッシュ" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h1>
 
-<h2 id="ローカル変数">ローカル変数</h2>
+<h2 id="ローカル変数">ローカル変数<a href="#ローカル変数" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
 <div class="highlight"><pre class="chroma"><code class="language-cmake" data-lang="cmake"><span class="nb">set</span><span class="p">(</span><span class="s">MY_VARIABLE</span> <span class="s2">&#34;value&#34;</span><span class="p">)</span><span class="err">
 </span><span class="err"></span><span class="nb">set</span><span class="p">(</span><span class="s">MY_LIST</span> <span class="s2">&#34;one&#34;</span> <span class="s2">&#34;two&#34;</span><span class="p">)</span><span class="err">
 </span><span class="err"></span><span class="nb">set</span><span class="p">(</span><span class="s">MY_LIST_THAT_SAME_ABOVE</span> <span class="s2">&#34;one;two&#34;</span><span class="p">)</span></code></pre></div>
@@ -129,7 +163,7 @@
 
 <p>またCMakeの変数はスペース（空白）文字に寄って区切られているため、空白文字が入ってそうなパスが入った変数に接近する時には、<code>&quot;&quot;</code>を付けて接近するほうが良さそうかも。</p>
 
-<h2 id="キャッシュ変数">キャッシュ変数</h2>
+<h2 id="キャッシュ変数">キャッシュ変数<a href="#キャッシュ変数" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
 
 <p>CMakeでビルドする時に変数の値などを決めたいなら、<strong>キャッシュ変数</strong>を使う。BOOLならば普通の<strong>OPTION</strong>でも良いが、</p>
 <div class="highlight"><pre class="chroma"><code class="language-cmake" data-lang="cmake"><span class="nb">option</span><span class="p">(</span><span class="s">MY_OPTION</span> <span class="s2">&#34;This is settable from the command line&#34;</span> <span class="s">OFF</span><span class="p">)</span></code></pre></div>
@@ -142,7 +176,7 @@
 </span><span class="err"></span><span class="nb">set</span><span class="p">(</span><span class="s">MY_CACHE_VARIABLE</span> <span class="s2">&#34;VALUE&#34;</span> <span class="s">CACHE</span> <span class="s">INTERNAL</span> <span class="s2">&#34;&#34;</span><span class="p">)</span></code></pre></div>
 <p>このキャッシュ変数を使って実装されたビルトイン変数は<a href="https://cmake.org/cmake/help/latest/manual/cmake-variables.7.html">リンク</a>で見れる。</p>
 
-<h2 id="properties">Properties</h2>
+<h2 id="properties">Properties<a href="#properties" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
 
 <p>属性（Properties）は変数と使い方は同じだが、ターゲットまたはディレクトリーにくっ付いたものである。Propertiesもグローバル属性があるんだけど、ターゲットの大体の属性は<code>CMAKE_</code>として始まる変数を見て、属性を値を埋めるように設計されているらしい。</p>
 
@@ -155,9 +189,9 @@
 <div class="highlight"><pre class="chroma"><code class="language-cmake" data-lang="cmake"><span class="nb">get_property</span><span class="p">(</span><span class="s">ResultVariable</span> <span class="s">TARGET</span> <span class="s">TargetName</span> <span class="s">PROPERTY</span> <span class="s">CXX_STANDARD</span><span class="p">)</span></code></pre></div>
 <p>属性のリストは<a href="https://cmake.org/cmake/help/latest/manual/cmake-properties.7.html">リンク</a>で見れるらしい。</p>
 
-<h1 id="programming-in-cmake">Programming in CMake</h1>
+<h1 id="programming-in-cmake">Programming in CMake<a href="#programming-in-cmake" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h1>
 
-<h2 id="if-構文"><code>if</code>構文</h2>
+<h2 id="if-構文"><code>if</code>構文<a href="#if-構文" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
 
 <p><code>if</code>構文は変数と表現式をどう使うかによって<code>THEN</code>に入ることと<code>ELSE</code>に入ることが変わる。例えば、ある変数<code>variable</code>がある時、普通に<code>variable</code>に入れたら、</p>
 <div class="highlight"><pre class="chroma"><code class="language-cmake" data-lang="cmake"><span class="nb">if</span> <span class="p">(</span><span class="s">variable</span><span class="p">)</span><span class="err">
@@ -171,9 +205,9 @@
 </span><span class="c"></span><span class="nb">else</span><span class="p">()</span><span class="err">
 </span><span class="err"></span>	<span class="c"># &#39;&#34;&#34;&#39; または true になれない表現式はすべてこっちへ
 </span><span class="c"></span><span class="nb">endif</span><span class="p">()</span></code></pre></div>
-<h2 id="generator-expressions">Generator-Expressions</h2>
+<h2 id="generator-expressions">Generator-Expressions<a href="#generator-expressions" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
 
-<h2 id="マクロと関数">マクロと関数</h2>
+<h2 id="マクロと関数">マクロと関数<a href="#マクロと関数" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
 
 <blockquote>
 <p><a href="https://cmake.org/cmake/help/latest/command/macro.html">macro</a><br><a href="https://cmake.org/cmake/help/latest/command/function.html">function</a></p>
@@ -189,9 +223,9 @@
 </span><span class="err"></span><span class="nb">message</span><span class="p">(</span><span class="s2">&#34;Output: ${This}&#34;</span><span class="p">)</span> <span class="err">#</span> <span class="err">Output:</span> <span class="err">From</span> <span class="err">SIMPLE</span></code></pre></div>
 <p>ここで<code>${ARGV}</code>と<code>${ARGN}</code>という関数で呼べるビルトイン変数があってこれを使い渡した引数を出力することができるだろう。そして、CMakeの関数では他の言語とは違いリターン値がない。なので関数から何かを返したい場合には出力専用の引数を作ってそこに<code>PARENT_SCOPE</code>でセットすること。</p>
 
-<h1 id="デバッグ">デバッグ</h1>
+<h1 id="デバッグ">デバッグ<a href="#デバッグ" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h1>
 
-<h2 id="変数などを出力">変数などを出力</h2>
+<h2 id="変数などを出力">変数などを出力<a href="#変数などを出力" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
 
 <p>普通<code>message</code>で出力することができる。</p>
 <div class="highlight"><pre class="chroma"><code class="language-cmake" data-lang="cmake"><span class="nb">message</span><span class="p">(</span><span class="s">STATUS</span> <span class="s2">&#34;MY_VARIABLE=${MY_VARIABLE}&#34;</span><span class="p">)</span></code></pre></div>
@@ -203,41 +237,42 @@
     <span class="s">TARGETS</span> <span class="s">my_target</span>
     <span class="s">PROPERTIES</span> <span class="s">POSITION_INDEPENDENT_CODE</span>
 <span class="p">)</span></code></pre></div>
-<h2 id="デバッグモードでビルド">デバッグモードでビルド</h2>
+<h2 id="デバッグモードでビルド">デバッグモードでビルド<a href="#デバッグモードでビルド" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
 <div class="highlight"><pre class="chroma"><code class="language-cmake" data-lang="cmake"><span class="err">-DCMAKE_BUILD_TYPE=Debug</span></code></pre></div>
 			</div>
+			<hr class="post-end">
+			<footer class="post-info">
+				<p>
+					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-tag meta-icon"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7" y2="7"></line></svg><span class="tag"><a href="https://liliilli.github.io/tags/untagged">untagged</a></span>
+				</p>
+				<p><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>2969 Words</p>
+				<p><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>2020-03-03 23:59 &#43;0900</p>
+			</footer>
 		</article>
+		<div class="post-nav thin">
+			<a class="next-post" href="https://liliilli.github.io/posts/dy_cmake/">
+				<span class="post-nav-label"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-left"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>&nbsp;Newer</span><br><span>自分でやるDyのCMakeListsファイル説明</span>
+			</a>
+			<a class="prev-post" href="https://liliilli.github.io/posts/hugo_memo/">
+				<span class="post-nav-label">Older&nbsp;<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-right"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg></span><br><span>Hugoブログを使いこなせるためのメモ</span>
+			</a>
+		</div>
+		<div id="comments" class="thin">
+</div>
 	</main>
-<aside>
-	<div>
-		<div>
-			<h3>LATEST POSTS</h3>
-		</div>
-		<div>
-			<ul>
-				
-				<li><a href="/posts/shader_opti_memo_2/">Low-level shader optimization for next-gen and D3D11のメモ</a></li>
-				
-				<li><a href="/posts/sfinae_afaid/">SFINAEの活用、ざっくりメモ</a></li>
-				
-				<li><a href="/posts/shader_opti_memo/">Low Level Thinking in High Shader Languages</a></li>
-				
-				<li><a href="/posts/dinput8/">DirectInput8 導入メモ</a></li>
-				
-				<li><a href="/posts/tlsf_basic/">TLSF Allocatorを作ってみた</a></li>
-				
-			</ul>
-		</div>
-	</div>
-</aside>
+
+	<footer id="site-footer" class="section-inner thin animated fadeIn faster">
+		<p>&copy; 2020 <a href="https://liliilli.github.io">jongmin yun - neu.</a> &#183; <a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC BY-NC 4.0</a></p>
+		<p>
+			Made with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> &#183; Theme <a href="https://github.com/Track3/hermit" target="_blank" rel="noopener">Hermit</a> &#183; <a href="https://liliilli.github.io/posts/index.xml" target="_blank" title="rss"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-rss"><path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1"></circle></svg></a>
+		</p>
+	</footer>
 
 
-	<footer>
-	<p>&copy; 2020 <a href="https://liliilli.github.io"><b>neuromantic</b></a>.
-	<a href="https://github.com/liliilli"><b>Github</b></a>.
-	<a href="https://twitter.com/NeuliliilliD"><b>Twitter</b></a>.
-	</p>
-</footer>
+
+	<script src="https://liliilli.github.io/js/bundle.min.4a9a0ac3d2217822c7865b4161e6c2a71de1d70492264337755427898dd718f6.js" integrity="sha256-SpoKw9IheCLHhltBYebCpx3h1wSSJkM3dVQniY3XGPY=" crossorigin="anonymous"></script>
+	
 
 </body>
+
 </html>
