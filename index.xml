@@ -7,10 +7,19 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright>
-    <lastBuildDate>Fri, 19 Jun 2020 12:16:09 +0900</lastBuildDate>
+    <lastBuildDate>Thu, 13 Aug 2020 10:04:36 +0900</lastBuildDate>
     
 	<atom:link href="https://liliilli.github.io/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Rust＋Winapiで窓を生成してみた</title>
+      <link>https://liliilli.github.io/posts/rust_winapi_memo/</link>
+      <pubDate>Thu, 13 Aug 2020 10:04:36 +0900</pubDate>
+      
+      <guid>https://liliilli.github.io/posts/rust_winapi_memo/</guid>
+      <description>暇つぶしでRustとwinapi crateを使って、窓を生成してイベントメッセージを処理するルーチンを作ってみました。実はdinput8とx</description>
+    </item>
     
     <item>
       <title>AMD GCNアーキテクチャ文書を読んでメモ</title>
@@ -91,15 +100,6 @@
       
       <guid>https://liliilli.github.io/posts/dy_cmake/</guid>
       <description>はじめに 自分の個人プロジェクトのDyという、ゲームエンジンプロジェクトがあって、たまに時間がある時開発をしています。ですけど今は表じゃなく裏</description>
-    </item>
-    
-    <item>
-      <title>CMakeのメモまとめ</title>
-      <link>https://liliilli.github.io/posts/cmake_memo/</link>
-      <pubDate>Tue, 03 Mar 2020 23:59:05 +0900</pubDate>
-      
-      <guid>https://liliilli.github.io/posts/cmake_memo/</guid>
-      <description>https://cliutils.gitlab.io/modern-cmake/chapters/intro/dodonot.html https://gist.github.com/mbinna/c61dbb39bca0e4fb7d1f73b0d66a4fd1 Do&amp;rsquo;s and Don&amp;rsquo;ts CMakeで避けるべきのパターン https://cliutils.gitlab.io/modern-cmake/chapters/intro/dodonot.html https://gist.github.com/mbinna/c61dbb39bca0e4fb7d1f73b0d66a4fd1 link_directories、include_librariesなどのグローバル関数を使わ</description>
     </item>
     
   </channel>
