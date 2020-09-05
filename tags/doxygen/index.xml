@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>doxygen on neuromantic</title>
+    <link>https://liliilli.github.io/tags/doxygen/</link>
+    <description>Recent content in doxygen on neuromantic</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright>
+    <lastBuildDate>Sat, 05 Sep 2020 16:21:55 +0900</lastBuildDate>
+    
+	<atom:link href="https://liliilli.github.io/tags/doxygen/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>C&#43;&#43;でのDoxygenの書き方のメモ</title>
+      <link>https://liliilli.github.io/posts/doxygen_memo/</link>
+      <pubDate>Sat, 05 Sep 2020 16:21:55 +0900</pubDate>
+      
+      <guid>https://liliilli.github.io/posts/doxygen_memo/</guid>
+      <description>以前にもコードの説明を書く時にDoxygenみたいな構文で書いてきたんですが、本格的にAPIのマニュアルを成立しようとしたらどう書けばいいか</description>
+    </item>
+    
+  </channel>
+</rss>

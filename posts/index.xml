@@ -6,8 +6,212 @@
 		<generator>Hugo -- gohugo.io</generator>
 		<language>en-us</language>
 		<copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright>
-		<lastBuildDate>Thu, 13 Aug 2020 10:04:36 +0900</lastBuildDate>
+		<lastBuildDate>Sat, 05 Sep 2020 16:21:55 +0900</lastBuildDate>
 		<atom:link href="https://liliilli.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+		
+		<item>
+			<title>C&#43;&#43;でのDoxygenの書き方のメモ</title>
+			<link>https://liliilli.github.io/posts/doxygen_memo/</link>
+			<pubDate>Sat, 05 Sep 2020 16:21:55 +0900</pubDate>
+			
+			<guid>https://liliilli.github.io/posts/doxygen_memo/</guid>
+			<description>以前にもコードの説明を書く時にDoxygenみたいな構文で書いてきたんですが、本格的にAPIのマニュアルを成立しようとしたらどう書けばいいか</description>
+			<content type="html"><![CDATA[
+
+<p>以前にもコードの説明を書く時にDoxygenみたいな構文で書いてきたんですが、本格的にAPIのマニュアルを成立しようとしたらどう書けばいいかが迷ったので、ここでもう一度公式文書を読みながら自分的にメモを書かせてもらいたいと思います。</p>
+
+<h1 id="documenting-the-code">Documenting the code</h1>
+
+<blockquote>
+<p><a href="https://www.doxygen.nl/manual/docblocks.html">https://www.doxygen.nl/manual/docblocks.html</a></p>
+</blockquote>
+
+<h2 id="special-comment-blocks">Special comment blocks</h2>
+<div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="c1">/// 
+</span><span class="c1">/// ... text ...
+</span><span class="c1">///
+</span></code></pre></div>
+<p>で書くのが経験上VS2019～でコメント作成しやすいし、Intellisenseでもちゃんと把握してTipとして見せるようだ。</p>
+
+<p>上の形式以外にもDoxygenで検知してくれるコメントの形式は色々とあるみたいだが、一つのプロジェクトの中ではちゃんと形式を決めて使いましょうっていうこと。</p>
+
+<h2 id="brief-を書く為には"><code>\brief</code>を書く為には？</h2>
+
+<ol>
+<li><p><code>\brief</code>（または<code>@brief</code>）でヘッダーを明示的に書く方法。</p>
+<div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="c1">///
+</span><span class="c1">/// @brief Brief description
+</span><span class="c1">///     Breif description continued.
+</span><span class="c1">///
+</span><span class="c1">/// Detailed description starts here.
+</span></code></pre></div>
+<p><code>\brief</code>ヘッダーは簡単な説明を書く時に使うべき。もっと詳しい説明は一行開けてから書けばいいらしい。（これ知らなかった）</p></li>
+
+<li><p><code>JAVADOC_AUTOBRIEF</code>を有効化すれば、１のような方法でなくてもBriefが書けるらしい。ただ明示的ではないため、個人的にはちょっと好きじゃないかも。</p></li>
+</ol>
+
+<h2 id="メンバ変数の後に説明を付けたい場合">メンバ変数の後に説明を付けたい場合</h2>
+<div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="kt">int</span> <span class="n">var</span><span class="p">;</span> <span class="c1">///&lt; Brief description after the member.
+</span><span class="c1"></span>         <span class="c1">//!&lt; Or Details description after the member as comments are continued.
+</span></code></pre></div>
+<p>通常コメントをつけるのと同じだが、Prefixの最後に<code>&lt;</code>をつけることでDoxygenの文書化をすることができるそうだ。</p>
+
+<p>また、関数の引数の中でも<code>/**&lt; ... */</code>のような構造でDoxygenに検知させることもできる。個人的には見た目が余計に複雑になるからあんまり使いたくはないが…</p>
+<div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="kt">void</span> <span class="nf">foo</span><span class="p">(</span><span class="kt">int</span> <span class="n">v</span> <span class="cm">/**&lt; [in] docs for input parameter v. */</span><span class="p">);</span>
+</code></pre></div>
+<p>注意点としては、こういった文書化はメンバ変数とパラメータにしかできないことだ。クラスとか列挙型などには普通のブロックコメントで文書化をするしかないらしい。そしてヘッダーコマンド（<code>\brief</code>や<code>\class</code>のような）も使えない。</p>
+
+<h2 id="例-1">例 1</h2>
+<div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="c1">/// A Test class
+</span><span class="c1"></span><span class="k">class</span> <span class="nc">Afterdoc_Test</span>
+<span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="c1">/// An enum type.
+</span><span class="c1"></span>    <span class="c1">/// The documentation block cannot be put after the enum.
+</span><span class="c1"></span>    <span class="k">enum</span> <span class="nc">EnumType</span>
+    <span class="p">{</span>
+        <span class="kt">int</span> <span class="n">Eval1</span><span class="p">,</span> <span class="c1">///&lt; Enum value 1
+</span><span class="c1"></span>        <span class="kt">int</span> <span class="n">Eval2</span><span class="p">,</span> <span class="c1">///&lt; Enum value 2
+</span><span class="c1"></span>    <span class="p">};</span>
+    <span class="kt">void</span> <span class="nf">member</span><span class="p">();</span> <span class="c1">///&lt; A member function.
+</span><span class="c1"></span>    
+<span class="k">protected</span><span class="o">:</span>
+    <span class="kt">int</span> <span class="n">value</span><span class="p">;</span> <span class="c1">///&lt; An integer value.
+</span><span class="c1"></span><span class="p">}</span>
+</code></pre></div>
+<h2 id="例-2-doxygenマニュアルのexamples">例 2 (doxygenマニュアルのExamples)</h2>
+
+<ul>
+<li><code>\brief</code>で生成される簡単な説明文はDoxygen生成設定ファイルの<code>BRIEF_MEMBER_DESC</code>をNOにすることで隠せるそうだ。</li>
+<li>基本<code>\brief</code>で生成される説明はディテールな説明文項目でも繰り返して出てくる。ディテールで<code>\brief</code>説明文を消すためにはやっぱり設定ファイルで<code>REPEAT_BRIEF</code>をNOにすればなくなるらしい。</li>
+<li>Qtスタイル（基本？）では説明を書かなくても良いらしい。</li>
+</ul>
+
+<h2 id="他のとこでコメント文書を作成する為には">他のとこでコメント文書を作成する為には</h2>
+
+<p>普通はクラスの前、列挙型の前、それともメンバ変数の後に<code>&lt;</code>をつけてコメントを書いてDoxygenがそれを生成させるのが一般的だ。しかしやむをえず他のとこで文書化したい要素を書かなければならない場合には、<strong>Structural Command</strong>を最初に使ってどの要素を文書化したいかを指定しなければならない。</p>
+
+<p>*Structural Command*は最初に<code>\</code>か<code>@</code>をつける。</p>
+<div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="c1">/// @class Test
+</span><span class="c1">/// @brief A test class.
+</span><span class="c1">///
+</span><span class="c1">/// A more detailed class description.
+</span></code></pre></div>
+<p>*Structural Command*の種類は以下のリストで見れる。</p>
+
+<table>
+<thead>
+<tr>
+<th>Command</th>
+<th>説明</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>class</td>
+<td>クラス</td>
+</tr>
+
+<tr>
+<td>struct</td>
+<td>Cスタイルの構造体</td>
+</tr>
+
+<tr>
+<td>union</td>
+<td>共用体</td>
+</tr>
+
+<tr>
+<td>enum</td>
+<td>列挙型</td>
+</tr>
+
+<tr>
+<td>fn</td>
+<td>関数</td>
+</tr>
+
+<tr>
+<td>var</td>
+<td>変数、<code>typedef</code>、または列挙型の値</td>
+</tr>
+
+<tr>
+<td>def</td>
+<td>前処理機の<code>#define</code></td>
+</tr>
+
+<tr>
+<td>file</td>
+<td>ファイル</td>
+</tr>
+
+<tr>
+<td>namespace</td>
+<td>ネームスペース</td>
+</tr>
+</tbody>
+</table>
+
+<p>他に<code>@package</code>または<code>@interface</code>などがあるが、C++だけ適用できる要素だけ触れていくのでメモしない。</p>
+
+<p>注意点としては、<strong>C++</strong>でクラスのメンバ変数を文書化したければ、ネームスペースから初めてクラスまで文書化されなければならないらしい。また、Cスタイルの関数などを文書化したければ、C関数の宣言が入っているファイルもDoxygenスタイルでコメントを書かなければならないそうだ。</p>
+
+<p>ファイルさえもコメントしなければならないのが一気に面倒くさくてちょっとアレだが、公式マニュアルでは普通に</p>
+<div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="c1">/// @file file_name.h
+</span></code></pre></div>
+<p>でもファイルの文書が定義されてキャッチできるようになっているので、ぜひ書いてほしいと書いてある…</p>
+
+<h1 id="markdown-support">Markdown Support</h1>
+
+<blockquote>
+<p><a href="https://www.doxygen.nl/manual/markdown.html">https://www.doxygen.nl/manual/markdown.html</a></p>
+</blockquote>
+
+<p>Doxygenは標準Markdownと独自仕様のMarkdownをサポートする。既存のMarkdownと共通している部分もあるが、共通してない、注意すべきの要素のついてメモを取りたい。</p>
+
+<h2 id="code-blocks">Code Blocks</h2>
+<div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="c1">/// This a normal paragraph
+</span><span class="c1">///
+</span><span class="c1">///     // THIS IS CODE BLOCK
+</span><span class="c1">///     int main() { return 0; }
+</span><span class="c1">///
+</span><span class="c1">/// Continue with a normal paragraph again.
+</span></code></pre></div>
+<p>コードブロックを生成するにはスペースを４つ開くことでコードブロックが生成できる。コードブロックが生成される時に余白は自動削除される。</p>
+
+<p>リストを使う時にはリストの項目から更に４文字空白を開けることがコードブロックができる。</p>
+<div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="c1">/// 1.  Item
+</span><span class="c1">///     
+</span><span class="c1">///     More text for item1.
+</span><span class="c1">///
+</span><span class="c1">/// 2.  Item2
+</span><span class="c1">///     More text for item2.
+</span><span class="c1">///     
+</span><span class="c1">///         Code block for item2.
+</span></code></pre></div>
+<h2 id="強調構文">強調構文</h2>
+<div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="c1">/// *single asterisks*
+</span><span class="c1">/// _single underscores_
+</span><span class="c1">/// **double asterisks**
+</span><span class="c1">/// __double_asterisks__
+</span><span class="c1">/// ~~double~_tilde~~
+</span></code></pre></div>
+<p>標準Markdownとは違って、途中で<code>_</code>（アンダーバー）があっても強調構文が終わらない仕様になっている。ただし、強調構文が成立するには必ず構文の左右に空白が来なければならない。</p>
+
+<h2 id="を使ったcode-blocks"><code>~~~</code>を使ったCode Blocks</h2>
+<div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="c1">/// This a normal paragraph.
+</span><span class="c1">///
+</span><span class="c1">/// ~~~{.cpp}
+</span><span class="c1">/// // THIS IS ALSO CODE BLOCK.
+</span><span class="c1">/// int main() { return 0; }
+</span><span class="c1">/// ~~~
+</span></code></pre></div>
+<p>普通の段落から一行開けて<code>~~~</code>を使うことでコードブロックを生成することができる。上の既存の方式ではすべてのコードに４つ以上のスペースを入れなければならなかったが、これを使うことでもっと便利にコードが作成できる。</p>
+]]></content>
+		</item>
 		
 		<item>
 			<title>Rust＋Winapiで窓を生成してみた</title>
