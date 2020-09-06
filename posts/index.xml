@@ -210,7 +210,45 @@
 </span><span class="c1">/// ~~~
 </span></code></pre></div>
 <p>普通の段落から一行開けて<code>~~~</code>を使うことでコードブロックを生成することができる。上の既存の方式ではすべてのコードに４つ以上のスペースを入れなければならなかったが、これを使うことでもっと便利にコードが作成できる。</p>
-]]></content>
+
+<h1 id="その他">その他</h1>
+
+<h2 id="doxygenが一部コードを分析しないようにしたい">doxygenが一部コードを分析しないようにしたい</h2>
+
+<blockquote>
+<p><a href="https://www.star.bnl.gov/public/comp/sofi/doxygen/faq.html">https://www.star.bnl.gov/public/comp/sofi/doxygen/faq.html</a></p>
+</blockquote>
+
+<p>doxygenはコード分析で文書化作業を行う前に、C/C++コンパイラみたいに前処理を行うことが出来る。設定ファイルの<code>ENABLE_PREPROCESSING</code>と<code>PREDEFINED</code>タグがあって、<code>ENABLE_PREPROCESSING</code>をONにした状態で<code>PREDEFINED</code>にdoxygenが起動する時定義されるマクロを指定してコードの中で分岐を作ることが出来る。</p>
+
+<p>これらを使って、マクロを指定し、前処理機の分岐（<code>#ifndef</code>）でマクロが定義されていなかったかを確認してdoxygenが動いてる途中では分岐で囲んだ一部のコードを分析しないようにすることが出来る。</p>
+<div class="highlight"><pre class="chroma"><code class="language-doxyfile" data-lang="doxyfile">// in Doxyfile
+ENABLE_PREPROCESSING   = YES
+PREDEFINED             = DY_DOXYGEN_SHOULD_SKIP_THIS</code></pre></div><div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="cp">#ifndef DY_DOXYGEN_SHOULD_SKIP_THIS
+</span><span class="cp"></span><span class="c1">// doxygenが起動したらこの中にあるコードは分析しない。しかし通常のコンパイラではビルドされる。
+</span><span class="c1"></span><span class="cp">#endif </span><span class="c1">// ^!defined(DY_DOXYGEN_SHOULD_SKIP_THIS)
+</span></code></pre></div>
+<h2 id="マクロの説明で-documentation-for-unknown-define-found-という警告が出る">マクロの説明で<code>documentation for unknown define ## found</code>という警告が出る。</h2>
+
+<blockquote>
+<p><a href="https://stackoverflow.com/questions/16243849/doxygen-documenting-commented-define">https://stackoverflow.com/questions/16243849/doxygen-documenting-commented-define</a></p>
+</blockquote>
+
+<p>これも前処理機のマクロを使って、doxygenで処理をしている途中だけマクロを明示的に指定することでエラー（または警告）がなくなる。</p>
+<div class="highlight"><pre class="chroma"><code class="language-doxyfile" data-lang="doxyfile">// in Doxyfile
+PREDEFINED += DY_DOXYGEN_FOR_DOXYGEN</code></pre></div><div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="cp">#if defined(DY_DOXYGEN_FOR_DOXYGEN) </span><span class="c1">// for avoiding doxygen generation error.
+</span><span class="c1"></span>    <span class="cp">#define DY_ENABLE_ENUM_BITMASK_OP
+</span><span class="cp">#endif </span><span class="c1">// ^ defined(DY_DOXYGEN_FOR_DOXYGEN) 
+</span><span class="c1"></span>
+<span class="c1">/// @brief Enable enumeration bitmask operation feature on given `__Enum__` type.
+</span><span class="c1">/// @param __Enum__ Enumeration type.
+</span><span class="c1"></span><span class="cp">#define DY_ENABLE_ENUM_BITMASK_OP(__Enum__)                                                                            \
+</span><span class="cp">    template &lt;&gt;                                                                                                        \
+</span><span class="cp">    struct ::dy::EnableBitmaskOperators&lt;__Enum__&gt;                                                                      \
+</span><span class="cp">    {                                                                                                                  \
+</span><span class="cp">        static constexpr bool sk_is_enabled = true;                                                                    \
+</span><span class="cp">    };\
+</span></code></pre></div>]]></content>
 		</item>
 		
 		<item>
