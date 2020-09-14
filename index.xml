@@ -22,6 +22,15 @@
     </item>
     
     <item>
+      <title>C&#43;&#43;で実装するDelegateコードの分析（Don Clugston）</title>
+      <link>https://liliilli.github.io/posts/donclugston_delegate/</link>
+      <pubDate>Thu, 27 Aug 2020 09:30:34 +0900</pubDate>
+      
+      <guid>https://liliilli.github.io/posts/donclugston_delegate/</guid>
+      <description>ざっくりとコードを読みながら分析したものに過ぎないと思いますが、気になるコードを抜粋して解説して行きたいと思います。 リンク https://www.codeproject.com/Articles/7150/Member-Function-Pointers-and-the-Fastest-Possible 元ソースコードと</description>
+    </item>
+    
+    <item>
       <title>Rust＋Winapiで窓を生成してみた</title>
       <link>https://liliilli.github.io/posts/rust_winapi_memo/</link>
       <pubDate>Thu, 13 Aug 2020 10:04:36 +0900</pubDate>
@@ -91,15 +100,6 @@
       
       <guid>https://liliilli.github.io/posts/tlsf_basic/</guid>
       <description>TLSFとは何なのか http://www.gii.upv.es/tlsf/ http://www.gii.upv.es/tlsf/files/ecrts04_tlsf.pdf https://www.researchgate.net/publication/234785757_A_comparison_of_memory_allocators_for_real-time_applications TLSF（Two-Level Segregate Fit）は、リアルタイムで要求される速度、安定性、決定性（Deterministic</description>
-    </item>
-    
-    <item>
-      <title>行列変数のネーミングについて</title>
-      <link>https://liliilli.github.io/posts/matrix_name/</link>
-      <pubDate>Fri, 13 Mar 2020 13:11:47 +0900</pubDate>
-      
-      <guid>https://liliilli.github.io/posts/matrix_name/</guid>
-      <description>https://www.sebastiansylvan.com/post/matrix_naming_convention/ D3Dスタイル（Row-Major、左から右へ演算していくスタイル）でやると、 vector4_t transformed_point = point * M * A; が普通だけど、このままじゃ後でまた見る時に何</description>
     </item>
     
   </channel>
