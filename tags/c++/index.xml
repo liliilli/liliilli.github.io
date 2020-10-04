@@ -1,16 +1,25 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>c&#43;&#43; on neuromantic</title>
+    <title>C&#43;&#43; on neuromantic</title>
     <link>https://liliilli.github.io/tags/c&#43;&#43;/</link>
-    <description>Recent content in c&#43;&#43; on neuromantic</description>
+    <description>Recent content in C&#43;&#43; on neuromantic</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright>
-    <lastBuildDate>Thu, 21 Nov 2019 20:33:04 +0900</lastBuildDate>
+    <lastBuildDate>Sun, 04 Oct 2020 11:45:17 +0900</lastBuildDate>
     
 	<atom:link href="https://liliilli.github.io/tags/c++/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>CppCon2017 C&#43;&#43; atomics, from basic to advancedのメモ</title>
+      <link>https://liliilli.github.io/posts/cppcon2017_atomics_memo/</link>
+      <pubDate>Sun, 04 Oct 2020 11:45:17 +0900</pubDate>
+      
+      <guid>https://liliilli.github.io/posts/cppcon2017_atomics_memo/</guid>
+      <description>本文 https://www.youtube.com/watch?v=ZQFzMfHIxng はじめに Atomicはマルチスレッドに対応したロジックでMutexなしにLock-free programmingを実装するために利用出</description>
+    </item>
     
     <item>
       <title>C&#43;&#43;2aのconceptsを使ってみた。</title>

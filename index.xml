@@ -7,10 +7,19 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright>
-    <lastBuildDate>Sat, 05 Sep 2020 16:21:55 +0900</lastBuildDate>
+    <lastBuildDate>Sun, 04 Oct 2020 11:45:17 +0900</lastBuildDate>
     
 	<atom:link href="https://liliilli.github.io/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>CppCon2017 C&#43;&#43; atomics, from basic to advancedのメモ</title>
+      <link>https://liliilli.github.io/posts/cppcon2017_atomics_memo/</link>
+      <pubDate>Sun, 04 Oct 2020 11:45:17 +0900</pubDate>
+      
+      <guid>https://liliilli.github.io/posts/cppcon2017_atomics_memo/</guid>
+      <description>本文 https://www.youtube.com/watch?v=ZQFzMfHIxng はじめに Atomicはマルチスレッドに対応したロジックでMutexなしにLock-free programmingを実装するために利用出</description>
+    </item>
     
     <item>
       <title>C&#43;&#43;でのDoxygenの書き方のメモ</title>
@@ -91,15 +100,6 @@
       
       <guid>https://liliilli.github.io/posts/dinput8/</guid>
       <description>https://en.wikipedia.org/wiki/DirectInput https://bell0bytes.eu/directinput/ https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee416842(v=vs.85)?redirectedfrom=MSDN https://docs.microsoft.com/ko-kr/windows/win32/xinput/xinput-and-directinput?redirectedfrom=MSDN DirectInputとは DirectInputは、キーボード、マウス、そして各種のコントローラーを含んでほぼ同一な挙動制御をサポー</description>
-    </item>
-    
-    <item>
-      <title>TLSF Allocatorを作ってみた</title>
-      <link>https://liliilli.github.io/posts/tlsf_basic/</link>
-      <pubDate>Sun, 15 Mar 2020 19:13:14 +0900</pubDate>
-      
-      <guid>https://liliilli.github.io/posts/tlsf_basic/</guid>
-      <description>TLSFとは何なのか http://www.gii.upv.es/tlsf/ http://www.gii.upv.es/tlsf/files/ecrts04_tlsf.pdf https://www.researchgate.net/publication/234785757_A_comparison_of_memory_allocators_for_real-time_applications TLSF（Two-Level Segregate Fit）は、リアルタイムで要求される速度、安定性、決定性（Deterministic</description>
     </item>
     
   </channel>
