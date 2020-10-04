@@ -26,6 +26,13 @@
         <p class="logo"><a href="https://liliilli.github.io">neuromantic</a></p>
         <ul class="menu" id="menu" onscroll="menu_on_scroll()">
             <li>
+                <a href="https://liliilli.github.io/posts/">
+                    <span class="active">
+                        Posts
+                    </span>
+                </a>
+            </li>
+            <li>
                 <a href="https://liliilli.github.io/archives/">
                     <span>
                         Archives
@@ -49,157 +56,14 @@
         </ul>
     </nav>
 </header>
-    <main class="main"> 
+    <main class="main">
 <header class="page-header">
-  <h1>Posts</h1>
+    <h1>Posts</h1>
 </header>
 
+<ul class="terms-tags">
+</ul>
 
-<article class="post-entry">
-  <header class="entry-header">
-    <h2>
-      CppCon2017 C&#43;&#43; atomics, from basic to advancedのメモ
-    </h2>
-  </header>
-  <section class="entry-content">
-    <p>本文 https://www.youtube.com/watch?v=ZQFzMfHIxng はじめに Atomicはマルチスレッドに対応したロジックでMutexなしにLock-free programmingを実装するために利用出...</p>
-  </section>
-  <footer class="entry-footer">
-    <time>October 4, 2020</time>&nbsp;·&nbsp;Jongmin Yun, Neu.
-  </footer>
-  <a class="entry-link" aria-label="post link to CppCon2017 C&#43;&#43; atomics, from basic to advancedのメモ" href="https://liliilli.github.io/posts/cppcon2017_atomics_memo/"></a>
-</article>
-<article class="post-entry">
-  <header class="entry-header">
-    <h2>
-      C&#43;&#43;でのDoxygenの書き方のメモ
-    </h2>
-  </header>
-  <section class="entry-content">
-    <p>以前にもコードの説明を書く時にDoxygenみたいな構文で書いてきたんですが、本格的にAPIのマニュアルを成立しようとしたらどう書けばいいか...</p>
-  </section>
-  <footer class="entry-footer">
-    <time>September 5, 2020</time>&nbsp;·&nbsp;Jongmin Yun, Neu.
-  </footer>
-  <a class="entry-link" aria-label="post link to C&#43;&#43;でのDoxygenの書き方のメモ" href="https://liliilli.github.io/posts/doxygen_memo/"></a>
-</article>
-<article class="post-entry">
-  <header class="entry-header">
-    <h2>
-      C&#43;&#43;で実装するDelegateコードの分析（Don Clugston）
-    </h2>
-  </header>
-  <section class="entry-content">
-    <p>ざっくりとコードを読みながら分析したものに過ぎないと思いますが、気になるコードを抜粋して解説して行きたいと思います。 リンク https://www.codeproject.com/Articles/7150/Member-Function-Pointers-and-the-Fastest-Possible 元ソースコードと...</p>
-  </section>
-  <footer class="entry-footer">
-    <time>August 27, 2020</time>&nbsp;·&nbsp;Jongmin Yun, Neu.
-  </footer>
-  <a class="entry-link" aria-label="post link to C&#43;&#43;で実装するDelegateコードの分析（Don Clugston）" href="https://liliilli.github.io/posts/donclugston_delegate/"></a>
-</article>
-<article class="post-entry">
-  <header class="entry-header">
-    <h2>
-      Rust＋Winapiで窓を生成してみた
-    </h2>
-  </header>
-  <section class="entry-content">
-    <p>暇つぶしでRustとwinapi crateを使って、窓を生成してイベントメッセージを処理するルーチンを作ってみました。実はdinput8とx...</p>
-  </section>
-  <footer class="entry-footer">
-    <time>August 13, 2020</time>&nbsp;·&nbsp;Jongmin Yun, Neu.
-  </footer>
-  <a class="entry-link" aria-label="post link to Rust＋Winapiで窓を生成してみた" href="https://liliilli.github.io/posts/rust_winapi_memo/"></a>
-</article>
-<article class="post-entry">
-  <header class="entry-header">
-    <h2>
-      AMD GCNアーキテクチャ文書を読んでメモ
-    </h2>
-  </header>
-  <section class="entry-content">
-    <p>用語 略語 説明 VS Vertex Shader PS Pixel Shader (Fragment Shader) VLIW Very Long Instruction Word FLOPS FLoating point Operations Per Second GCN Graphics Core Next CU Compute Unit EU Export Unit ISA Instruction Set Architecture SIMD Single Instruction Multiple Data ALU Arithmetic Logic Unit AGU Address Generation Unit SALU Scalar Arithmetic Logic Unit VALU Vector Arithmetic Logic Unit APU Accelated Processing Unit PC Program Counter IB...</p>
-  </section>
-  <footer class="entry-footer">
-    <time>June 19, 2020</time>&nbsp;·&nbsp;Jongmin Yun, Neu.
-  </footer>
-  <a class="entry-link" aria-label="post link to AMD GCNアーキテクチャ文書を読んでメモ" href="https://liliilli.github.io/posts/gcn_architecture_crash/"></a>
-</article>
-<article class="post-entry">
-  <header class="entry-header">
-    <h2>
-      最近簡単に読んだポスト
-    </h2>
-  </header>
-  <section class="entry-content">
-    <p>Avoid double negation, unless… !!x == xのような構文を使わないこと。代わりにenabledに終わる（何かが有効化されたか？）ように関数またはフラグなどを作って渡すこと...</p>
-  </section>
-  <footer class="entry-footer">
-    <time>June 19, 2020</time>&nbsp;·&nbsp;Jongmin Yun, Neu.
-  </footer>
-  <a class="entry-link" aria-label="post link to 最近簡単に読んだポスト" href="https://liliilli.github.io/posts/week25_2020/"></a>
-</article>
-<article class="post-entry">
-  <header class="entry-header">
-    <h2>
-      Low-level shader optimization for next-gen and D3D11のメモ
-    </h2>
-  </header>
-  <section class="entry-content">
-    <p>メモの基になる原文は2014年GDCで発表されたもので、翻訳ミスによる間違いがある可能性があります。また、GCN（AMD）アーキテクチャの重...</p>
-  </section>
-  <footer class="entry-footer">
-    <time>June 18, 2020</time>&nbsp;·&nbsp;Jongmin Yun, Neu.
-  </footer>
-  <a class="entry-link" aria-label="post link to Low-level shader optimization for next-gen and D3D11のメモ" href="https://liliilli.github.io/posts/shader_opti_memo_2/"></a>
-</article>
-<article class="post-entry">
-  <header class="entry-header">
-    <h2>
-      SFINAEの活用、ざっくりメモ
-    </h2>
-  </header>
-  <section class="entry-content">
-    <p>SFINAEとは SFINAEとはSubstitution Failure is not an error（SFINAE)の略語として、テンプレートパラメータの一致しないテ...</p>
-  </section>
-  <footer class="entry-footer">
-    <time>June 17, 2020</time>&nbsp;·&nbsp;Jongmin Yun, Neu.
-  </footer>
-  <a class="entry-link" aria-label="post link to SFINAEの活用、ざっくりメモ" href="https://liliilli.github.io/posts/sfinae_afaid/"></a>
-</article>
-<article class="post-entry">
-  <header class="entry-header">
-    <h2>
-      Low Level Thinking in High Shader Languages
-    </h2>
-  </header>
-  <section class="entry-content">
-    <p>これは参照項目のGDCのリンクを読んで適当にメモしたものです。詳しくは参照のリンクをご覧ください。 Goal of this presentation ローレベル思考はいまだに有効である...</p>
-  </section>
-  <footer class="entry-footer">
-    <time>June 17, 2020</time>&nbsp;·&nbsp;Jongmin Yun, Neu.
-  </footer>
-  <a class="entry-link" aria-label="post link to Low Level Thinking in High Shader Languages" href="https://liliilli.github.io/posts/shader_opti_memo/"></a>
-</article>
-<article class="post-entry">
-  <header class="entry-header">
-    <h2>
-      DirectInput8 導入メモ
-    </h2>
-  </header>
-  <section class="entry-content">
-    <p>https://en.wikipedia.org/wiki/DirectInput https://bell0bytes.eu/directinput/ https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee416842(v=vs.85)?redirectedfrom=MSDN https://docs.microsoft.com/ko-kr/windows/win32/xinput/xinput-and-directinput?redirectedfrom=MSDN DirectInputとは DirectInputは、キーボード、マウス、そして各種のコントローラーを含んでほぼ同一な挙動制御をサポー...</p>
-  </section>
-  <footer class="entry-footer">
-    <time>April 25, 2020</time>&nbsp;·&nbsp;Jongmin Yun, Neu.
-  </footer>
-  <a class="entry-link" aria-label="post link to DirectInput8 導入メモ" href="https://liliilli.github.io/posts/dinput8/"></a>
-</article>
-<footer class="page-footer">
-  <nav class="pagination">
-    <a class="next" href="/posts/page/2/">Next Page »</a>
-  </nav>
-</footer>
 
     </main><footer class="footer">
     <span>&copy; 2020 <a href="https://liliilli.github.io">neuromantic</a></span>
