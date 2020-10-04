@@ -1,137 +1,97 @@
 <!DOCTYPE html>
-<html lang="en-us">
+<html lang="en">
 
-<head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<meta http-equiv="X-UA-Compatible" content="ie=edge">
-	<meta name="theme-color" content="#494f5c">
-	<meta name="msapplication-TileColor" content="#494f5c">
-<meta itemprop="name" content="CppCon2017 C&#43;&#43; atomics, from basic to advancedのメモ">
-<meta itemprop="description" content="本文 https://www.youtube.com/watch?v=ZQFzMfHIxng はじめに Atomicはマルチスレッドに対応したロジックでMutexなしにLock-free programmingを実装するために利用出">
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
+<title>CppCon2017 C&#43;&#43; atomics, from basic to advancedのメモ - neuromantic</title>
 
-<meta itemprop="datePublished" content="2020-10-04T11:45:17&#43;09:00" />
-<meta itemprop="dateModified" content="2020-10-04T11:45:17&#43;09:00" />
-<meta itemprop="wordCount" content="6256">
+<meta name="description" content="本文 https://www.youtube.com/watch?v=ZQFzMfHIxng はじめに Atomicはマルチスレッドに対応したロジックでMutexなしにLock-free programmingを実装するために利用出">
+<meta name="keywords" content= />
+<meta name="author" content="Jongmin Yun, Neu.">
+<link rel="canonical" href="https://liliilli.github.io/posts/cppcon2017_atomics_memo/" />
+<link href="https://liliilli.github.io/assets/css/stylesheet.min.a3b13905fd4b98ea165a18374ae5215d9de97a04f187f789736c56858296ba12.css" integrity="sha256-o7E5Bf1LmOoWWhg3SuUhXZ3pegTxh/eJc2xWhYKWuhI=" rel="preload stylesheet"
+    as="style">
+<link rel="apple-touch-icon" href="https://liliilli.github.io/apple-touch-icon.png">
+<link rel="icon" href="https://liliilli.github.io/favicon.ico">
+<meta name="generator" content="Hugo 0.75.1" />
 
-
-
-<meta itemprop="keywords" content="C&#43;&#43;," />
-<meta property="og:title" content="CppCon2017 C&#43;&#43; atomics, from basic to advancedのメモ" />
-<meta property="og:description" content="本文 https://www.youtube.com/watch?v=ZQFzMfHIxng はじめに Atomicはマルチスレッドに対応したロジックでMutexなしにLock-free programmingを実装するために利用出" />
-<meta property="og:type" content="article" />
-<meta property="og:url" content="https://liliilli.github.io/posts/cppcon2017_atomics_memo/" />
-<meta property="article:published_time" content="2020-10-04T11:45:17+09:00" />
-<meta property="article:modified_time" content="2020-10-04T11:45:17+09:00" />
-<meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="CppCon2017 C&#43;&#43; atomics, from basic to advancedのメモ"/>
-<meta name="twitter:description" content="本文 https://www.youtube.com/watch?v=ZQFzMfHIxng はじめに Atomicはマルチスレッドに対応したロジックでMutexなしにLock-free programmingを実装するために利用出"/>
-
-	<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-	<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-	<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-	<link rel="manifest" href="/site.webmanifest">
-	<link rel="mask-icon" href="/safari-pinned-tab.svg" color="">
-	<link rel="shortcut icon" href="/favicon.ico">
-
-	<title>CppCon2017 C&#43;&#43; atomics, from basic to advancedのメモ</title>
-	<link rel="stylesheet" href="https://liliilli.github.io/css/style.min.eac77496566fd7d5768fd650ddb0b2b181ca6a2d7c5fdd6fe6b8ba4bf47e566f.css" integrity="sha256-6sd0llZv19V2j9ZQ3bCysYHKai18X91v5ri6S/R+Vm8=" crossorigin="anonymous">
-	
 </head>
 
-<body id="page">
-	
-	<header id="site-header" class="animated slideInUp">
-		<div class="hdr-wrapper section-inner">
-			<div class="hdr-left">
-				<div class="site-branding">
-					<a href="https://liliilli.github.io">neuromantic</a>
-				</div>
-				<nav class="site-nav hide-in-mobile">
-					
-				<a href="https://liliilli.github.io/posts/">Posts</a>
-				<a href="https://liliilli.github.io/about-hugo/">About</a>
+<body class="single" id="top">
+<header class="header">
+    <nav class="nav">
+        <p class="logo"><a href="https://liliilli.github.io">neuromantic</a></p>
+        <ul class="menu" id="menu" onscroll="menu_on_scroll()">
+            <li>
+                <a href="https://liliilli.github.io/archives/">
+                    <span>
+                        Archives
+                    </span>
+                </a>
+            </li>
+            <li>
+                <a href="https://liliilli.github.io/tags/">
+                    <span>
+                        Tags
+                    </span>
+                </a>
+            </li>
+            <li>
+                <a href="https://liliilli.github.io/series/">
+                    <span>
+                        Series
+                    </span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+    <main class="main">
 
-				</nav>
-			</div>
-			<div class="hdr-right hdr-icons">
-				<span class="hdr-social hide-in-mobile"><a href="https://twitter.com/NeuliliilliD" target="_blank" rel="noopener me" title="Twitter"><svg xmlns="http://www.w3.org/2000/svg" class="feather" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg></a><a href="https://github.com/liliilli" target="_blank" rel="noopener me" title="Github"><svg xmlns="http://www.w3.org/2000/svg" class="feather" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg></a></span><button id="menu-btn" class="hdr-btn" title="Menu"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-menu"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg></button>
-			</div>
-		</div>
-	</header>
-	<div id="mobile-menu" class="animated fast">
-		<ul>
-			<li><a href="https://liliilli.github.io/posts/">Posts</a></li>
-			<li><a href="https://liliilli.github.io/about-hugo/">About</a></li>
-		</ul>
-	</div>
-
-
-
-
-	<main class="site-main section-inner animated fadeIn faster">
-		<article class="thin">
-			<header class="post-header">
-				<div class="post-meta"><span>Oct 4, 2020</span></div>
-				<h1>CppCon2017 C&#43;&#43; atomics, from basic to advancedのメモ</h1>
-			</header>
-			<div class="content">
-				
-
-<h1 id="本文">本文<a href="#本文" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h1>
-
+<article class="post-single">
+  <header class="post-header">
+    <h1 class="post-title">
+      CppCon2017 C&#43;&#43; atomics, from basic to advancedのメモ
+    </h1>
+    <div class="post-meta">
+      <time>October 4, 2020</time>&nbsp;·&nbsp;Jongmin Yun, Neu.
+    </div>
+  </header>
+  <div class="post-content"><h1 id="本文">本文</h1>
 <blockquote>
 <p><a href="https://www.youtube.com/watch?v=ZQFzMfHIxng">https://www.youtube.com/watch?v=ZQFzMfHIxng</a></p>
 </blockquote>
-
-<h2 id="はじめに">はじめに<a href="#はじめに" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
-
+<h2 id="はじめに">はじめに</h2>
 <p><strong>Atomic</strong>はマルチスレッドに対応したロジックで<a href="https://ja.wikipedia.org/wiki/%E3%83%9F%E3%83%A5%E3%83%BC%E3%83%86%E3%83%83%E3%82%AF%E3%82%B9">Mutex</a>なしに<a href="https://stackoverflow.com/questions/14011849/what-is-lock-free-multithreaded-programming">Lock-free programming</a>を実装するために利用出来る演算単位だ。<em>Atomic</em> は一つの排他的演算が行われるようになっている。</p>
-
 <p><em>Atomic</em> 上手く使うことにより、他のスレッドからでは前または後ろの演算が見えるようになる。（最適化によっての演算の処理が移動しなくなる）ただし、アトミック変数の演算途中の状態はわからない。</p>
-
 <p><em>Atomic</em> をサポートするハードウェアでは、ハードウェア自体でアトミック演算が行うように特殊な命令語などで実行しようとしている。ただ、この <em>Atomic</em> 演算はハードウェア従属ではなくてもっと汎用的な意味として活用できる。</p>
-
-<p>ただし、Atomicを上手く使わないと <em>Mutex</em> より全然速度の向上が無いことを念頭に置きたい。<br>PPTの３ページ目では <em>Atomic</em> を使っても（そしてLock-freeを超えたWait-freeでロジックが構成されている）*Mutex*みたいにスレッドの数によって比例して性能が上がらないことがわかる。</p>
-
+<p>ただし、Atomicを上手く使わないと <em>Mutex</em> より全然速度の向上が無いことを念頭に置きたい。<!-- raw HTML omitted -->PPTの３ページ目では <em>Atomic</em> を使っても（そしてLock-freeを超えたWait-freeでロジックが構成されている）<em>Mutex</em>みたいにスレッドの数によって比例して性能が上がらないことがわかる。</p>
 <p>5ページ目でなぜLock-freeを使っても性能が上がらないかについてのロジックが見れる。<code>Program A</code>の場合、配列のインデックスによって接近出来る値を一つ一つ <em>Atomic</em> に入れることがわかる。しかし <em>Mutex</em> の場合には、関数内部にローカルで値を保持するための変数を作って、その結果を結果変数に渡して更新することがわかる。</p>
-
 <p>ということは、<strong>Lock-free Programming</strong>をしたとしてロジックの<strong>アルゴリズム</strong>自体が悪いと <em>Atomic</em> を使わないことより性能は悪くなれることを示している。</p>
-
 <p>よってどんだけ <em>Atomic</em> を使ったとしても、基盤となるロジックのアルゴリズムが <em>Atomic</em> を上手く活かせないと速度の向上は全然見込めない。</p>
-
 <p><em>Atomic</em> 自体は時間を減らしてくれるのではなく、あくまでもコンピュータの演算手順を見て何かをやってくれるのに過ぎない。</p>
-
 <p>なので <em>Atomic</em> を使う時にはAtomic変数の特性を考えながら慎重にロジックを作成しなければならない。</p>
-
 <p><em>Atomic</em> ではない一般変数の <strong>Read-Modify-Write</strong> は全然アトミック演算ではない。なのでデータ競合（Data Race）が起こってしまう。（１０ページから１３ページまで）</p>
 <div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="kt">int</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
 
 <span class="kt">int</span> <span class="n">tmp</span> <span class="o">=</span> <span class="n">x</span><span class="p">;</span>
 <span class="n">tmp</span><span class="o">++</span><span class="p">;</span>
 <span class="n">x</span> <span class="o">=</span> <span class="n">tmp</span><span class="p">;</span> <span class="c1">// &lt;== Non-atomic!
-</span></code></pre></div>
-<p><code>C++11</code>からは<code>std::atomic&lt;&gt;</code>が追加されてそれが使える。</p>
+</span></code></pre></div><p><code>C++11</code>からは<code>std::atomic&lt;&gt;</code>が追加されてそれが使える。</p>
 <div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="n">std</span><span class="o">::</span><span class="n">atomic</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
 <span class="n">x</span><span class="o">++</span><span class="p">;</span> <span class="c1">// Atomic read-modify-write
-</span></code></pre></div>
-<p>同じ変数を参照する時、アトミック演算の挙動によって他スレッドで保持しているキャッシュラインなども更新され、変わった変数での同期化を保証できる。（しない場合もある）</p>
-
-<h2 id="std-atomic"><code>std::atomic</code><a href="#std-atomic" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
-
+</span></code></pre></div><p>同じ変数を参照する時、アトミック演算の挙動によって他スレッドで保持しているキャッシュラインなども更新され、変わった変数での同期化を保証できる。（しない場合もある）</p>
+<h2 id="stdatomic"><code>std::atomic</code></h2>
 <p><em>atomic</em> アトミック変数タイプは、<strong>Trivially Copyable</strong>である時アトミック演算を保証してくれる。<em>Trivially Copyable</em> とは、タイプのすべてのデータが<code>memcpy</code>でコピーできるし、そして仮想関数（<code>virtual</code>）、またコンストラクタが<code>noexcept</code>じゃないことを指す。</p>
-
 <p>整数タイプのアトミック変数の場合、掛け算（Multiplication）はアトミックではない。（掛け算したい場合ならCASするかExchangeするか、それともRead-Modify-Writeする方法がある）</p>
-
 <p><strong>また、<code>std::atomic&lt;int&gt;</code>として例を上げると、<code>++x</code>と<code>x+=1</code>と<code>x=x+1</code>はそれぞれ違う。非アトミック変数なら最終的には同じ命令語になるようにしてくれるだろうけど、アトミックではそれぞれ違う演算をするようにしている。</strong></p>
-
 <p>また、アトミック変数自体についての演算はアトミックだが、次のようなRead-Modify-Writeはアトミックであることを保証してくれない。</p>
 <div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="n">std</span><span class="o">::</span><span class="n">atomic</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">x</span><span class="p">{</span><span class="mi">0</span><span class="p">};</span>
 <span class="n">x</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span> <span class="c1">// &lt;== Non-atomic
 </span><span class="c1"></span><span class="n">x</span> <span class="o">=</span> <span class="n">x</span> <span class="o">*</span> <span class="mi">2</span><span class="p">;</span> <span class="c1">// &lt;== Non-atomic
-</span></code></pre></div>
-<p>一般演算子を使うのではなく、関数<code>load()</code>と<code>store()</code>を使って数値を更新することも出来る。また、それらとは別で<code>exchange()</code>と<code>compare_exchange()</code>関数を使ってCASを駆使出来る。これらがLock-freeアルゴリズムで役に立つ。</p>
+</span></code></pre></div><p>一般演算子を使うのではなく、関数<code>load()</code>と<code>store()</code>を使って数値を更新することも出来る。また、それらとは別で<code>exchange()</code>と<code>compare_exchange()</code>関数を使ってCASを駆使出来る。これらがLock-freeアルゴリズムで役に立つ。</p>
 <div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="n">std</span><span class="o">::</span><span class="n">atomic</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">x</span><span class="p">;</span>
 <span class="n">T</span> <span class="n">y</span> <span class="o">=</span> <span class="n">x</span><span class="p">.</span><span class="n">load</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">memory_order_acquire</span><span class="p">);</span> <span class="c1">// Same as T y = x but std::memory_order_seq_cst;
 </span><span class="c1"></span><span class="n">x</span><span class="p">.</span><span class="n">store</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">memory_order_release</span><span class="p">);</span>	 <span class="c1">// Same as x = y but std::memory_order_seq_cst;
@@ -142,8 +102,7 @@
 <span class="c1">// CAS
 </span><span class="c1"></span><span class="k">while</span> <span class="p">(</span><span class="o">!</span><span class="n">x</span><span class="p">.</span><span class="n">compare_exchange_strong</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">))</span> <span class="c1">// If x == y, x = z and return true.
 </span><span class="c1"></span>    <span class="p">;</span> <span class="c1">// If x != y, y = x and return false.
-</span></code></pre></div>
-<p><strong>Compare-and-swap</strong>は大多数のロックフリーアルゴリズムで使われている。</p>
+</span></code></pre></div><p><strong>Compare-and-swap</strong>は大多数のロックフリーアルゴリズムで使われている。</p>
 <div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="n">std</span><span class="o">::</span><span class="n">atomic</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">x</span><span class="p">{</span><span class="mi">0</span><span class="p">};</span>
 <span class="kt">int</span> <span class="n">x0</span> <span class="o">=</span> <span class="n">x</span><span class="p">.</span><span class="n">load</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">memory_order_acquire</span><span class="p">);</span>
 <span class="k">while</span> <span class="p">(</span><span class="o">!</span><span class="n">x</span><span class="p">.</span><span class="n">compare_exchange_strong</span><span class="p">(</span><span class="n">x0</span><span class="p">,</span> <span class="n">x0</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
@@ -152,29 +111,19 @@
 <span class="c1">// また、CASを使って整数を２倍させることも可能だ。
 </span><span class="c1"></span><span class="k">while</span> <span class="p">(</span><span class="o">!</span><span class="n">x</span><span class="p">.</span><span class="n">compare_exchange_strong</span><span class="p">(</span><span class="n">x0</span><span class="p">,</span> <span class="n">x0</span> <span class="o">*</span> <span class="mi">2</span><span class="p">))</span>
     <span class="p">;</span>
-</code></pre></div>
-<p>代入演算子の場合、<code>fetch_add()</code>、<code>fetch_sub()</code>のような関数で明示的に演算が行える。ただ、この関数は<code>exchange()</code>のようなリターン値を返すようになっている。たとえば、<code>x = y.fetch_add(z)</code>した場合、<code>x</code>は演算される前の<code>y</code>の値を持ち、<code>y</code>は<code>z</code>が加算された新しい値を持つ。</p>
-
-<h2 id="atomic-の実際の性能"><code>atomic</code>の実際の性能<a href="#atomic-の実際の性能" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
-
-<p><code>atomic</code><strong>自体がすべてのハードウェアで速いわけではない。</strong>例えば、Broadwell-EXアーキテクチャで120コアを持つCPUでは<code>mutex</code>よりは１０倍早かったが、<code>spinlock</code>で実装したロジックに比べたら差異は見えなかったらしい。Haswellアーキテクチャの４コアでは<code>atomic</code>より<code>spinlock</code>のほうが少し速かったそうだ。</p>
-
+</code></pre></div><p>代入演算子の場合、<code>fetch_add()</code>、<code>fetch_sub()</code>のような関数で明示的に演算が行える。ただ、この関数は<code>exchange()</code>のようなリターン値を返すようになっている。たとえば、<code>x = y.fetch_add(z)</code>した場合、<code>x</code>は演算される前の<code>y</code>の値を持ち、<code>y</code>は<code>z</code>が加算された新しい値を持つ。</p>
+<h2 id="atomicの実際の性能"><code>atomic</code>の実際の性能</h2>
+<p><code>atomic</code>**自体がすべてのハードウェアで速いわけではない。**例えば、Broadwell-EXアーキテクチャで120コアを持つCPUでは<code>mutex</code>よりは１０倍早かったが、<code>spinlock</code>で実装したロジックに比べたら差異は見えなかったらしい。Haswellアーキテクチャの４コアでは<code>atomic</code>より<code>spinlock</code>のほうが少し速かったそうだ。</p>
 <p>そして一般アトミック演算ではなく <em>Compare-and-swap</em> を使った場合には<code>mutex</code>よりは性能が上がってるけど他の軽量ロック、または一般アトミック演算よりは処理速度が落ちるのが見える。</p>
-
 <p><strong>よってアトミック変数を使って <em>Lock-free algorithm</em> を実装する時には性能を測定してから判断すべきだと言っている。</strong></p>
-
-<h2 id="すべてのタイプがlock-freeではない">すべてのタイプがLock-freeではない。<a href="#すべてのタイプがlock-freeではない" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
-
+<h2 id="すべてのタイプがlock-freeではない">すべてのタイプがLock-freeではない。</h2>
 <p><code>std::atomic&lt;&gt;</code>に入る型引数のサイズによっても実は <em>Lock-free</em> ではない可能性がある。</p>
 <div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="kt">long</span> <span class="n">x</span><span class="p">;</span> <span class="c1">// &lt;== Lock-free
 </span><span class="c1"></span><span class="k">struct</span> <span class="nc">A</span> <span class="p">{</span> <span class="kt">long</span> <span class="n">x</span><span class="p">;</span> <span class="p">};</span> <span class="c1">// &lt;== Lock-free
 </span><span class="c1"></span><span class="k">struct</span> <span class="nc">B</span> <span class="p">{</span> <span class="kt">long</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">;</span> <span class="p">};</span> <span class="c1">// &lt;== Compiler, OS, architecture dependent. (maybe, maybe not)
 </span><span class="c1"></span><span class="k">struct</span> <span class="nc">C</span> <span class="p">{</span> <span class="kt">long</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">;</span> <span class="p">};</span> <span class="c1">// &lt;== Not Lock-free
-</span></code></pre></div>
-<p>もしアトミック変数のタイプがロックフリーではなければ、ランタイムでの挙動が変わるかもしれない。ということでC++17からは該当アトミック変数タイプがロックフリーなのかを確認するための<code>is_always_lock_free()</code>が追加された。</p>
-
-<h2 id="shared-vs-non-shared-42p">shared vs non-shared？(42p)<a href="#shared-vs-non-shared-42p" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
-
+</span></code></pre></div><p>もしアトミック変数のタイプがロックフリーではなければ、ランタイムでの挙動が変わるかもしれない。ということでC++17からは該当アトミック変数タイプがロックフリーなのかを確認するための<code>is_always_lock_free()</code>が追加された。</p>
+<h2 id="shared-vs-non-shared42p">shared vs non-shared？(42p)</h2>
 <p>もし以下のようなコードがあるとして、</p>
 <div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="n">std</span><span class="o">::</span><span class="n">atomic</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">x</span><span class="p">;</span> <span class="c1">// ...a
 </span><span class="c1">// In Thread 1
@@ -187,17 +136,11 @@
 </span><span class="c1"></span><span class="o">++</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
 <span class="c1">// In Thread 2
 </span><span class="c1"></span><span class="o">++</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>
-</code></pre></div>
-<p>普通にみれば<code>b</code>のほうが速いだろうと思うけど、実際にはそうじゃないらしい。なぜなら、変数が共有されないとしてもキャッシュライン同期化によってThread1では参照されない<code>x[1]</code>さえキャッシュで同期化され、逆もそうなっているからだ。（<strong>False Sharing</strong>とも言える）即ち、キャッシュラインごとに排他制御（<strong>Exclusive Access</strong>）になっている。</p>
-
+</code></pre></div><p>普通にみれば<code>b</code>のほうが速いだろうと思うけど、実際にはそうじゃないらしい。なぜなら、変数が共有されないとしてもキャッシュライン同期化によってThread1では参照されない<code>x[1]</code>さえキャッシュで同期化され、逆もそうなっているからだ。（<strong>False Sharing</strong>とも言える）即ち、キャッシュラインごとに排他制御（<strong>Exclusive Access</strong>）になっている。</p>
 <p>この排他制御によって、<code>std::atomic&lt;T&gt;</code>を使っても<code>mutex</code>より遥かに速度が遅くなってしまう不具合が生じれる。特に速度が遅れてしまうのって上のコードのようにアトミック変数に書き込みをする際に起こってしまうらしい。単純に読み込みだけなら速度はそんなに落ちないらしい。</p>
-
 <p>実はアトミック演算はすべての演算について無料であるわけではない。データ競合を避ける為に該当アトミック変数、最悪またそれがあるキャッシュラインまで同期化される必要があるかもしれない。ということで同じキャッシュラインの違うメモリに接近することはFalse sharingになり、ランタイムの速度が落ちる可能性が生じる。</p>
-
-<h2 id="casの-strong-と-weak">CASの<code>_strong</code>と<code>_weak</code><a href="#casの-strong-と-weak" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
-
+<h2 id="casの_strongと_weak">CASの<code>_strong</code>と<code>_weak</code></h2>
 <p><code>compare_exchange_strong()</code>とは違って、<code>compare_exchange_weak()</code>はハードウェアによるエラーによってもし<code>_strong()</code>によってTRUEが返されるものがFALSEになってしまう時がある。しかしFailureチェックをしなくてもいいので<code>_strong()</code>よりは性能が落ちない長所がある。（また、Failure自体はそんなに中々起こらないらしい。）</p>
-
 <p><code>compare_exchange_strong()</code>の類似コード（pseudo code）は以下のようになっている。C++03のシングルトンパターンでよく見えた<a href="https://en.wikipedia.org/wiki/Double-checked_locking">Double-Checked Locking</a>パターンを使っていることがわかる。また、値を書き込むことよりFailureされて戻れるのが速いのもわかる。</p>
 <div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="kt">bool</span> <span class="nf">compare_exchange_strong</span><span class="p">(</span>
     <span class="n">T</span><span class="o">&amp;</span> <span class="n">old_v</span><span class="p">,</span> <span class="n">T</span> <span class="n">new_v</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">memory_order</span> <span class="n">success</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">memory_order_failure</span><span class="p">)</span>
@@ -211,9 +154,7 @@
     <span class="n">value</span><span class="p">.</span><span class="n">store</span><span class="p">(</span><span class="n">new_v</span><span class="p">,</span> <span class="n">success</span><span class="p">);</span>
     <span class="k">return</span> <span class="nb">true</span><span class="p">;</span>
 <span class="p">}</span>
-</code></pre></div>
-<p>ただし上のコードはあくまでも類似コードで、実際にはハードウェア依存の特殊ロジックを使って上のような挙動が実行されるらしい。なのでCAS自体もアトミック演算だと見れる。</p>
-
+</code></pre></div><p>ただし上のコードはあくまでも類似コードで、実際にはハードウェア依存の特殊ロジックを使って上のような挙動が実行されるらしい。なのでCAS自体もアトミック演算だと見れる。</p>
 <p><code>_weak()</code>の類似コードは排他制御するコストが高い時に使える。内部的には時間制限をかけたロックを使ってCASを試みるそうだ。</p>
 <div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="kt">bool</span> <span class="nf">compare_exchange_strong</span><span class="p">(</span>
     <span class="n">T</span><span class="o">&amp;</span> <span class="n">old_v</span><span class="p">,</span> <span class="n">T</span> <span class="n">new_v</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">memory_order</span> <span class="n">success</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">memory_order_failure</span><span class="p">)</span>
@@ -229,9 +170,7 @@
     <span class="n">value</span><span class="p">.</span><span class="n">store</span><span class="p">(</span><span class="n">new_v</span><span class="p">,</span> <span class="n">success</span><span class="p">);</span>
     <span class="k">return</span> <span class="nb">true</span><span class="p">;</span>
 <span class="p">}</span>
-</code></pre></div>
-<h2 id="活用">活用<a href="#活用" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
-
+</code></pre></div><h2 id="活用">活用</h2>
 <p><em>Atomic</em> 変数はそのものままのだけで使うことはめったにない。なにかのアトミックじゃないメモリと一緒に使うことが多い。下のコードではアトミック変数が非アトミックメモリへの安全なインデックスの役割を果たしている。</p>
 <div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="kt">int</span> <span class="n">q</span><span class="p">[</span><span class="n">N</span><span class="p">];</span>
 <span class="n">std</span><span class="o">::</span><span class="n">atomic</span><span class="o">&lt;</span><span class="n">size_t</span><span class="o">&gt;</span> <span class="n">front</span><span class="p">;</span>
@@ -241,8 +180,7 @@
     <span class="n">size_t</span> <span class="n">my_slot</span> <span class="o">=</span> <span class="n">front</span><span class="p">.</span><span class="n">fetch_add</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span> <span class="c1">// &lt;== Explicit increment is atomic operation
 </span><span class="c1"></span>    <span class="n">q</span><span class="p">[</span><span class="n">my_slot</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span><span class="p">;</span> <span class="c1">// &lt;== Safe!
 </span><span class="c1"></span><span class="p">}</span>
-</code></pre></div>
-<p>または連結リスト（Linked List）にも使える。ここではアトミック変数は非アトミックメモリでのポインターとして扱われる。</p>
+</code></pre></div><p>または連結リスト（Linked List）にも使える。ここではアトミック変数は非アトミックメモリでのポインターとして扱われる。</p>
 <div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="k">struct</span> <span class="nc">Node</span> <span class="p">{</span> <span class="kt">int</span> <span class="n">value</span><span class="p">;</span> <span class="n">Node</span><span class="o">*</span> <span class="n">p_next</span><span class="p">;</span> <span class="p">};</span>
 <span class="n">std</span><span class="o">::</span><span class="n">atomic</span><span class="o">&lt;</span><span class="n">Node</span><span class="o">*&gt;</span> <span class="n">a_head</span><span class="p">;</span>
 
@@ -258,136 +196,118 @@
     <span class="p">}</span>
     <span class="k">while</span> <span class="p">(</span><span class="o">!</span><span class="n">head</span><span class="p">.</span><span class="n">compare_exchange_strong</span><span class="p">(</span><span class="n">p_old</span><span class="p">,</span> <span class="n">p_new</span><span class="p">));</span>
 <span class="p">}</span>
-</code></pre></div>
-<p>アトミック変数は上手く使えば、ロックを使わずメモリへの排他制御が出来て、また他のスレッドへメモリを公開させることも出来る。ただ、マルチスレッド環境でメモリに排他接近をする時には他のスレッドなどでのメモリの更新がちゃんと終わってなければならない。</p>
-
+</code></pre></div><p>アトミック変数は上手く使えば、ロックを使わずメモリへの排他制御が出来て、また他のスレッドへメモリを公開させることも出来る。ただ、マルチスレッド環境でメモリに排他接近をする時には他のスレッドなどでのメモリの更新がちゃんと終わってなければならない。</p>
 <p>逆も通じて、排他接近を終えてアトミックを更新した時にはその排他メモリが他のスレッドにも同期化されて見えなければならない。アトミックはそれをサポートする為のメモリバリア（<a href="https://en.wikipedia.org/wiki/Memory_barrier">Memory barrier</a>）の機能も果たしている。</p>
-
-<h2 id="memory-barriers-59p">Memory barriers (59p)<a href="#memory-barriers-59p" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
-
+<h2 id="memory-barriers-59p">Memory barriers (59p)</h2>
 <p>メモリバリアは一つのスレッドによって更新されたメモリが他のスレッドでどう同期化されたり見えるかをコントロールする。メモリバリアは原子性を持たないメモリに対しては明示的なロックなどを使わないと同期化自体が保証されない。</p>
-
-<p>C++03まではSTLでのスレッドサポート自体がなかったため、当然メモリバリア自体も存在しなかった。しかしC++11からはスレッドモデルの導入と共にメモリバリアも存在になっている。しかしSTLではメモリバリアそのまま使わせるのではなく <strong>Memory Order（メモリオーダリング）</strong>というのを使ってやろうとした。</p>
-
+<p>C++03まではSTLでのスレッドサポート自体がなかったため、当然メモリバリア自体も存在しなかった。しかしC++11からはスレッドモデルの導入と共にメモリバリアも存在になっている。しかしSTLではメモリバリアそのまま使わせるのではなく **Memory Order（メモリオーダリング）**というのを使ってやろうとした。</p>
 <p>C++のメモリバリア自体はアトミック演算の時に一緒に使える。</p>
 <div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="n">std</span><span class="o">::</span><span class="n">atomic</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">x</span><span class="p">;</span>
 <span class="n">x</span><span class="p">.</span><span class="n">store</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">memory_order_release</span><span class="p">);</span>
-</code></pre></div>
-<h3 id="std-memory-order-releaxed-60p"><code>std::memory_order_releaxed</code> (60p)<a href="#std-memory-order-releaxed-60p" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
-
+</code></pre></div><h3 id="stdmemory_order_releaxed-60p"><code>std::memory_order_releaxed</code> (60p)</h3>
 <p>一般変数<code>a</code>、<code>b</code>、<code>c</code>とアトミック変数<code>x</code>がある時、これらを使ったロジックの中で</p>
 <div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="n">x</span><span class="p">.</span><span class="n">fetch_add</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">memory_order_relaxed</span><span class="p">);</span>
-</code></pre></div>
-<p>があるとしたら、<code>std::memory_order_relaxed</code>は一番ゆるく、ロジックの実行順の保証をしないのでコンパイラによる最適化が一番強く入れる。よって他の変数の実行がお互いに干渉しない限り、無作為に変わってしまう。（ただし、変数自体の<code>A -&gt; B</code>が<code>B -&gt; A</code>になったりはしない）</p>
-
-<h3 id="std-memory-order-acquire-61p"><code>std::memory_order_acquire</code> (61p)<a href="#std-memory-order-acquire-61p" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
-
+</code></pre></div><p>があるとしたら、<code>std::memory_order_relaxed</code>は一番ゆるく、ロジックの実行順の保証をしないのでコンパイラによる最適化が一番強く入れる。よって他の変数の実行がお互いに干渉しない限り、無作為に変わってしまう。（ただし、変数自体の<code>A -&gt; B</code>が<code>B -&gt; A</code>になったりはしない）</p>
+<h3 id="stdmemory_order_acquire-61p"><code>std::memory_order_acquire</code> (61p)</h3>
 <p><code>std::memory_order_acquire</code>はアトミック演算の後についてくるすべての（スコープ上の）メモリ演算に対してアトミック演算の前に移らないようにしてくれる。すべての演算というのは、非アトミック変数までの読み込み・書き込みも含む。</p>
 <div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="n">x</span><span class="p">.</span><span class="n">load</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">memory_order_acquire</span><span class="p">);</span> <span class="c1">// Exclusive accessを得る（acquire)
-</span></code></pre></div>
-<p>があるとしたら、アトミック演算の前にある命令は演算の後ろで実行するように最適化できるけど、その逆はしないようになる。しかし演算によって区分された２つの領域の中での最適化は出来る。</p>
-
+</span></code></pre></div><p>があるとしたら、アトミック演算の前にある命令は演算の後ろで実行するように最適化できるけど、その逆はしないようになる。しかし演算によって区分された２つの領域の中での最適化は出来る。</p>
 <p>またこのメモリモデルは<code>std::memory_order_release</code>と合わせて使える。</p>
-
-<h3 id="std-memory-order-release-63p"><code>std::memory_order_release</code> (63p)<a href="#std-memory-order-release-63p" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
-
+<h3 id="stdmemory_order_release-63p"><code>std::memory_order_release</code> (63p)</h3>
 <p><code>std::memory_order_release</code>はアトミック演算の前についてくるすべての（スコープ上の）メモリ演算に対してアトミック演算の後ろに移らないようにしてくれる。</p>
 <div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="n">x</span><span class="p">.</span><span class="n">store</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">memory_order_release</span><span class="p">);</span> <span class="c1">// Exclusive accessを放出する（release)
-</span></code></pre></div>
-<p>があるとしたら、アトミック演算の後ろにある命令は演算の前で実行するように最適化できるけど、その逆はしないようになる。しかし演算によって区分された２つの領域の中での最適化は出来る。</p>
-
+</span></code></pre></div><p>があるとしたら、アトミック演算の後ろにある命令は演算の前で実行するように最適化できるけど、その逆はしないようになる。しかし演算によって区分された２つの領域の中での最適化は出来る。</p>
 <p>またこのメモリモデルは<code>std::memory_order_acquire</code>と合わせて使える。</p>
-
 <p>この<code>std::memory_order_acquire</code>と<code>std::memory_order_release</code>は共に使うことが多い。例えば、スレッド１と２があったとしてスレッド１は<code>_release</code>でアトミック変数<code>x</code>に書き込み、そして２は逆に<code>_acquire</code>で<code>x</code>を読み込んでいる。こうすることによって<strong>スレッド１の演算の前にあったメモリ書き込みはスレッド２のアトミック演算（読み込み）の後で同期化されて見れるようになる。</strong></p>
-
 <p>もし、スレッド２のアトミック演算の前にスレッド１で一緒に書き込んだ何らかのメモリを読もうとしたら、それは正しい値を指しているかは保証できない。</p>
-
-<h3 id="std-memory-order-acq-rel-68p"><code>std::memory_order_acq_rel</code> (68p)<a href="#std-memory-order-acq-rel-68p" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
-
+<h3 id="stdmemory_order_acq_rel-68p"><code>std::memory_order_acq_rel</code> (68p)</h3>
 <p>双方向バリアで、スレッドが同じアトミック変数を参照している限り、前後区間のスコープ内の書き込み・読み込み演算は自分たちの領域内で最適化されるようになる。</p>
-
-<h3 id="std-memory-order-seq-cst"><code>std::memory_order_seq_cst</code><a href="#std-memory-order-seq-cst" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
-
+<h3 id="stdmemory_order_seq_cst"><code>std::memory_order_seq_cst</code></h3>
 <p>コンパイラによる最適化による演算の順番切り替えを容認しない。一番協力なバリアでながらも性能も落ちる可能性もある。（しかし、落ちない場合もある）アトミック演算でメモリモデルを何も書かなかったら基本的にこれのモデルの準拠して動作するようになる。</p>
-
-<hr />
-
+<hr>
 <p>そもそもメモリバリア自体はプラットフォームによって他のアトミック演算よりコストが高いかもしれない。また、プラットフォームによって上のメモリモデル全てがサポートできるとは断言できない。例えばx86アーキテクチャでは<code>seq_cst</code>が<code>acq_rel</code>と同じ挙動になって、またRead-Modify-Writeも基本的に<code>acq_rel</code>になる。もちろん別のメモリモデルを付与してそれに伴って演算させることも出来るけど、そうしたらプラットフォームによってコストが高くなってしまう恐れもあるそうだ。</p>
-
 <p>＋ちなみんx86では普通の読み込みと書き込みも<code>_acquire</code>か<code>_release</code>に動作している。<code>_relaxed</code>を入れてもどちらかに解釈して演算させているらしい。</p>
-
 <p>また、アトミックを使ってロックを実装する場合には、<code>std::memory_order_acquire</code>と<code>std::memory_order_release</code>が適合だそうだ。</p>
-
-<h2 id="ロックとして活用">ロックとして活用<a href="#ロックとして活用" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
+<h2 id="ロックとして活用">ロックとして活用</h2>
 <div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="n">Lock</span> <span class="n">L</span><span class="p">;</span>
 <span class="n">L</span><span class="p">.</span><span class="n">lock</span><span class="p">();</span>
 <span class="o">++</span><span class="n">x</span><span class="p">;</span>
 <span class="n">L</span><span class="p">.</span><span class="n">unlock</span><span class="p">();</span>
-</code></pre></div>
-<p>を</p>
+</code></pre></div><p>を</p>
 <div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="n">std</span><span class="o">::</span><span class="n">atomic</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">l</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span> <span class="c1">// std::atomic_flagを使うのはどうかな
 </span><span class="c1"></span><span class="k">while</span> <span class="p">(</span><span class="n">l</span><span class="p">.</span><span class="n">exchange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">memory_order_acquire</span><span class="p">));</span> <span class="c1">// 後ろが他のスレッドに見える
 </span><span class="c1"></span><span class="o">++</span><span class="n">x</span><span class="p">;</span>
 <span class="n">l</span><span class="p">.</span><span class="n">store</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">memory_order_release</span><span class="p">);</span> <span class="c1">// 前が他のスレッドに見える。
-</span></code></pre></div>
-<p>で書ける。</p>
-
-<h2 id="atomic-演算にメモリモデルを使った例の解説"><code>atomic</code>演算にメモリモデルを使った例の解説<a href="#atomic-演算にメモリモデルを使った例の解説" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
-
-<h3 id="1">1.<a href="#1" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
+</span></code></pre></div><p>で書ける。</p>
+<h2 id="atomic演算にメモリモデルを使った例の解説"><code>atomic</code>演算にメモリモデルを使った例の解説</h2>
+<h3 id="1">1.</h3>
 <div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="n">std</span><span class="o">::</span><span class="n">atomic</span><span class="o">&lt;</span><span class="n">size_t</span><span class="o">&gt;</span> <span class="n">count</span><span class="p">;</span>
 <span class="n">count</span><span class="p">.</span><span class="n">fetch_add</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">memory_order_relaxed</span><span class="p">);</span>
-</code></pre></div>
-<blockquote>
+</code></pre></div><blockquote>
 <p><code>count</code>は並列に、アトミック演算として１ずつ増加する。ただし、これは何らかのメモリポインターへのインデックスだったり、参照カウントなどに使うことはない。あくまでもカウンターのようなものだけである。</p>
 </blockquote>
-
-<h3 id="2">2.<a href="#2" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
+<h3 id="2">2.</h3>
 <div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="n">std</span><span class="o">::</span><span class="n">atomic</span><span class="o">&lt;</span><span class="n">size_t</span><span class="o">&gt;</span> <span class="n">count</span><span class="p">;</span>
 <span class="n">T</span> <span class="n">data</span><span class="p">[</span><span class="n">N</span><span class="p">];</span>
 
 <span class="n">initialize</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">count</span><span class="p">.</span><span class="n">load</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">memory_order_relaxed</span><span class="p">)]);</span> <span class="c1">// Nobody can see new data yet
 </span><span class="c1"></span><span class="n">count</span><span class="p">.</span><span class="n">fetch_add</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">memory_order_release</span><span class="p">);</span> <span class="c1">// but now they can see it.
-</span></code></pre></div>
-<blockquote>
+</span></code></pre></div><blockquote>
 <p><code>count</code>がメモリのインデックスとして使える。また、演算する前のメモリ演算が他のスレッドにも見える（同期化される）</p>
 </blockquote>
-
-<h1 id="参考">参考<a href="#参考" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h1>
-
+<h1 id="参考">参考</h1>
 <p><a href="https://stackoverflow.com/questions/25199838/understanding-stdatomiccompare-exchange-weak-in-c11">Understanding std::atomic::compare_exchange_weak() in C++11</a></p>
-
-			</div>
-			<hr class="post-end">
-			<footer class="post-info">
-				<p>
-					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-tag meta-icon"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7" y2="7"></line></svg><span class="tag"><a href="https://liliilli.github.io/tags/c&#43;&#43;">C&#43;&#43;</a></span>
-				</p>
-				<p><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>6256 Words</p>
-				<p><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>2020-10-04 11:45 &#43;0900</p>
-			</footer>
-		</article>
-		<div class="post-nav thin">
-			<a class="prev-post" href="https://liliilli.github.io/posts/doxygen_memo/">
-				<span class="post-nav-label">Older&nbsp;<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-right"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg></span><br><span>C&#43;&#43;でのDoxygenの書き方のメモ</span>
-			</a>
-		</div>
-		<div id="comments" class="thin">
 </div>
-	</main>
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://liliilli.github.io/tags/c&#43;&#43;">C&#43;&#43;</a></li>
+    </ul>
+  </footer>
+</article>
+    </main><footer class="footer">
+    <span>&copy; 2020 <a href="https://liliilli.github.io">neuromantic</a></span>
+    <span>&middot;</span>
+    <span>Powered by <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo️️</a>️</span>
+    <span>&middot;</span>
+    <span>Theme️ <a href="https://git.io/hugopapermod" rel="noopener" target="_blank">PaperMod</a></span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top">
+    <button class="top-link" id="top-link" type="button">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6">
+            <path d="M12 6H0l6-6z" /></svg>
+    </button>
+</a>
+<script src="https://liliilli.github.io/assets/js/highlight.min.e7afc2928c0925d65c4732dfebe147014d91299a98e819e4b42f25c4fa68e91c.js" integrity="sha256-56/CkowJJdZcRzLf6&#43;FHAU2RKZqY6BnktC8lxPpo6Rw="></script>
+<script>hljs.initHighlightingOnLoad();</script>
+<script>
+    window.onload = function () {
+        if (localStorage.getItem("menu-scroll-position")) {
+            document.getElementById('menu').scrollLeft = localStorage.getItem("menu-scroll-position");
+        }
+    }
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
 
-	<footer id="site-footer" class="section-inner thin animated fadeIn faster">
-		<p>&copy; 2020 <a href="https://liliilli.github.io">jongmin yun - neu.</a> &#183; <a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC BY-NC 4.0</a></p>
-		<p>
-			Made with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> &#183; Theme <a href="https://github.com/Track3/hermit" target="_blank" rel="noopener">Hermit</a> &#183; <a href="https://liliilli.github.io/posts/index.xml" target="_blank" title="rss"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-rss"><path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1"></circle></svg></a>
-		</p>
-	</footer>
-
-
-
-	<script src="https://liliilli.github.io/js/bundle.min.4a9a0ac3d2217822c7865b4161e6c2a71de1d70492264337755427898dd718f6.js" integrity="sha256-SpoKw9IheCLHhltBYebCpx3h1wSSJkM3dVQniY3XGPY=" crossorigin="anonymous"></script>
-	
-
+            document.querySelector(this.getAttribute("href")).scrollIntoView({
+                behavior: "smooth"
+            });
+        });
+    });
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+    function menu_on_scroll() {
+        localStorage.setItem("menu-scroll-position", document.getElementById('menu').scrollLeft);
+    }
+</script>
 </body>
 
 </html>

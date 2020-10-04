@@ -1,128 +1,98 @@
 <!DOCTYPE html>
-<html lang="en-us">
+<html lang="en">
 
-<head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<meta http-equiv="X-UA-Compatible" content="ie=edge">
-	<meta name="theme-color" content="#494f5c">
-	<meta name="msapplication-TileColor" content="#494f5c">
-<meta itemprop="name" content="C&#43;&#43;でのDoxygenの書き方のメモ">
-<meta itemprop="description" content="以前にもコードの説明を書く時にDoxygenみたいな構文で書いてきたんですが、本格的にAPIのマニュアルを成立しようとしたらどう書けばいいか">
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
+<title>C&#43;&#43;でのDoxygenの書き方のメモ - neuromantic</title>
 
-<meta itemprop="datePublished" content="2020-09-05T16:21:55&#43;09:00" />
-<meta itemprop="dateModified" content="2020-09-15T00:23:05&#43;09:00" />
-<meta itemprop="wordCount" content="2748">
+<meta name="description" content="以前にもコードの説明を書く時にDoxygenみたいな構文で書いてきたんですが、本格的にAPIのマニュアルを成立しようとしたらどう書けばいいか">
+<meta name="keywords" content= />
+<meta name="author" content="Jongmin Yun, Neu.">
+<link rel="canonical" href="https://liliilli.github.io/posts/doxygen_memo/" />
+<link href="https://liliilli.github.io/assets/css/stylesheet.min.a3b13905fd4b98ea165a18374ae5215d9de97a04f187f789736c56858296ba12.css" integrity="sha256-o7E5Bf1LmOoWWhg3SuUhXZ3pegTxh/eJc2xWhYKWuhI=" rel="preload stylesheet"
+    as="style">
+<link rel="apple-touch-icon" href="https://liliilli.github.io/apple-touch-icon.png">
+<link rel="icon" href="https://liliilli.github.io/favicon.ico">
+<meta name="generator" content="Hugo 0.75.1" />
 
-
-
-<meta itemprop="keywords" content="doxygen," />
-<meta property="og:title" content="C&#43;&#43;でのDoxygenの書き方のメモ" />
-<meta property="og:description" content="以前にもコードの説明を書く時にDoxygenみたいな構文で書いてきたんですが、本格的にAPIのマニュアルを成立しようとしたらどう書けばいいか" />
-<meta property="og:type" content="article" />
-<meta property="og:url" content="https://liliilli.github.io/posts/doxygen_memo/" />
-<meta property="article:published_time" content="2020-09-05T16:21:55+09:00" />
-<meta property="article:modified_time" content="2020-09-15T00:23:05+09:00" />
-<meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="C&#43;&#43;でのDoxygenの書き方のメモ"/>
-<meta name="twitter:description" content="以前にもコードの説明を書く時にDoxygenみたいな構文で書いてきたんですが、本格的にAPIのマニュアルを成立しようとしたらどう書けばいいか"/>
-
-	<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-	<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-	<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-	<link rel="manifest" href="/site.webmanifest">
-	<link rel="mask-icon" href="/safari-pinned-tab.svg" color="">
-	<link rel="shortcut icon" href="/favicon.ico">
-
-	<title>C&#43;&#43;でのDoxygenの書き方のメモ</title>
-	<link rel="stylesheet" href="https://liliilli.github.io/css/style.min.eac77496566fd7d5768fd650ddb0b2b181ca6a2d7c5fdd6fe6b8ba4bf47e566f.css" integrity="sha256-6sd0llZv19V2j9ZQ3bCysYHKai18X91v5ri6S/R+Vm8=" crossorigin="anonymous">
-	
 </head>
 
-<body id="page">
-	
-	<header id="site-header" class="animated slideInUp">
-		<div class="hdr-wrapper section-inner">
-			<div class="hdr-left">
-				<div class="site-branding">
-					<a href="https://liliilli.github.io">neuromantic</a>
-				</div>
-				<nav class="site-nav hide-in-mobile">
-					
-				<a href="https://liliilli.github.io/posts/">Posts</a>
-				<a href="https://liliilli.github.io/about-hugo/">About</a>
+<body class="single" id="top">
+<header class="header">
+    <nav class="nav">
+        <p class="logo"><a href="https://liliilli.github.io">neuromantic</a></p>
+        <ul class="menu" id="menu" onscroll="menu_on_scroll()">
+            <li>
+                <a href="https://liliilli.github.io/archives/">
+                    <span>
+                        Archives
+                    </span>
+                </a>
+            </li>
+            <li>
+                <a href="https://liliilli.github.io/tags/">
+                    <span>
+                        Tags
+                    </span>
+                </a>
+            </li>
+            <li>
+                <a href="https://liliilli.github.io/series/">
+                    <span>
+                        Series
+                    </span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+    <main class="main">
 
-				</nav>
-			</div>
-			<div class="hdr-right hdr-icons">
-				<span class="hdr-social hide-in-mobile"><a href="https://twitter.com/NeuliliilliD" target="_blank" rel="noopener me" title="Twitter"><svg xmlns="http://www.w3.org/2000/svg" class="feather" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg></a><a href="https://github.com/liliilli" target="_blank" rel="noopener me" title="Github"><svg xmlns="http://www.w3.org/2000/svg" class="feather" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg></a></span><button id="menu-btn" class="hdr-btn" title="Menu"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-menu"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg></button>
-			</div>
-		</div>
-	</header>
-	<div id="mobile-menu" class="animated fast">
-		<ul>
-			<li><a href="https://liliilli.github.io/posts/">Posts</a></li>
-			<li><a href="https://liliilli.github.io/about-hugo/">About</a></li>
-		</ul>
-	</div>
-
-
-
-
-	<main class="site-main section-inner animated fadeIn faster">
-		<article class="thin">
-			<header class="post-header">
-				<div class="post-meta"><span>Sep 5, 2020</span></div>
-				<h1>C&#43;&#43;でのDoxygenの書き方のメモ</h1>
-			</header>
-			<div class="content">
-				
-
-<p>以前にもコードの説明を書く時にDoxygenみたいな構文で書いてきたんですが、本格的にAPIのマニュアルを成立しようとしたらどう書けばいいかが迷ったので、ここでもう一度公式文書を読みながら自分的にメモを書かせてもらいたいと思います。</p>
-
-<h1 id="documenting-the-code">Documenting the code<a href="#documenting-the-code" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h1>
-
+<article class="post-single">
+  <header class="post-header">
+    <h1 class="post-title">
+      C&#43;&#43;でのDoxygenの書き方のメモ
+    </h1>
+    <div class="post-meta">
+      <time>September 5, 2020</time>&nbsp;·&nbsp;Jongmin Yun, Neu.
+    </div>
+  </header>
+  <div class="post-content"><p>以前にもコードの説明を書く時にDoxygenみたいな構文で書いてきたんですが、本格的にAPIのマニュアルを成立しようとしたらどう書けばいいかが迷ったので、ここでもう一度公式文書を読みながら自分的にメモを書かせてもらいたいと思います。</p>
+<h1 id="documenting-the-code">Documenting the code</h1>
 <blockquote>
 <p><a href="https://www.doxygen.nl/manual/docblocks.html">https://www.doxygen.nl/manual/docblocks.html</a></p>
 </blockquote>
-
-<h2 id="special-comment-blocks">Special comment blocks<a href="#special-comment-blocks" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
+<h2 id="special-comment-blocks">Special comment blocks</h2>
 <div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="c1">/// 
 </span><span class="c1">/// ... text ...
 </span><span class="c1">///
-</span></code></pre></div>
-<p>で書くのが経験上VS2019～でコメント作成しやすいし、Intellisenseでもちゃんと把握してTipとして見せるようだ。</p>
-
+</span></code></pre></div><p>で書くのが経験上VS2019～でコメント作成しやすいし、Intellisenseでもちゃんと把握してTipとして見せるようだ。</p>
 <p>上の形式以外にもDoxygenで検知してくれるコメントの形式は色々とあるみたいだが、一つのプロジェクトの中ではちゃんと形式を決めて使いましょうっていうこと。</p>
-
-<h2 id="brief-を書く為には"><code>\brief</code>を書く為には？<a href="#brief-を書く為には" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
-
+<h2 id="briefを書く為には"><code>\brief</code>を書く為には？</h2>
 <ol>
-<li><p><code>\brief</code>（または<code>@brief</code>）でヘッダーを明示的に書く方法。</p>
+<li>
+<p><code>\brief</code>（または<code>@brief</code>）でヘッダーを明示的に書く方法。</p>
 <div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="c1">///
 </span><span class="c1">/// @brief Brief description
 </span><span class="c1">///     Breif description continued.
 </span><span class="c1">///
 </span><span class="c1">/// Detailed description starts here.
-</span></code></pre></div>
-<p><code>\brief</code>ヘッダーは簡単な説明を書く時に使うべき。もっと詳しい説明は一行開けてから書けばいいらしい。（これ知らなかった）</p></li>
-
-<li><p><code>JAVADOC_AUTOBRIEF</code>を有効化すれば、１のような方法でなくてもBriefが書けるらしい。ただ明示的ではないため、個人的にはちょっと好きじゃないかも。</p></li>
+</span></code></pre></div><p><code>\brief</code>ヘッダーは簡単な説明を書く時に使うべき。もっと詳しい説明は一行開けてから書けばいいらしい。（これ知らなかった）</p>
+</li>
+<li>
+<p><code>JAVADOC_AUTOBRIEF</code>を有効化すれば、１のような方法でなくてもBriefが書けるらしい。ただ明示的ではないため、個人的にはちょっと好きじゃないかも。</p>
+</li>
 </ol>
-
-<h2 id="メンバ変数の後に説明を付けたい場合">メンバ変数の後に説明を付けたい場合<a href="#メンバ変数の後に説明を付けたい場合" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
+<h2 id="メンバ変数の後に説明を付けたい場合">メンバ変数の後に説明を付けたい場合</h2>
 <div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="kt">int</span> <span class="n">var</span><span class="p">;</span> <span class="c1">///&lt; Brief description after the member.
 </span><span class="c1"></span>         <span class="c1">//!&lt; Or Details description after the member as comments are continued.
-</span></code></pre></div>
-<p>通常コメントをつけるのと同じだが、Prefixの最後に<code>&lt;</code>をつけることでDoxygenの文書化をすることができるそうだ。</p>
-
+</span></code></pre></div><p>通常コメントをつけるのと同じだが、Prefixの最後に<code>&lt;</code>をつけることでDoxygenの文書化をすることができるそうだ。</p>
 <p>また、関数の引数の中でも<code>/**&lt; ... */</code>のような構造でDoxygenに検知させることもできる。個人的には見た目が余計に複雑になるからあんまり使いたくはないが…</p>
 <div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="kt">void</span> <span class="nf">foo</span><span class="p">(</span><span class="kt">int</span> <span class="n">v</span> <span class="cm">/**&lt; [in] docs for input parameter v. */</span><span class="p">);</span>
-</code></pre></div>
-<p>注意点としては、こういった文書化はメンバ変数とパラメータにしかできないことだ。クラスとか列挙型などには普通のブロックコメントで文書化をするしかないらしい。そしてヘッダーコマンド（<code>\brief</code>や<code>\class</code>のような）も使えない。</p>
-
-<h2 id="例-1">例 1<a href="#例-1" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
+</code></pre></div><p>注意点としては、こういった文書化はメンバ変数とパラメータにしかできないことだ。クラスとか列挙型などには普通のブロックコメントで文書化をするしかないらしい。そしてヘッダーコマンド（<code>\brief</code>や<code>\class</code>のような）も使えない。</p>
+<h2 id="例-1">例 1</h2>
 <div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="c1">/// A Test class
 </span><span class="c1"></span><span class="k">class</span> <span class="nc">Afterdoc_Test</span>
 <span class="p">{</span>
@@ -139,27 +109,20 @@
 <span class="k">protected</span><span class="o">:</span>
     <span class="kt">int</span> <span class="n">value</span><span class="p">;</span> <span class="c1">///&lt; An integer value.
 </span><span class="c1"></span><span class="p">}</span>
-</code></pre></div>
-<h2 id="例-2-doxygenマニュアルのexamples">例 2 (doxygenマニュアルのExamples)<a href="#例-2-doxygenマニュアルのexamples" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
-
+</code></pre></div><h2 id="例-2-doxygenマニュアルのexamples">例 2 (doxygenマニュアルのExamples)</h2>
 <ul>
 <li><code>\brief</code>で生成される簡単な説明文はDoxygen生成設定ファイルの<code>BRIEF_MEMBER_DESC</code>をNOにすることで隠せるそうだ。</li>
 <li>基本<code>\brief</code>で生成される説明はディテールな説明文項目でも繰り返して出てくる。ディテールで<code>\brief</code>説明文を消すためにはやっぱり設定ファイルで<code>REPEAT_BRIEF</code>をNOにすればなくなるらしい。</li>
 <li>Qtスタイル（基本？）では説明を書かなくても良いらしい。</li>
 </ul>
-
-<h2 id="他のとこでコメント文書を作成する為には">他のとこでコメント文書を作成する為には<a href="#他のとこでコメント文書を作成する為には" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
-
+<h2 id="他のとこでコメント文書を作成する為には">他のとこでコメント文書を作成する為には</h2>
 <p>普通はクラスの前、列挙型の前、それともメンバ変数の後に<code>&lt;</code>をつけてコメントを書いてDoxygenがそれを生成させるのが一般的だ。しかしやむをえず他のとこで文書化したい要素を書かなければならない場合には、<strong>Structural Command</strong>を最初に使ってどの要素を文書化したいかを指定しなければならない。</p>
-
-<p>*Structural Command*は最初に<code>\</code>か<code>@</code>をつける。</p>
+<p><em>Structural Command</em>は最初に<code>\</code>か<code>@</code>をつける。</p>
 <div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="c1">/// @class Test
 </span><span class="c1">/// @brief A test class.
 </span><span class="c1">///
 </span><span class="c1">/// A more detailed class description.
-</span></code></pre></div>
-<p>*Structural Command*の種類は以下のリストで見れる。</p>
-
+</span></code></pre></div><p><em>Structural Command</em>の種類は以下のリストで見れる。</p>
 <table>
 <thead>
 <tr>
@@ -167,82 +130,63 @@
 <th>説明</th>
 </tr>
 </thead>
-
 <tbody>
 <tr>
 <td>class</td>
 <td>クラス</td>
 </tr>
-
 <tr>
 <td>struct</td>
 <td>Cスタイルの構造体</td>
 </tr>
-
 <tr>
 <td>union</td>
 <td>共用体</td>
 </tr>
-
 <tr>
 <td>enum</td>
 <td>列挙型</td>
 </tr>
-
 <tr>
 <td>fn</td>
 <td>関数</td>
 </tr>
-
 <tr>
 <td>var</td>
 <td>変数、<code>typedef</code>、または列挙型の値</td>
 </tr>
-
 <tr>
 <td>def</td>
 <td>前処理機の<code>#define</code></td>
 </tr>
-
 <tr>
 <td>file</td>
 <td>ファイル</td>
 </tr>
-
 <tr>
 <td>namespace</td>
 <td>ネームスペース</td>
 </tr>
 </tbody>
 </table>
-
 <p>他に<code>@package</code>または<code>@interface</code>などがあるが、C++だけ適用できる要素だけ触れていくのでメモしない。</p>
-
-<p>注意点としては、<strong>C++</strong>でクラスのメンバ変数を文書化したければ、ネームスペースから初めてクラスまで文書化されなければならないらしい。また、Cスタイルの関数などを文書化したければ、C関数の宣言が入っているファイルもDoxygenスタイルでコメントを書かなければならないそうだ。</p>
-
+<p>注意点としては、**C++**でクラスのメンバ変数を文書化したければ、ネームスペースから初めてクラスまで文書化されなければならないらしい。また、Cスタイルの関数などを文書化したければ、C関数の宣言が入っているファイルもDoxygenスタイルでコメントを書かなければならないそうだ。</p>
 <p>ファイルさえもコメントしなければならないのが一気に面倒くさくてちょっとアレだが、公式マニュアルでは普通に</p>
 <div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="c1">/// @file file_name.h
-</span></code></pre></div>
-<p>でもファイルの文書が定義されてキャッチできるようになっているので、ぜひ書いてほしいと書いてある…</p>
-
-<h1 id="markdown-support">Markdown Support<a href="#markdown-support" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h1>
-
+</span></code></pre></div><p>でもファイルの文書が定義されてキャッチできるようになっているので、ぜひ書いてほしいと書いてある…</p>
+<h1 id="markdown-support">Markdown Support</h1>
 <blockquote>
 <p><a href="https://www.doxygen.nl/manual/markdown.html">https://www.doxygen.nl/manual/markdown.html</a></p>
 </blockquote>
-
 <p>Doxygenは標準Markdownと独自仕様のMarkdownをサポートする。既存のMarkdownと共通している部分もあるが、共通してない、注意すべきの要素のついてメモを取りたい。</p>
-
-<h2 id="code-blocks">Code Blocks<a href="#code-blocks" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
+<h2 id="code-blocks">Code Blocks</h2>
 <div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="c1">/// This a normal paragraph
 </span><span class="c1">///
 </span><span class="c1">///     // THIS IS CODE BLOCK
 </span><span class="c1">///     int main() { return 0; }
 </span><span class="c1">///
 </span><span class="c1">/// Continue with a normal paragraph again.
-</span></code></pre></div>
-<p>コードブロックを生成するにはスペースを４つ開くことでコードブロックが生成できる。コードブロックが生成される時に余白は自動削除される。</p>
-
+</span></code></pre></div><p>コードブロックを生成するにはスペースを４つ開くことでコードブロックが生成できる。コードブロックが生成される時に余白は自動削除される。</p>
 <p>リストを使う時にはリストの項目から更に４文字空白を開けることがコードブロックができる。</p>
 <div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="c1">/// 1.  Item
 </span><span class="c1">///     
@@ -252,52 +196,42 @@
 </span><span class="c1">///     More text for item2.
 </span><span class="c1">///     
 </span><span class="c1">///         Code block for item2.
-</span></code></pre></div>
-<h2 id="強調構文">強調構文<a href="#強調構文" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
+</span></code></pre></div><h2 id="強調構文">強調構文</h2>
 <div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="c1">/// *single asterisks*
 </span><span class="c1">/// _single underscores_
 </span><span class="c1">/// **double asterisks**
 </span><span class="c1">/// __double_asterisks__
 </span><span class="c1">/// ~~double~_tilde~~
-</span></code></pre></div>
-<p>標準Markdownとは違って、途中で<code>_</code>（アンダーバー）があっても強調構文が終わらない仕様になっている。ただし、強調構文が成立するには必ず構文の左右に空白が来なければならない。</p>
-
-<h2 id="を使ったcode-blocks"><code>~~~</code>を使ったCode Blocks<a href="#を使ったcode-blocks" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
+</span></code></pre></div><p>標準Markdownとは違って、途中で<code>_</code>（アンダーバー）があっても強調構文が終わらない仕様になっている。ただし、強調構文が成立するには必ず構文の左右に空白が来なければならない。</p>
+<h2 id="を使ったcode-blocks"><code>~~~</code>を使ったCode Blocks</h2>
 <div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="c1">/// This a normal paragraph.
 </span><span class="c1">///
 </span><span class="c1">/// ~~~{.cpp}
 </span><span class="c1">/// // THIS IS ALSO CODE BLOCK.
 </span><span class="c1">/// int main() { return 0; }
 </span><span class="c1">/// ~~~
-</span></code></pre></div>
-<p>普通の段落から一行開けて<code>~~~</code>を使うことでコードブロックを生成することができる。上の既存の方式ではすべてのコードに４つ以上のスペースを入れなければならなかったが、これを使うことでもっと便利にコードが作成できる。</p>
-
-<h1 id="その他">その他<a href="#その他" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h1>
-
-<h2 id="doxygenが一部コードを分析しないようにしたい">doxygenが一部コードを分析しないようにしたい<a href="#doxygenが一部コードを分析しないようにしたい" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
-
+</span></code></pre></div><p>普通の段落から一行開けて<code>~~~</code>を使うことでコードブロックを生成することができる。上の既存の方式ではすべてのコードに４つ以上のスペースを入れなければならなかったが、これを使うことでもっと便利にコードが作成できる。</p>
+<h1 id="その他">その他</h1>
+<h2 id="doxygenが一部コードを分析しないようにしたい">doxygenが一部コードを分析しないようにしたい</h2>
 <blockquote>
 <p><a href="https://www.star.bnl.gov/public/comp/sofi/doxygen/faq.html">https://www.star.bnl.gov/public/comp/sofi/doxygen/faq.html</a></p>
 </blockquote>
-
 <p>doxygenはコード分析で文書化作業を行う前に、C/C++コンパイラみたいに前処理を行うことが出来る。設定ファイルの<code>ENABLE_PREPROCESSING</code>と<code>PREDEFINED</code>タグがあって、<code>ENABLE_PREPROCESSING</code>をONにした状態で<code>PREDEFINED</code>にdoxygenが起動する時定義されるマクロを指定してコードの中で分岐を作ることが出来る。</p>
-
 <p>これらを使って、マクロを指定し、前処理機の分岐（<code>#ifndef</code>）でマクロが定義されていなかったかを確認してdoxygenが動いてる途中では分岐で囲んだ一部のコードを分析しないようにすることが出来る。</p>
-<div class="highlight"><pre class="chroma"><code class="language-doxyfile" data-lang="doxyfile">// in Doxyfile
+<pre><code class="language-doxyfile" data-lang="doxyfile">// in Doxyfile
 ENABLE_PREPROCESSING   = YES
-PREDEFINED             = DY_DOXYGEN_SHOULD_SKIP_THIS</code></pre></div><div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="cp">#ifndef DY_DOXYGEN_SHOULD_SKIP_THIS
+PREDEFINED             = DY_DOXYGEN_SHOULD_SKIP_THIS
+</code></pre><div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="cp">#ifndef DY_DOXYGEN_SHOULD_SKIP_THIS
 </span><span class="cp"></span><span class="c1">// doxygenが起動したらこの中にあるコードは分析しない。しかし通常のコンパイラではビルドされる。
 </span><span class="c1"></span><span class="cp">#endif </span><span class="c1">// ^!defined(DY_DOXYGEN_SHOULD_SKIP_THIS)
-</span></code></pre></div>
-<h2 id="マクロの説明で-documentation-for-unknown-define-found-という警告が出る">マクロの説明で<code>documentation for unknown define ## found</code>という警告が出る。<a href="#マクロの説明で-documentation-for-unknown-define-found-という警告が出る" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
-
+</span></code></pre></div><h2 id="マクロの説明でdocumentation-for-unknown-define--foundという警告が出る">マクロの説明で<code>documentation for unknown define ## found</code>という警告が出る。</h2>
 <blockquote>
 <p><a href="https://stackoverflow.com/questions/16243849/doxygen-documenting-commented-define">https://stackoverflow.com/questions/16243849/doxygen-documenting-commented-define</a></p>
 </blockquote>
-
 <p>これも前処理機のマクロを使って、doxygenで処理をしている途中だけマクロを明示的に指定することでエラー（または警告）がなくなる。</p>
-<div class="highlight"><pre class="chroma"><code class="language-doxyfile" data-lang="doxyfile">// in Doxyfile
-PREDEFINED += DY_DOXYGEN_FOR_DOXYGEN</code></pre></div><div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="cp">#if defined(DY_DOXYGEN_FOR_DOXYGEN) </span><span class="c1">// for avoiding doxygen generation error.
+<pre><code class="language-doxyfile" data-lang="doxyfile">// in Doxyfile
+PREDEFINED += DY_DOXYGEN_FOR_DOXYGEN
+</code></pre><div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="cp">#if defined(DY_DOXYGEN_FOR_DOXYGEN) </span><span class="c1">// for avoiding doxygen generation error.
 </span><span class="c1"></span>    <span class="cp">#define DY_ENABLE_ENUM_BITMASK_OP
 </span><span class="cp">#endif </span><span class="c1">// ^ defined(DY_DOXYGEN_FOR_DOXYGEN) 
 </span><span class="c1"></span>
@@ -309,49 +243,62 @@ PREDEFINED += DY_DOXYGEN_FOR_DOXYGEN</code></pre></div><div class="highlight"><p
 </span><span class="cp">    {                                                                                                                  \
 </span><span class="cp">        static constexpr bool sk_is_enabled = true;                                                                    \
 </span><span class="cp">    };\
-</span></code></pre></div>
-<h2 id="ディレクトリまたはファイルを検索しなくしてほしい">ディレクトリまたはファイルを検索しなくしてほしい<a href="#ディレクトリまたはファイルを検索しなくしてほしい" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
-
+</span></code></pre></div><h2 id="ディレクトリまたはファイルを検索しなくしてほしい">ディレクトリまたはファイルを検索しなくしてほしい</h2>
 <blockquote>
 <p><a href="https://stackoverflow.com/questions/5507055/excluding-directories-for-doxygen">https://stackoverflow.com/questions/5507055/excluding-directories-for-doxygen</a></p>
 </blockquote>
-
 <p>doxygenの設定ファイルで<code>EXCLUDE</code>というタグがあり、普通ならばそこに</p>
-
-			</div>
-			<hr class="post-end">
-			<footer class="post-info">
-				<p>
-					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-tag meta-icon"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7" y2="7"></line></svg><span class="tag"><a href="https://liliilli.github.io/tags/doxygen">doxygen</a></span>
-				</p>
-				<p><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>2748 Words</p>
-				<p><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>2020-09-05 16:21 &#43;0900</p>
-			</footer>
-		</article>
-		<div class="post-nav thin">
-			<a class="next-post" href="https://liliilli.github.io/posts/cppcon2017_atomics_memo/">
-				<span class="post-nav-label"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-left"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>&nbsp;Newer</span><br><span>CppCon2017 C&#43;&#43; atomics, from basic to advancedのメモ</span>
-			</a>
-			<a class="prev-post" href="https://liliilli.github.io/posts/donclugston_delegate/">
-				<span class="post-nav-label">Older&nbsp;<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-right"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg></span><br><span>C&#43;&#43;で実装するDelegateコードの分析（Don Clugston）</span>
-			</a>
-		</div>
-		<div id="comments" class="thin">
 </div>
-	</main>
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://liliilli.github.io/tags/doxygen">doxygen</a></li>
+    </ul>
+  </footer>
+</article>
+    </main><footer class="footer">
+    <span>&copy; 2020 <a href="https://liliilli.github.io">neuromantic</a></span>
+    <span>&middot;</span>
+    <span>Powered by <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo️️</a>️</span>
+    <span>&middot;</span>
+    <span>Theme️ <a href="https://git.io/hugopapermod" rel="noopener" target="_blank">PaperMod</a></span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top">
+    <button class="top-link" id="top-link" type="button">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6">
+            <path d="M12 6H0l6-6z" /></svg>
+    </button>
+</a>
+<script src="https://liliilli.github.io/assets/js/highlight.min.e7afc2928c0925d65c4732dfebe147014d91299a98e819e4b42f25c4fa68e91c.js" integrity="sha256-56/CkowJJdZcRzLf6&#43;FHAU2RKZqY6BnktC8lxPpo6Rw="></script>
+<script>hljs.initHighlightingOnLoad();</script>
+<script>
+    window.onload = function () {
+        if (localStorage.getItem("menu-scroll-position")) {
+            document.getElementById('menu').scrollLeft = localStorage.getItem("menu-scroll-position");
+        }
+    }
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
 
-	<footer id="site-footer" class="section-inner thin animated fadeIn faster">
-		<p>&copy; 2020 <a href="https://liliilli.github.io">jongmin yun - neu.</a> &#183; <a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC BY-NC 4.0</a></p>
-		<p>
-			Made with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> &#183; Theme <a href="https://github.com/Track3/hermit" target="_blank" rel="noopener">Hermit</a> &#183; <a href="https://liliilli.github.io/posts/index.xml" target="_blank" title="rss"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-rss"><path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1"></circle></svg></a>
-		</p>
-	</footer>
-
-
-
-	<script src="https://liliilli.github.io/js/bundle.min.4a9a0ac3d2217822c7865b4161e6c2a71de1d70492264337755427898dd718f6.js" integrity="sha256-SpoKw9IheCLHhltBYebCpx3h1wSSJkM3dVQniY3XGPY=" crossorigin="anonymous"></script>
-	
-
+            document.querySelector(this.getAttribute("href")).scrollIntoView({
+                behavior: "smooth"
+            });
+        });
+    });
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+    function menu_on_scroll() {
+        localStorage.setItem("menu-scroll-position", document.getElementById('menu').scrollLeft);
+    }
+</script>
 </body>
 
 </html>

@@ -1,92 +1,68 @@
 <!DOCTYPE html>
-<html lang="en-us">
+<html lang="en">
 
-<head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<meta http-equiv="X-UA-Compatible" content="ie=edge">
-	<meta name="theme-color" content="#494f5c">
-	<meta name="msapplication-TileColor" content="#494f5c">
-<meta itemprop="name" content="Rust＋Winapiで窓を生成してみた">
-<meta itemprop="description" content="暇つぶしでRustとwinapi crateを使って、窓を生成してイベントメッセージを処理するルーチンを作ってみました。実はdinput8とx">
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
+<title>Rust＋Winapiで窓を生成してみた - neuromantic</title>
 
-<meta itemprop="datePublished" content="2020-08-13T10:04:36&#43;09:00" />
-<meta itemprop="dateModified" content="2020-08-13T17:18:39&#43;09:00" />
-<meta itemprop="wordCount" content="4290">
+<meta name="description" content="暇つぶしでRustとwinapi crateを使って、窓を生成してイベントメッセージを処理するルーチンを作ってみました。実はdinput8とx">
+<meta name="keywords" content= />
+<meta name="author" content="Jongmin Yun, Neu.">
+<link rel="canonical" href="https://liliilli.github.io/posts/rust_winapi_memo/" />
+<link href="https://liliilli.github.io/assets/css/stylesheet.min.a3b13905fd4b98ea165a18374ae5215d9de97a04f187f789736c56858296ba12.css" integrity="sha256-o7E5Bf1LmOoWWhg3SuUhXZ3pegTxh/eJc2xWhYKWuhI=" rel="preload stylesheet"
+    as="style">
+<link rel="apple-touch-icon" href="https://liliilli.github.io/apple-touch-icon.png">
+<link rel="icon" href="https://liliilli.github.io/favicon.ico">
+<meta name="generator" content="Hugo 0.75.1" />
 
-
-
-<meta itemprop="keywords" content="Rust, Winapi," />
-<meta property="og:title" content="Rust＋Winapiで窓を生成してみた" />
-<meta property="og:description" content="暇つぶしでRustとwinapi crateを使って、窓を生成してイベントメッセージを処理するルーチンを作ってみました。実はdinput8とx" />
-<meta property="og:type" content="article" />
-<meta property="og:url" content="https://liliilli.github.io/posts/rust_winapi_memo/" />
-<meta property="article:published_time" content="2020-08-13T10:04:36+09:00" />
-<meta property="article:modified_time" content="2020-08-13T17:18:39+09:00" />
-<meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="Rust＋Winapiで窓を生成してみた"/>
-<meta name="twitter:description" content="暇つぶしでRustとwinapi crateを使って、窓を生成してイベントメッセージを処理するルーチンを作ってみました。実はdinput8とx"/>
-
-	<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-	<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-	<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-	<link rel="manifest" href="/site.webmanifest">
-	<link rel="mask-icon" href="/safari-pinned-tab.svg" color="">
-	<link rel="shortcut icon" href="/favicon.ico">
-
-	<title>Rust＋Winapiで窓を生成してみた</title>
-	<link rel="stylesheet" href="https://liliilli.github.io/css/style.min.eac77496566fd7d5768fd650ddb0b2b181ca6a2d7c5fdd6fe6b8ba4bf47e566f.css" integrity="sha256-6sd0llZv19V2j9ZQ3bCysYHKai18X91v5ri6S/R+Vm8=" crossorigin="anonymous">
-	
 </head>
 
-<body id="page">
-	
-	<header id="site-header" class="animated slideInUp">
-		<div class="hdr-wrapper section-inner">
-			<div class="hdr-left">
-				<div class="site-branding">
-					<a href="https://liliilli.github.io">neuromantic</a>
-				</div>
-				<nav class="site-nav hide-in-mobile">
-					
-				<a href="https://liliilli.github.io/posts/">Posts</a>
-				<a href="https://liliilli.github.io/about-hugo/">About</a>
+<body class="single" id="top">
+<header class="header">
+    <nav class="nav">
+        <p class="logo"><a href="https://liliilli.github.io">neuromantic</a></p>
+        <ul class="menu" id="menu" onscroll="menu_on_scroll()">
+            <li>
+                <a href="https://liliilli.github.io/archives/">
+                    <span>
+                        Archives
+                    </span>
+                </a>
+            </li>
+            <li>
+                <a href="https://liliilli.github.io/tags/">
+                    <span>
+                        Tags
+                    </span>
+                </a>
+            </li>
+            <li>
+                <a href="https://liliilli.github.io/series/">
+                    <span>
+                        Series
+                    </span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+    <main class="main">
 
-				</nav>
-			</div>
-			<div class="hdr-right hdr-icons">
-				<span class="hdr-social hide-in-mobile"><a href="https://twitter.com/NeuliliilliD" target="_blank" rel="noopener me" title="Twitter"><svg xmlns="http://www.w3.org/2000/svg" class="feather" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg></a><a href="https://github.com/liliilli" target="_blank" rel="noopener me" title="Github"><svg xmlns="http://www.w3.org/2000/svg" class="feather" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg></a></span><button id="menu-btn" class="hdr-btn" title="Menu"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-menu"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg></button>
-			</div>
-		</div>
-	</header>
-	<div id="mobile-menu" class="animated fast">
-		<ul>
-			<li><a href="https://liliilli.github.io/posts/">Posts</a></li>
-			<li><a href="https://liliilli.github.io/about-hugo/">About</a></li>
-		</ul>
-	</div>
-
-
-
-
-	<main class="site-main section-inner animated fadeIn faster">
-		<article class="thin">
-			<header class="post-header">
-				<div class="post-meta"><span>Aug 13, 2020</span></div>
-				<h1>Rust＋Winapiで窓を生成してみた</h1>
-			</header>
-			<div class="content">
-				
-
-<p><img src="/image/2008/rust_memo_execute.jpg" alt="Rust execution" /></p>
-
+<article class="post-single">
+  <header class="post-header">
+    <h1 class="post-title">
+      Rust＋Winapiで窓を生成してみた
+    </h1>
+    <div class="post-meta">
+      <time>August 13, 2020</time>&nbsp;·&nbsp;Jongmin Yun, Neu.
+    </div>
+  </header>
+  <div class="post-content"><p><img src="/image/2008/rust_memo_execute.jpg" alt="Rust execution"></p>
 <p>暇つぶしでRustとwinapi crateを使って、窓を生成してイベントメッセージを処理するルーチンを作ってみました。実は<code>dinput8</code>と<code>xinput</code>まで実装したかったのですが、ここで使ってるcrateのwinapiではまだ実装されていないみたいで（<code>dinput8</code>自体も結構古くて実装も難しいと思いますが）適当なところで辞めました。</p>
-
 <p>上の画像は窓を作って、メッセージを処理して<code>println!()</code>で情報を出力するのをスクショしたものです。</p>
-
-<h1 id="環境">環境<a href="#環境" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h1>
-
+<h1 id="環境">環境</h1>
 <ul>
 <li>Clion 2020.2</li>
 <li>cargo 1.42.0 (86334295e 2020-01-31)</li>
@@ -96,42 +72,33 @@
 <li>CMake 3.17.3 (Clion Bundled)</li>
 <li>LLDB 9.0 (Clion Bundled)</li>
 </ul>
-
 <p>ビルド環境はClionでVisual Studio 2019＋amd64でやっております。MinGWでもwinapi crateは一旦ビルド出来ますが、特定関数を使おうとするとEntry pointが探せないというエラーと一緒に起動が出来ないようになってしまいます。</p>
-
 <p>また使っているcrateは以下のリストとなります。</p>
-
 <ul>
 <li>widestring 0.4.2</li>
+<li>winapi</li>
+</ul>
+<pre><code class="language-cargo" data-lang="cargo">[dependencies]
+widestring = &quot;0.4.2&quot;
 
-<li><p>winapi</p>
-<div class="highlight"><pre class="chroma"><code class="language-cargo" data-lang="cargo">[dependencies]
-widestring = &#34;0.4.2&#34;
-
-[target.&#39;cfg(windows)&#39;.dependencies.winapi]
-version = &#34;0.3.9&#34;
+[target.'cfg(windows)'.dependencies.winapi]
+version = &quot;0.3.9&quot;
 features = [
-&#34;basetsd&#34;, &#34;commctrl&#34;, &#34;dbt&#34;, &#34;mmsystem&#34;,
-&#34;winuser&#34;, &#34;winbase&#34;, &#34;winnls&#34;, &#34;winnt&#34;, &#34;dinput&#34;,
-&#34;shellapi&#34;, &#34;errhandlingapi&#34;, &#34;profileapi&#34;, &#34;timeapi&#34;,
-&#34;hidclass&#34;, &#34;minwindef&#34;, &#34;windef&#34;, &#34;ntdef&#34;, &#34;windowsx&#34; ]
+    &quot;basetsd&quot;, &quot;commctrl&quot;, &quot;dbt&quot;, &quot;mmsystem&quot;,
+    &quot;winuser&quot;, &quot;winbase&quot;, &quot;winnls&quot;, &quot;winnt&quot;, &quot;dinput&quot;,
+    &quot;shellapi&quot;, &quot;errhandlingapi&quot;, &quot;profileapi&quot;, &quot;timeapi&quot;,
+    &quot;hidclass&quot;, &quot;minwindef&quot;, &quot;windef&quot;, &quot;ntdef&quot;, &quot;windowsx&quot; ]
 
 [profile.dev]
 opt-level = 0
 overflow-checks = false
-debug = 2</code></pre></div></li>
-</ul>
-
-<h1 id="実装">実装<a href="#実装" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h1>
-
-<h2 id="wndclassの登録">WNDCLASSの登録<a href="#wndclassの登録" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
-
+debug = 2
+</code></pre><h1 id="実装">実装</h1>
+<h2 id="wndclassの登録">WNDCLASSの登録</h2>
 <blockquote>
 <p><a href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-registerclassexw">RegisterClassExW</a></p>
 </blockquote>
-
 <p>winapi crateではC/C++で使ってる関数、変数などがそのまま使えるように実装されています。実装されていない関数もいくつかありますが、大体古すぎるか、代わりに使える機能があったりして実装されてないみたいです。</p>
-
 <p>窓を作る前に<code>WNDCLASSEXW</code>と<code>RegisterClassExW</code>関数を使ってクラスを登録します。やり方はC/C++のとほぼ同じです。</p>
 <div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="k">unsafe</span><span class="w"> </span><span class="p">{</span><span class="w">
 </span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">class</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">WNDCLASSEXW</span><span class="w">
@@ -152,24 +119,18 @@ debug = 2</code></pre></div></li>
 </span><span class="w">    
 </span><span class="w">    </span><span class="n">RegisterClassExW</span><span class="p">(</span><span class="o">&amp;</span><span class="n">class</span><span class="p">)</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">0</span><span class="w">
 </span><span class="w"></span><span class="p">}</span><span class="w">
-</span></code></pre></div>
-<p>ただここで使ってる関数はWindows専用のUnicode（UCS-2）文字列しか受け取らないため、rustで基本提供している<code>OSCString</code>を使うか、それともwidestring crateの<code>U16CString</code>を使って、文字列を変換して渡す必要があります。自分はU16CStringを使いました。</p>
+</span></code></pre></div><p>ただここで使ってる関数はWindows専用のUnicode（UCS-2）文字列しか受け取らないため、rustで基本提供している<code>OSCString</code>を使うか、それともwidestring crateの<code>U16CString</code>を使って、文字列を変換して渡す必要があります。自分はU16CStringを使いました。</p>
 <div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="kd">let</span><span class="w"> </span><span class="n">class_name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">U16CString</span>::<span class="n">from_str</span><span class="p">(</span><span class="n">class_name</span><span class="p">).</span><span class="n">unwrap</span><span class="p">();</span><span class="w">
-</span></code></pre></div>
-<p>また注意する点はwinapi crateから提供する関数はほぼ<code>unsafe</code>であるため、上のようにunsafeブロックで囲んで使うようになっています。出来ればsafeな関数を作ってその中にunsafeブロックでwinapiの関数を使うのをおすすめします。</p>
+</span></code></pre></div><p>また注意する点はwinapi crateから提供する関数はほぼ<code>unsafe</code>であるため、上のようにunsafeブロックで囲んで使うようになっています。出来ればsafeな関数を作ってその中にunsafeブロックでwinapiの関数を使うのをおすすめします。</p>
 <div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">register_wndclass</span><span class="p">(</span><span class="n">hmodule</span>: <span class="nc">HMODULE</span><span class="p">,</span><span class="w"> </span><span class="n">class_name</span>: <span class="kp">&amp;</span><span class="kt">str</span><span class="p">,</span><span class="w"> </span><span class="kr">proc</span>: <span class="nc">WNDPROC</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="kt">bool</span>
 <span class="p">{</span><span class="w">
 </span><span class="w">    </span><span class="c1">//... unsafe blocks
 </span><span class="c1"></span><span class="p">}</span><span class="w">
-</span></code></pre></div>
-<h2 id="ウィンドウ-窓-の生成">ウィンドウ（窓）の生成<a href="#ウィンドウ-窓-の生成" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
-
-<h3 id="一般ウィンドウの生成">一般ウィンドウの生成<a href="#一般ウィンドウの生成" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
-
+</span></code></pre></div><h2 id="ウィンドウ窓の生成">ウィンドウ（窓）の生成</h2>
+<h3 id="一般ウィンドウの生成">一般ウィンドウの生成</h3>
 <blockquote>
 <p><a href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-createwindowexw">CreateWindowExW</a></p>
 </blockquote>
-
 <p>C/C++でやったのと同じくコードを作成します。ただCreateWindowExWはunsafeであるため、ブロックで囲みます。</p>
 <div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="kd">let</span><span class="w"> </span><span class="n">class_name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">U16CString</span>::<span class="n">from_str</span><span class="p">(</span><span class="n">class_name</span><span class="p">).</span><span class="n">expect</span><span class="p">(</span><span class="s">&#34;Error message&#34;</span><span class="p">);</span><span class="w">
 </span><span class="w"></span><span class="kd">let</span><span class="w"> </span><span class="n">window_name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">U16CString</span>::<span class="n">from_str</span><span class="p">(</span><span class="n">window_name</span><span class="p">.</span><span class="n">unwrap_or</span><span class="p">(</span><span class="s">&#34;new window&#34;</span><span class="p">)).</span><span class="n">expect</span><span class="p">(</span><span class="s">&#34;Error message&#34;</span><span class="p">);</span><span class="w">
@@ -187,13 +148,10 @@ debug = 2</code></pre></div></li>
 </span><span class="w">                    </span><span class="n">hmodule</span><span class="p">,</span><span class="w">
 </span><span class="w">                    </span><span class="n">ptr</span>::<span class="n">null_mut</span><span class="p">())</span><span class="w">
 </span><span class="w"></span><span class="p">};</span><span class="w">
-</span></code></pre></div>
-<p>C/C++で窓を作ってる時と同じ注意点ですが、styleとex-styleによって窓全体の大きさがそれぞれ違いますので、<code>AdjustWindowRectEx</code>という関数で全体窓のサイズを取得する必要があります。僕は<code>get_adjusted_window_size()</code>という関数を作ってその中でサイズを取得するようにしました。</p>
-
+</span></code></pre></div><p>C/C++で窓を作ってる時と同じ注意点ですが、styleとex-styleによって窓全体の大きさがそれぞれ違いますので、<code>AdjustWindowRectEx</code>という関数で全体窓のサイズを取得する必要があります。僕は<code>get_adjusted_window_size()</code>という関数を作ってその中でサイズを取得するようにしました。</p>
 <blockquote>
 <p><a href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-adjustwindowrectex">AdjustWindowRectEx</a></p>
 </blockquote>
-
 <p>以下は上の関数をラッピングした関数の全文です。ちなみに<code>#[cfg(windows)]</code>とは、ビルドしようとするプラットフォームがWindowsである時だけ、この関数をビルドするという意味をしてます。</p>
 <div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="cp">#[cfg(windows)]</span><span class="w">
 </span><span class="w"></span><span class="k">fn</span> <span class="nf">get_adjusted_window_size</span><span class="p">(</span><span class="w">
@@ -213,8 +171,7 @@ debug = 2</code></pre></div></li>
 </span><span class="w">
 </span><span class="w">    </span><span class="p">(</span><span class="n">input</span><span class="p">.</span><span class="n">right</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">input</span><span class="p">.</span><span class="n">left</span><span class="p">,</span><span class="w"> </span><span class="n">input</span><span class="p">.</span><span class="n">bottom</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">input</span><span class="p">.</span><span class="n">top</span><span class="p">)</span><span class="w">
 </span><span class="w"></span><span class="p">}</span><span class="w">
-</span></code></pre></div>
-<p>とにかくCreateWindowExWで正しいハンドルを取得したらラッピングして返します。じゃなければエラーメッセージを入れて返します。そうするためにrustで基本提供している<code>Result&lt;,&gt;</code>を使います。ちなみにC++ではC++17から<code>std::variant</code>で真似して使えます。（それともboost::outcomeを使うこともアリだし、自分で直接つくるのもOKかもです…。）</p>
+</span></code></pre></div><p>とにかくCreateWindowExWで正しいハンドルを取得したらラッピングして返します。じゃなければエラーメッセージを入れて返します。そうするためにrustで基本提供している<code>Result&lt;,&gt;</code>を使います。ちなみにC++ではC++17から<code>std::variant</code>で真似して使えます。（それともboost::outcomeを使うこともアリだし、自分で直接つくるのもOKかもです…。）</p>
 <div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">create_window</span><span class="p">(...,</span><span class="w"> </span><span class="n">parent</span>: <span class="nb">Option</span><span class="o">&lt;</span><span class="n">HWND</span><span class="o">&gt;</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nb">Result</span><span class="o">&lt;</span><span class="nb">Box</span><span class="o">&lt;</span><span class="n">WindowHandle</span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="n">DyError</span><span class="o">&gt;</span><span class="w">
 </span><span class="w">
 </span><span class="w"></span><span class="k">if</span><span class="w"> </span><span class="n">hwnd</span><span class="p">.</span><span class="n">is_null</span><span class="p">()</span><span class="w">
@@ -225,30 +182,21 @@ debug = 2</code></pre></div></li>
 </span><span class="w"></span><span class="p">{</span><span class="w">
 </span><span class="w">    </span><span class="nb">Ok</span><span class="p">(</span><span class="nb">Box</span>::<span class="n">new</span><span class="p">(</span><span class="n">WindowHandle</span><span class="p">{</span><span class="w"> </span><span class="n">hwnd</span><span class="p">,</span><span class="w"> </span><span class="n">notify_icon</span>: <span class="nc">NotifyIcon</span>::<span class="nb">None</span><span class="w"> </span><span class="p">}))</span><span class="w">
 </span><span class="w"></span><span class="p">}</span><span class="w">
-</span></code></pre></div>
-<p>返されたHWNDはあくまでもポインターなため、<code>is_null()</code>でC++の<code>HWND == nullptr</code>のような挙動が書けます。</p>
-
-<h3 id="メッセージ処理専用のウィンドウ生成">メッセージ処理専用のウィンドウ生成<a href="#メッセージ処理専用のウィンドウ生成" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
-
+</span></code></pre></div><p>返されたHWNDはあくまでもポインターなため、<code>is_null()</code>でC++の<code>HWND == nullptr</code>のような挙動が書けます。</p>
+<h3 id="メッセージ処理専用のウィンドウ生成">メッセージ処理専用のウィンドウ生成</h3>
 <blockquote>
 <p><a href="https://docs.microsoft.com/en-us/windows/win32/winmsg/window-features#message-only-windows">Message-Only Windows</a></p>
-
 <p>&hellip;To create a message-only window, specify the HWND_MESSAGE constant or a handle to an existing message-only window in the hWndParent parameter of the CreateWindowEx function. You can also change an existing window to a message-only window by specifying HWND_MESSAGE in the hWndNewParent parameter of the SetParent function&hellip;</p>
 </blockquote>
-
 <p>ここではHIDデバイスを探知するためのバックグラウンドウィンドウを作ります。ただ今まで書いたコードではHIDデバイスをリアルタイムで判断して登録するコードがないため、あくまでご参考だけにしてください。</p>
-
 <p>ウィンドウ生成自体は上記と同じですが、parentの引数として<code>HWND_MESSAGE</code>を入れるのが違いです。</p>
 <div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="kd">let</span><span class="w"> </span><span class="n">hwnd</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">create_window</span><span class="p">(</span><span class="n">class_name</span><span class="p">,</span><span class="w"> </span><span class="n">window_name</span><span class="p">,</span><span class="w"> </span><span class="nb">None</span><span class="p">,</span><span class="w"> </span><span class="nb">None</span><span class="p">,</span><span class="w">
 </span><span class="w">                         </span><span class="nb">Some</span><span class="p">(</span><span class="n">WS_CLIPSIBLINGS</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">WS_CLIPCHILDREN</span><span class="p">),</span><span class="w"> </span><span class="nb">None</span><span class="p">,</span><span class="w">
 </span><span class="w">                         </span><span class="nb">Some</span><span class="p">(</span><span class="n">hmodule</span><span class="p">),</span><span class="w"> </span><span class="nb">Some</span><span class="p">(</span><span class="n">HWND_MESSAGE</span><span class="p">))</span><span class="o">?</span><span class="p">;</span><span class="w">
-</span></code></pre></div>
-<blockquote>
+</span></code></pre></div><blockquote>
 <p><a href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-registerdevicenotificationw">RegisterDeviceNotificationW</a></p>
-
 <p><a href="https://docs.microsoft.com/en-us/windows/win32/api/dbt/ns-dbt-dev_broadcast_deviceinterface_w">DEV_BROADCAST_DEVICEINTERFACE_W</a></p>
 </blockquote>
-
 <p>HWNDが正常に生成されたらHIDデバイスの探知を起動させるため、DEV_BROADCAST_DEVICEINTERFACE_WとRegisterDeviceNotificationWを使ってHNOTIFYハンドルを生成します。</p>
 <div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="kd">let</span><span class="w"> </span><span class="n">db_hid</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">DEV_BROADCAST_DEVICEINTERFACE_W</span><span class="w">
 </span><span class="w"></span><span class="p">{</span><span class="w">
@@ -264,17 +212,12 @@ debug = 2</code></pre></div></li>
 </span><span class="w">        </span><span class="o">&amp;</span><span class="n">db_hid</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="o">*</span><span class="k">const</span><span class="w"> </span><span class="n">DEV_BROADCAST_DEVICEINTERFACE_W</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">LPVOID</span><span class="p">,</span><span class="w"> 
 </span><span class="w">        </span><span class="n">DEVICE_NOTIFY_WINDOW_HANDLE</span><span class="p">)</span><span class="w">
 </span><span class="w"></span><span class="p">};</span><span class="w">
-</span></code></pre></div>
-<p>正常に生成されたら、ランタイムでHIDデバイスが探知されたら<code>WM_DEVICECHANGE</code>というメッセージでデバイスの情報が取得できるそうです。（Rustでやったことはないですのでどう探知して情報を入れるかは存じないこと、申し訳ありません。）</p>
-
+</span></code></pre></div><p>正常に生成されたら、ランタイムでHIDデバイスが探知されたら<code>WM_DEVICECHANGE</code>というメッセージでデバイスの情報が取得できるそうです。（Rustでやったことはないですのでどう探知して情報を入れるかは存じないこと、申し訳ありません。）</p>
 <p>また取得したHNOTIFYは必ず<code>UnregisterDeviceNotification</code>で登録解除をしなければなりません。上記のHWNDも同じです。</p>
-
-<h2 id="プロパティの入れ方">プロパティの入れ方<a href="#プロパティの入れ方" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
-
+<h2 id="プロパティの入れ方">プロパティの入れ方</h2>
 <blockquote>
 <p><a href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-setpropw">SetPropW</a></p>
 </blockquote>
-
 <p>C/C++と同様にSetPropWでプロパティが入れられます。ただ、入れたデータはrustのborrow checkerで検査されてないままになるのでプロパティが解除されるまでは手動で別途で管理する必要があります。</p>
 <div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="k">pub</span><span class="w"> </span><span class="k">struct</span> <span class="nc">WindowHandle</span><span class="w">
 </span><span class="w"></span><span class="p">{</span><span class="w">
@@ -298,60 +241,45 @@ debug = 2</code></pre></div></li>
 </span><span class="w">        </span><span class="k">unsafe</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="o">!</span><span class="n">RemovePropW</span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="n">hwnd</span><span class="p">(),</span><span class="w"> </span><span class="n">prop_name</span><span class="p">.</span><span class="n">as_ptr</span><span class="p">()).</span><span class="n">is_null</span><span class="p">()</span><span class="w"> </span><span class="p">}</span><span class="w">
 </span><span class="w">    </span><span class="p">}</span><span class="w">
 </span><span class="w"></span><span class="p">}</span><span class="w">
-</span></code></pre></div>
-<p>僕の場合には生成されたHWNDがラッピングされた構造体をプロパティとして入れました。内部のメッセージ処理コールバック関数の中でこれを使って処理をする必要があるからです。</p>
+</span></code></pre></div><p>僕の場合には生成されたHWNDがラッピングされた構造体をプロパティとして入れました。内部のメッセージ処理コールバック関数の中でこれを使って処理をする必要があるからです。</p>
 <div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="kd">let</span><span class="w"> </span><span class="n">data_hwnd</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="o">*</span><span class="n">hwnd</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="o">*</span><span class="k">mut</span><span class="w"> </span><span class="n">WindowHandle</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">HANDLE</span><span class="p">;</span><span class="w">
 </span><span class="w"></span><span class="n">hwnd</span><span class="p">.</span><span class="n">create_property_u16</span><span class="p">(</span><span class="o">&amp;</span><span class="n">windows</span>::<span class="n">HWND_PROPSTR</span><span class="p">,</span><span class="w"> </span><span class="n">data_hwnd</span><span class="p">);</span><span class="w">
-</span></code></pre></div>
-<p>プロパティを解除する関数は<code>RemovePropW</code>です。</p>
-
-<h2 id="サブクラス化してメッセージ処理コールバック登録">サブクラス化してメッセージ処理コールバック登録<a href="#サブクラス化してメッセージ処理コールバック登録" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
-
+</span></code></pre></div><p>プロパティを解除する関数は<code>RemovePropW</code>です。</p>
+<h2 id="サブクラス化してメッセージ処理コールバック登録">サブクラス化してメッセージ処理コールバック登録</h2>
 <blockquote>
 <p><a href="https://docs.microsoft.com/en-us/windows/win32/winmsg/about-window-procedures#window-procedure-subclassing">Window Procedure Subclassing</a></p>
 </blockquote>
-
 <p>Subclassingで特定ウィンドウから送ったり送られたメッセージを親のクラスで指定されているコールバックで処理される前に別途の処理をさせることが出来ます。上の文書を見るとわかりますが、Subclass Procedureという、別途のコールバックを指定することによって、既存のコールバックへの関数ポインターが切り替わりメッセージ処理が走るようになります。もし処理する必要がないなら、親クラスのコールバックへ渡すのも出来ます。</p>
-
 <p>ここではIntance Subclassingだけを使って、バックグラウンドのウィンドウとユーザーに見えるウィンドウの処理を分離させます。</p>
-
 <blockquote>
 <p><a href="https://docs.microsoft.com/en-us/windows/win32/api/commctrl/nf-commctrl-setwindowsubclass">SetWindowSubclass</a></p>
 </blockquote>
-
 <p>ただここで注意する点は、今サブクラス化しようとしているHWNDが子供（チルドレン）HWNDを持つ可能性があり、出来ればそのチルドレンも一緒にサブクラス化したいところです。そして最終的にはサブクラスのコールバックからメッセージと引数をまとめて外からのクロージャー（C++でいわばLambdaを<code>Function&lt;&gt;</code>化したもの）に安全に渡したいと思います。</p>
-
 <p>ということで、ターゲットしているHWNDを含めてHWNDを親として参照しているチルドレンまでサブクラス化するのは以下の手順を踏みます。</p>
-
 <ol>
 <li>EnumChildWindowsでチルドレンのHWNDを全部取る</li>
 <li>チルドレンのHWNDに対しSetWindowSubclassでサブクラス化する</li>
-
-<li><p>最後に自分のHWNDもサブクラス化する</p>
+<li>最後に自分のHWNDもサブクラス化する</li>
+</ol>
 <div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="k">struct</span> <span class="nc">LocalSetSubclassLParam</span><span class="w">
 </span><span class="w"></span><span class="p">{</span><span class="w">
-</span><span class="w"></span><span class="n">callback_ptr</span>: <span class="o">*</span><span class="k">mut</span><span class="w"> </span><span class="o">*</span><span class="k">const</span><span class="w"> </span><span class="n">SubclassCallback</span><span class="p">,</span><span class="w">
-</span><span class="w"></span><span class="n">subclass_id</span>: <span class="nc">UINT_PTR</span><span class="p">,</span><span class="w">
+</span><span class="w">    </span><span class="n">callback_ptr</span>: <span class="o">*</span><span class="k">mut</span><span class="w"> </span><span class="o">*</span><span class="k">const</span><span class="w"> </span><span class="n">SubclassCallback</span><span class="p">,</span><span class="w">
+</span><span class="w">    </span><span class="n">subclass_id</span>: <span class="nc">UINT_PTR</span><span class="p">,</span><span class="w">
 </span><span class="w"></span><span class="p">}</span><span class="w">
 </span><span class="w">
 </span><span class="w"></span><span class="k">unsafe</span><span class="w"> </span><span class="p">{</span><span class="w">
-</span><span class="w"></span><span class="c1">// Create local temporary input parameters for binding subclass procedure and specification id.
-</span><span class="c1"></span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">local_params</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LocalSetSubclassLParam</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">callback_ptr</span><span class="p">,</span><span class="w"> </span><span class="n">subclass_id</span><span class="w"> </span><span class="p">};</span><span class="w">
-</span><span class="w"></span><span class="n">EnumChildWindows</span><span class="p">(</span><span class="n">hwnd</span><span class="p">,</span><span class="w"> </span><span class="nb">Some</span><span class="p">(</span><span class="n">add_children_hwnd</span><span class="p">),</span><span class="w"> </span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">handler</span><span class="p">.</span><span class="n">handles</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="o">*</span><span class="k">mut</span><span class="w"> </span><span class="nb">Vec</span><span class="o">&lt;</span><span class="n">HWND</span><span class="o">&gt;</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">LPARAM</span><span class="p">);</span><span class="w">
-</span><span class="w"></span><span class="n">EnumChildWindows</span><span class="p">(</span><span class="n">hwnd</span><span class="p">,</span><span class="w"> </span><span class="nb">Some</span><span class="p">(</span><span class="n">bind_proc_to_children</span><span class="p">),</span><span class="w"> </span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">local_params</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="o">*</span><span class="k">mut</span><span class="w"> </span><span class="n">LocalSetSubclassLParam</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">LPARAM</span><span class="p">);</span><span class="w">
-</span><span class="w"></span><span class="c1">// Bind subclass procedure to top target window hwnd.
-</span><span class="c1"></span><span class="n">SetWindowSubclass</span><span class="p">(</span><span class="n">hwnd</span><span class="p">,</span><span class="w"> </span><span class="nb">Some</span><span class="p">(</span><span class="n">win32_subproc</span><span class="p">),</span><span class="w"> </span><span class="n">subclass_id</span><span class="p">,</span><span class="w"> </span><span class="n">callback_ptr</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">UINT_PTR</span><span class="p">);</span><span class="w">
-</span><span class="w"></span><span class="n">EVENT_HANDLER_ID</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w">
+</span><span class="w">    </span><span class="c1">// Create local temporary input parameters for binding subclass procedure and specification id.
+</span><span class="c1"></span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">local_params</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LocalSetSubclassLParam</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">callback_ptr</span><span class="p">,</span><span class="w"> </span><span class="n">subclass_id</span><span class="w"> </span><span class="p">};</span><span class="w">
+</span><span class="w">    </span><span class="n">EnumChildWindows</span><span class="p">(</span><span class="n">hwnd</span><span class="p">,</span><span class="w"> </span><span class="nb">Some</span><span class="p">(</span><span class="n">add_children_hwnd</span><span class="p">),</span><span class="w"> </span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">handler</span><span class="p">.</span><span class="n">handles</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="o">*</span><span class="k">mut</span><span class="w"> </span><span class="nb">Vec</span><span class="o">&lt;</span><span class="n">HWND</span><span class="o">&gt;</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">LPARAM</span><span class="p">);</span><span class="w">
+</span><span class="w">    </span><span class="n">EnumChildWindows</span><span class="p">(</span><span class="n">hwnd</span><span class="p">,</span><span class="w"> </span><span class="nb">Some</span><span class="p">(</span><span class="n">bind_proc_to_children</span><span class="p">),</span><span class="w"> </span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">local_params</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="o">*</span><span class="k">mut</span><span class="w"> </span><span class="n">LocalSetSubclassLParam</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">LPARAM</span><span class="p">);</span><span class="w">
+</span><span class="w">    </span><span class="c1">// Bind subclass procedure to top target window hwnd.
+</span><span class="c1"></span><span class="w">    </span><span class="n">SetWindowSubclass</span><span class="p">(</span><span class="n">hwnd</span><span class="p">,</span><span class="w"> </span><span class="nb">Some</span><span class="p">(</span><span class="n">win32_subproc</span><span class="p">),</span><span class="w"> </span><span class="n">subclass_id</span><span class="p">,</span><span class="w"> </span><span class="n">callback_ptr</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">UINT_PTR</span><span class="p">);</span><span class="w">
+</span><span class="w">    </span><span class="n">EVENT_HANDLER_ID</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w">
 </span><span class="w"></span><span class="p">}</span><span class="w">
-</span></code></pre></div></li>
-</ol>
-
-<p>ちなみにsubclass_idはサブクラスのIDを示します。ここでは普通にSTATICで変数を定義してサブクラスする関数を呼ぶたびに1ずつ増加させてIDを生成しています。</p>
-
+</span></code></pre></div><p>ちなみにsubclass_idはサブクラスのIDを示します。ここでは普通にSTATICで変数を定義してサブクラスする関数を呼ぶたびに1ずつ増加させてIDを生成しています。</p>
 <blockquote>
 <p><a href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-enumchildwindows">EnumChildWindows</a></p>
 </blockquote>
-
 <p>EnumChildWindows関数は、C/C++言語ABIの関数をコールバック引数として受け取って子HWNDを巡回して何らかの処理をする関数です。これを使って、上記の「１」をやります。ここで注意することはコールバック引数の関数は<code>unsafe extern &quot;system&quot;</code>でC ABIの関数になることを明示しないといけないことです。</p>
 <div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="k">unsafe</span><span class="w"> </span><span class="k">extern</span><span class="w"> </span><span class="s">&#34;system&#34;</span><span class="w"> </span><span class="k">fn</span> <span class="nf">add_children_hwnd</span><span class="p">(</span><span class="n">h</span>: <span class="nc">HWND</span><span class="p">,</span><span class="w"> </span><span class="n">l</span>: <span class="nc">LPARAM</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="kt">i32</span>
 <span class="p">{</span><span class="w">
@@ -370,8 +298,7 @@ debug = 2</code></pre></div></li>
 </span><span class="w">
 </span><span class="w"></span><span class="c1">// ...
 </span><span class="c1"></span><span class="n">EnumChildWindows</span><span class="p">(</span><span class="n">hwnd</span><span class="p">,</span><span class="w"> </span><span class="nb">Some</span><span class="p">(</span><span class="n">add_children_hwnd</span><span class="p">),</span><span class="w"> </span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">handler</span><span class="p">.</span><span class="n">handles</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="o">*</span><span class="k">mut</span><span class="w"> </span><span class="nb">Vec</span><span class="o">&lt;</span><span class="n">HWND</span><span class="o">&gt;</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">LPARAM</span><span class="p">);</span><span class="w">
-</span></code></pre></div>
-<p>win32_subprocは次のコードとなります。</p>
+</span></code></pre></div><p>win32_subprocは次のコードとなります。</p>
 <div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="cp">#[cfg(windows)]</span><span class="w">
 </span><span class="w"></span><span class="k">pub</span><span class="w"> </span><span class="k">unsafe</span><span class="w"> </span><span class="k">extern</span><span class="w"> </span><span class="s">&#34;system&#34;</span><span class="w"> </span><span class="k">fn</span> <span class="nf">win32_subproc</span><span class="p">(</span><span class="n">hwnd</span>: <span class="nc">HWND</span><span class="p">,</span><span class="w"> </span><span class="n">msg</span>: <span class="nc">UINT</span><span class="p">,</span><span class="w"> </span><span class="n">w</span>: <span class="nc">WPARAM</span><span class="p">,</span><span class="w"> </span><span class="n">l</span>: <span class="nc">LPARAM</span><span class="p">,</span><span class="w">
 </span><span class="w">                                            </span><span class="n">_id</span>: <span class="nc">UINT_PTR</span><span class="p">,</span><span class="w"> </span><span class="n">p_callback</span>: <span class="nc">DWORD_PTR</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">LRESULT</span><span class="w">
@@ -402,8 +329,7 @@ debug = 2</code></pre></div></li>
 </span><span class="w">    </span><span class="c1">//...
 </span><span class="c1"></span><span class="w">    </span><span class="n">DefSubclassProc</span><span class="p">(</span><span class="n">hwnd</span><span class="p">,</span><span class="w"> </span><span class="n">msg</span><span class="p">,</span><span class="w"> </span><span class="n">w</span><span class="p">,</span><span class="w"> </span><span class="n">l</span><span class="p">)</span><span class="w">
 </span><span class="w"></span><span class="p">}</span><span class="w">
-</span></code></pre></div>
-<p>子HWNDを全部取得したら、次は子HWNDをサブクラス化します。ここでクロージャーの参照回数を子供＋自分分保持させるために悪さをしていきます。</p>
+</span></code></pre></div><p>子HWNDを全部取得したら、次は子HWNDをサブクラス化します。ここでクロージャーの参照回数を子供＋自分分保持させるために悪さをしていきます。</p>
 <div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="k">type</span> <span class="nc">SubclassCallback</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">dyn</span><span class="w"> </span><span class="nb">Fn</span><span class="p">(</span><span class="n">EventType</span><span class="p">,</span><span class="w"> </span><span class="n">EventData</span><span class="p">,</span><span class="w"> </span><span class="n">EventRefHwnd</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="p">();</span><span class="w">
 </span><span class="w">
 </span><span class="w"></span><span class="c1">// ...
@@ -434,20 +360,17 @@ debug = 2</code></pre></div></li>
 </span><span class="w">
 </span><span class="w"></span><span class="c1">// ...
 </span><span class="c1"></span><span class="n">EnumChildWindows</span><span class="p">(</span><span class="n">hwnd</span><span class="p">,</span><span class="w"> </span><span class="nb">Some</span><span class="p">(</span><span class="n">bind_proc_to_children</span><span class="p">),</span><span class="w"> </span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">local_params</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="o">*</span><span class="k">mut</span><span class="w"> </span><span class="n">LocalSetSubclassLParam</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">LPARAM</span><span class="p">);</span><span class="w">
-</span></code></pre></div>
-<ol>
+</span></code></pre></div><ol>
 <li>まずクロージャーをdyn Fn（Fn traitを実装している何らか）を引数traitとして持っているRc（C++11からの<code>std::shared_ptr&lt;&gt;</code>のようなもの）に入れます。</li>
 <li>生成されたRcはすべてのチルドレンと自分HWNDがサブクラス解除されるまで消えなかればならないため、into_raw関数でわざと解除してRcのポインターをBoxでもう一度包んでBoxを作る（Boxとは<code>std::unique_ptr&lt;&gt;</code>のようなもんです）</li>
 <li>作られたBoxさえも任意解除して、チルドレン巡回に使うデータに入れます。</li>
 <li>bind_proc_to_childrenでは３で入れられたデータを逆参照してサブクラス化します。逆参照されたRcは手動でカウントを一つ増やします。ただし、コールバックがリターンされて参照カウントが基に戻ることを防ぐため、<code>mem::forget</code>でDropを呼ばないようにします。</li>
 </ol>
-
 <p>これでRcの参照カウントをチルドレン分上げつつ、各子HWNDにサブクラス化をすることが出来ました。最後にルートとなるHWNDもサブクラス化します。</p>
 <div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="c1">// Bind subclass procedure to top target window hwnd.
 </span><span class="c1"></span><span class="n">SetWindowSubclass</span><span class="p">(</span><span class="n">hwnd</span><span class="p">,</span><span class="w"> </span><span class="nb">Some</span><span class="p">(</span><span class="n">win32_subproc</span><span class="p">),</span><span class="w"> </span><span class="n">subclass_id</span><span class="p">,</span><span class="w"> </span><span class="n">callback_ptr</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">UINT_PTR</span><span class="p">);</span><span class="w">
 </span><span class="w"></span><span class="n">EVENT_HANDLER_ID</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w">
-</span></code></pre></div>
-<p>外側では以下のようなコードでサブクラスに必要な引数と、サブクラスで指定されたコールバック関数でまとまったデータを処理するためのクロージャーを書きます。</p>
+</span></code></pre></div><p>外側では以下のようなコードでサブクラスに必要な引数と、サブクラスで指定されたコールバック関数でまとまったデータを処理するためのクロージャーを書きます。</p>
 <div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="kd">let</span><span class="w"> </span><span class="n">hwnd_hevent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">windows</span>::<span class="n">bind_event_handler</span><span class="p">(</span><span class="w">
 </span><span class="w">    </span><span class="o">&amp;</span><span class="n">hwnd</span><span class="p">,</span><span class="w">
 </span><span class="w">    </span><span class="o">|</span><span class="n">msg</span><span class="p">,</span><span class="w"> </span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="n">_ref_hwnd</span><span class="o">|</span><span class="w"> </span><span class="p">{</span><span class="w">
@@ -492,8 +415,7 @@ debug = 2</code></pre></div></li>
 </span><span class="w">            </span><span class="n">_</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="p">{},</span><span class="w">
 </span><span class="w">        </span><span class="p">}</span><span class="w">
 </span><span class="w">    </span><span class="p">});</span><span class="w">
-</span></code></pre></div>
-<p>逆にサブクラス解除する時には、渡された<code>EventHandler</code>タイプのインスタンスの各HWNDと、subclass_idでサブクラスIDに該当するサブクラスがあるかを確認し、RemoveWindowSubclassで解除すればOKです。また、コールバック関数のポインター変数もBox→Rcに逆参照して参照カウンターをへらします。</p>
+</span></code></pre></div><p>逆にサブクラス解除する時には、渡された<code>EventHandler</code>タイプのインスタンスの各HWNDと、subclass_idでサブクラスIDに該当するサブクラスがあるかを確認し、RemoveWindowSubclassで解除すればOKです。また、コールバック関数のポインター変数もBox→Rcに逆参照して参照カウンターをへらします。</p>
 <div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="k">for</span><span class="w"> </span><span class="o">&amp;</span><span class="n">handle</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">handler</span><span class="p">.</span><span class="n">handles</span><span class="p">.</span><span class="n">iter</span><span class="p">()</span><span class="w">
 </span><span class="w"></span><span class="p">{</span><span class="w">
 </span><span class="w">    </span><span class="k">unsafe</span><span class="w"> </span><span class="p">{</span><span class="w">
@@ -512,50 +434,62 @@ debug = 2</code></pre></div></li>
 </span><span class="w">
 </span><span class="w"></span><span class="c1">// Finally free the pointer of the pointer of callback.
 </span><span class="c1"></span><span class="k">unsafe</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nb">Box</span>::<span class="n">from_raw</span><span class="p">(</span><span class="n">callback_ptr</span><span class="p">);</span><span class="w"> </span><span class="p">}</span><span class="w">
-</span></code></pre></div>
-<h2 id="windowを見せる">Windowを見せる<a href="#windowを見せる" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
-
+</span></code></pre></div><h2 id="windowを見せる">Windowを見せる</h2>
 <p>C/C++と同じ方法でいけます。</p>
 <div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="k">unsafe</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">ShowWindow</span><span class="p">(</span><span class="n">hwnd</span><span class="p">.</span><span class="n">hwnd</span><span class="p">(),</span><span class="w"> </span><span class="n">SW_NORMAL</span><span class="p">);</span><span class="w"> </span><span class="p">}</span><span class="w">
-</span></code></pre></div>
-<h1 id="最後に">最後に<a href="#最後に" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h1>
-
+</span></code></pre></div><h1 id="最後に">最後に</h1>
 <p>結局またC/C++へ戻ってしまうのですが（残念…）Rustで最大限に安全なコードを実装しながらC/C++のAPI設計で適用できるいくつかが見つかってかなり勉強になったと思います。</p>
-
-			</div>
-			<hr class="post-end">
-			<footer class="post-info">
-				<p>
-					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-tag meta-icon"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7" y2="7"></line></svg><span class="tag"><a href="https://liliilli.github.io/tags/rust-winapi">Rust, Winapi</a></span>
-				</p>
-				<p><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>4290 Words</p>
-				<p><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>2020-08-13 10:04 &#43;0900</p>
-			</footer>
-		</article>
-		<div class="post-nav thin">
-			<a class="next-post" href="https://liliilli.github.io/posts/donclugston_delegate/">
-				<span class="post-nav-label"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-left"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>&nbsp;Newer</span><br><span>C&#43;&#43;で実装するDelegateコードの分析（Don Clugston）</span>
-			</a>
-			<a class="prev-post" href="https://liliilli.github.io/posts/gcn_architecture_crash/">
-				<span class="post-nav-label">Older&nbsp;<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-right"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg></span><br><span>AMD GCNアーキテクチャ文書を読んでメモ</span>
-			</a>
-		</div>
-		<div id="comments" class="thin">
 </div>
-	</main>
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://liliilli.github.io/tags/rust-winapi">Rust, Winapi</a></li>
+    </ul>
+  </footer>
+</article>
+    </main><footer class="footer">
+    <span>&copy; 2020 <a href="https://liliilli.github.io">neuromantic</a></span>
+    <span>&middot;</span>
+    <span>Powered by <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo️️</a>️</span>
+    <span>&middot;</span>
+    <span>Theme️ <a href="https://git.io/hugopapermod" rel="noopener" target="_blank">PaperMod</a></span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top">
+    <button class="top-link" id="top-link" type="button">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6">
+            <path d="M12 6H0l6-6z" /></svg>
+    </button>
+</a>
+<script src="https://liliilli.github.io/assets/js/highlight.min.e7afc2928c0925d65c4732dfebe147014d91299a98e819e4b42f25c4fa68e91c.js" integrity="sha256-56/CkowJJdZcRzLf6&#43;FHAU2RKZqY6BnktC8lxPpo6Rw="></script>
+<script>hljs.initHighlightingOnLoad();</script>
+<script>
+    window.onload = function () {
+        if (localStorage.getItem("menu-scroll-position")) {
+            document.getElementById('menu').scrollLeft = localStorage.getItem("menu-scroll-position");
+        }
+    }
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
 
-	<footer id="site-footer" class="section-inner thin animated fadeIn faster">
-		<p>&copy; 2020 <a href="https://liliilli.github.io">jongmin yun - neu.</a> &#183; <a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC BY-NC 4.0</a></p>
-		<p>
-			Made with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> &#183; Theme <a href="https://github.com/Track3/hermit" target="_blank" rel="noopener">Hermit</a> &#183; <a href="https://liliilli.github.io/posts/index.xml" target="_blank" title="rss"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-rss"><path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1"></circle></svg></a>
-		</p>
-	</footer>
-
-
-
-	<script src="https://liliilli.github.io/js/bundle.min.4a9a0ac3d2217822c7865b4161e6c2a71de1d70492264337755427898dd718f6.js" integrity="sha256-SpoKw9IheCLHhltBYebCpx3h1wSSJkM3dVQniY3XGPY=" crossorigin="anonymous"></script>
-	
-
+            document.querySelector(this.getAttribute("href")).scrollIntoView({
+                behavior: "smooth"
+            });
+        });
+    });
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+    function menu_on_scroll() {
+        localStorage.setItem("menu-scroll-position", document.getElementById('menu').scrollLeft);
+    }
+</script>
 </body>
 
 </html>

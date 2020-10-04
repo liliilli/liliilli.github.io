@@ -1,126 +1,92 @@
 <!DOCTYPE html>
-<html lang="en-us">
+<html lang="en">
 
-<head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<meta http-equiv="X-UA-Compatible" content="ie=edge">
-	<meta name="theme-color" content="#494f5c">
-	<meta name="msapplication-TileColor" content="#494f5c">
-<meta itemprop="name" content="ShaderToyでPBRを書いてから、自ら解説してみた。">
-<meta itemprop="description" content="実は2週前に、ShaderToyというウェブでGLSLがかけて、それをレンダリングすることができるサイトで、上のシェーダーを書いてました。前">
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
+<title>ShaderToyでPBRを書いてから、自ら解説してみた。 - neuromantic</title>
 
-<meta itemprop="datePublished" content="2019-11-16T19:51:58&#43;09:00" />
-<meta itemprop="dateModified" content="2019-11-20T00:17:40&#43;09:00" />
-<meta itemprop="wordCount" content="4934">
+<meta name="description" content="なんで、このシェーダーを書きながら、どうやってPBRのDiffuseとSpecularを実装したのかを簡単と大雑把に書きたいと思います。図形">
+<meta name="keywords" content= />
+<meta name="author" content="Jongmin Yun, Neu.">
+<link rel="canonical" href="https://liliilli.github.io/posts/shadertoy_pbr/" />
+<link href="https://liliilli.github.io/assets/css/stylesheet.min.a3b13905fd4b98ea165a18374ae5215d9de97a04f187f789736c56858296ba12.css" integrity="sha256-o7E5Bf1LmOoWWhg3SuUhXZ3pegTxh/eJc2xWhYKWuhI=" rel="preload stylesheet"
+    as="style">
+<link rel="apple-touch-icon" href="https://liliilli.github.io/apple-touch-icon.png">
+<link rel="icon" href="https://liliilli.github.io/favicon.ico">
+<meta name="generator" content="Hugo 0.75.1" />
 
-
-
-<meta itemprop="keywords" content="untagged," />
-<meta property="og:title" content="ShaderToyでPBRを書いてから、自ら解説してみた。" />
-<meta property="og:description" content="実は2週前に、ShaderToyというウェブでGLSLがかけて、それをレンダリングすることができるサイトで、上のシェーダーを書いてました。前" />
-<meta property="og:type" content="article" />
-<meta property="og:url" content="https://liliilli.github.io/posts/shadertoy_pbr/" />
-<meta property="article:published_time" content="2019-11-16T19:51:58+09:00" />
-<meta property="article:modified_time" content="2019-11-20T00:17:40+09:00" />
-<meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="ShaderToyでPBRを書いてから、自ら解説してみた。"/>
-<meta name="twitter:description" content="実は2週前に、ShaderToyというウェブでGLSLがかけて、それをレンダリングすることができるサイトで、上のシェーダーを書いてました。前"/>
-
-	<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-	<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-	<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-	<link rel="manifest" href="/site.webmanifest">
-	<link rel="mask-icon" href="/safari-pinned-tab.svg" color="">
-	<link rel="shortcut icon" href="/favicon.ico">
-
-	<title>ShaderToyでPBRを書いてから、自ら解説してみた。</title>
-	<link rel="stylesheet" href="https://liliilli.github.io/css/style.min.eac77496566fd7d5768fd650ddb0b2b181ca6a2d7c5fdd6fe6b8ba4bf47e566f.css" integrity="sha256-6sd0llZv19V2j9ZQ3bCysYHKai18X91v5ri6S/R+Vm8=" crossorigin="anonymous">
-	
 </head>
 
-<body id="page">
-	
-	<header id="site-header" class="animated slideInUp">
-		<div class="hdr-wrapper section-inner">
-			<div class="hdr-left">
-				<div class="site-branding">
-					<a href="https://liliilli.github.io">neuromantic</a>
-				</div>
-				<nav class="site-nav hide-in-mobile">
-					
-				<a href="https://liliilli.github.io/posts/">Posts</a>
-				<a href="https://liliilli.github.io/about-hugo/">About</a>
+<body class="single" id="top">
+<header class="header">
+    <nav class="nav">
+        <p class="logo"><a href="https://liliilli.github.io">neuromantic</a></p>
+        <ul class="menu" id="menu" onscroll="menu_on_scroll()">
+            <li>
+                <a href="https://liliilli.github.io/archives/">
+                    <span>
+                        Archives
+                    </span>
+                </a>
+            </li>
+            <li>
+                <a href="https://liliilli.github.io/tags/">
+                    <span>
+                        Tags
+                    </span>
+                </a>
+            </li>
+            <li>
+                <a href="https://liliilli.github.io/series/">
+                    <span>
+                        Series
+                    </span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+    <main class="main">
 
-				</nav>
-			</div>
-			<div class="hdr-right hdr-icons">
-				<span class="hdr-social hide-in-mobile"><a href="https://twitter.com/NeuliliilliD" target="_blank" rel="noopener me" title="Twitter"><svg xmlns="http://www.w3.org/2000/svg" class="feather" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg></a><a href="https://github.com/liliilli" target="_blank" rel="noopener me" title="Github"><svg xmlns="http://www.w3.org/2000/svg" class="feather" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg></a></span><button id="menu-btn" class="hdr-btn" title="Menu"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-menu"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg></button>
-			</div>
-		</div>
-	</header>
-	<div id="mobile-menu" class="animated fast">
-		<ul>
-			<li><a href="https://liliilli.github.io/posts/">Posts</a></li>
-			<li><a href="https://liliilli.github.io/about-hugo/">About</a></li>
-		</ul>
-	</div>
-
-
-
-
-	<main class="site-main section-inner animated fadeIn faster">
-		<article class="thin">
-			<header class="post-header">
-				<div class="post-meta"><span>Nov 16, 2019</span></div>
-				<h1>ShaderToyでPBRを書いてから、自ら解説してみた。</h1>
-			</header>
-			<div class="content">
-				
-
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
-</script>
-
-<p><iframe width="640" height="360" frameborder="0" src="https://www.shadertoy.com/embed/WsdSDf?gui=true&t=10&paused=true&muted=false" allowfullscreen></iframe>
-実は2週前に、ShaderToyというウェブでGLSLがかけて、それをレンダリングすることができるサイトで、上のシェーダーを書いてました。前にもShaderToyで色々と書いたんですが、PBRを本格に適用して書いたのは今が初めてです。</p>
-
+<article class="post-single">
+  <header class="post-header">
+    <h1 class="post-title">
+      ShaderToyでPBRを書いてから、自ら解説してみた。
+    </h1>
+    <div class="post-meta">
+      <time>November 16, 2019</time>&nbsp;·&nbsp;Jongmin Yun, Neu.
+    </div>
+  </header>
+  <div class="post-content"><!-- raw HTML omitted -->
+<!-- raw HTML omitted -->
+<!-- raw HTML omitted -->
 <p>なんで、このシェーダーを書きながら、どうやってPBRのDiffuseとSpecularを実装したのかを簡単と大雑把に書きたいと思います。図形の作り方、またはレイマーチングのやり方に関しては説明いたしません。</p>
-
-<h1 id="本編">本編<a href="#本編" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h1>
-
+<h1 id="本編">本編</h1>
 <p>PBRレンダリングを勉強するときによく見られるDisneyの<code>Physical-Based Shading at Disney</code>、または色々のPBRが基づく理論文書を読みますと、光と視点のよるある地点の色は以下になります。</p>
-
 <p>$$
 f(\pmb{l}, \pmb{v}) = \text{diffuse} + \text{specular}
 $$
 <code>Diffuse</code>と<code>Specular</code>はそれぞれの特性を独立的に持てると言えます。なので、実施に最終色を入れるときに次のように単純に<code>Diffuse</code>と<code>Specular</code>を入れます。</p>
 <div class="highlight"><pre class="chroma"><code class="language-glsl" data-lang="glsl"><span class="c1">// fragColorは[0,1]のvec4(R,G,B,A)です。</span>
-<span class="n">fragColor</span> <span class="o">=</span> <span class="k">vec4</span><span class="p">(</span><span class="n">dif</span> <span class="o">+</span> <span class="n">spc</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span></code></pre></div>
-<blockquote>
+<span class="n">fragColor</span> <span class="o">=</span> <span class="k">vec4</span><span class="p">(</span><span class="n">dif</span> <span class="o">+</span> <span class="n">spc</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+</code></pre></div><blockquote>
 <p>$$ f(\pmb{l}, \pmb{v}) $$ は実際には色そのまのを表してはいません。あくまでBRDF（Bidirectional-Reflectance Distribution Funciton）のモデルを表したものであり、実際にはぶつかった入射光線と表面の法線での半球で、すべての反射光線がどの角度とエナジーを持つのかを調べて、全部合わせないと正確な数値が計算できません。</p>
-
 <p>ただし、今はもっと抽象化した数式を使ってレンダリングをしようとします。リアルタイムで完全な数式を解いて色を得ることはほぼ不可能だし、もっと抽象化したモデルでもだいたい通じます。</p>
 </blockquote>
-
-<h2 id="diffuse">Diffuse<a href="#diffuse" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
-
+<h2 id="diffuse">Diffuse</h2>
 <p>普通よく使うのは<code>Lambertian</code>ですが<code>Oren-Nayar</code>っていう、もっと正確なPBRモデルもあります。僕は最初は<code>Lambertian</code>を使いましたが、最終は<code>Oren-Nayar</code>にしました。</p>
-
-<h3 id="lambertian">Lambertian<a href="#lambertian" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
-
+<h3 id="lambertian">Lambertian</h3>
 <p>$$
 f(\pmb{l}, \pmb{v}) = \frac{\rho_{ss}}{\pi}
 $$</p>
-
 <p><code>Diffuse</code>モデルの中で一番簡単なモデルです。色だけでモデルBRDFが決まりますし、だとしてもそれっぽく見えるようになるので普通のゲームでもよく使います。</p>
-
 <p>ここで
 $$
 \rho_{ss}
 $$
 は、表面のアルベド（物体が光を弾いたときの反射率）を表します。これだけがLambertianのモデルの数値になります。</p>
-
 <p>下のコードはLambertianモデルを使って、実際のピクセルのカラーを表現するコードです。</p>
 <div class="highlight"><pre class="chroma"><code class="language-glsl" data-lang="glsl"><span class="k">float</span> <span class="n">FactorDiffLambertian</span><span class="p">(</span><span class="k">in</span> <span class="k">vec3</span> <span class="n">l</span><span class="p">,</span> <span class="k">in</span> <span class="k">vec3</span> <span class="n">n</span><span class="p">)</span> 
 <span class="p">{</span>
@@ -131,8 +97,8 @@ $$
                        <span class="k">in</span> <span class="k">vec3</span> <span class="n">diffuse</span><span class="p">,</span> <span class="k">in</span> <span class="k">vec3</span> <span class="n">ambient</span><span class="p">)</span> 
 <span class="p">{</span>
     <span class="k">return</span> <span class="n">mix</span><span class="p">(</span><span class="n">ambient</span><span class="p">,</span> <span class="n">diffuse</span><span class="p">,</span> <span class="n">FactorDiffLambertian</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span> <span class="o">*</span> <span class="n">pi</span><span class="p">);</span>
-<span class="p">}</span></code></pre></div>
-<p>注意するとこは、<code>FactorDiffLamberitan</code>の中の<code>dot(l, n)</code>は実際はLambertianのモデルの数式に含まれていません。<code>mix(ambient, diffuse, ...)</code>の<code>diffuse</code>が上記の
+<span class="p">}</span>
+</code></pre></div><p>注意するとこは、<code>FactorDiffLamberitan</code>の中の<code>dot(l, n)</code>は実際はLambertianのモデルの数式に含まれていません。<code>mix(ambient, diffuse, ...)</code>の<code>diffuse</code>が上記の
 $$
 \rho_{ss}
 $$
@@ -142,66 +108,58 @@ $$
 L_o(\mathbf{v}) = \int_{\mathbf{l}\in\Omega}{f(\mathbf{l}, \mathbf{v})L_i(\mathbf{l})(\mathbf{n}\cdot\mathbf{l})d\mathbf{l}}
 $$
 の<code>dot(l, n)</code>項を表しています。（ただし、πは事前に入れときました。反省するとこですね。）</p>
-
 <p>このモデルの特徴は表面が平坦だと見なしてレンダリングを行うところです。Roughnessが関与するとこが無く、単純にアルベドと光と表面の法線ベクトルによる明度だけをレンダリングします。ということで、ちょっと単純だけどコストが速いし、それなりにごまかせば他のモデルとあんまり違いは出ないと思います。</p>
-
-<h3 id="oren-nayar">Oren-Nayar<a href="#oren-nayar" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
-
+<h3 id="oren-nayar">Oren-Nayar</h3>
 <blockquote>
 <p><a href="https://en.wikipedia.org/wiki/Oren%E2%80%93Nayar_reflectance_model">https://en.wikipedia.org/wiki/Oren%E2%80%93Nayar_reflectance_model</a>
 <a href="https://mimosa-pudica.net/improved-oren-nayar.html">https://mimosa-pudica.net/improved-oren-nayar.html</a></p>
 </blockquote>
-
 <p>このモデルは上のLambertianとは違って、表面の粗さによって明度の違いのレンダリングを調節できます。Oren-Nayarとともに表面の粗さによるDiffuseレンダリングモデルを総じて、<code>Rough-surface diffuse BRDF</code>と呼びます。</p>
-
 <p>とりあえずOren-Nayarは論文をみますとFull-Model（完全モデル）とQuantitive-Model（ある程度省略したモデル）に分かれています。ウィキペディアに乗っているのはQuantitive-Modelだし、僕もフールモデルじゃなくてQuantitive-Modelを使ってOren-Nayarを実装してます。</p>
-
 <p>Oren-Nayar（Quantitiveバージョン）は以下の数式となります。
 $$
 \begin{align}
 L_{r} &amp;=
-    \frac{\rho}{\pi}
-    \cdot (\mathbf{l} \cdot \mathbf{n})
-    \cdot (A + (B \cdot \max[0, \cos(\phi_{i} - \phi_{v})]
-        \cdot \sin\alpha
-        \cdot \tan\beta))
-    \cdot E_0
-\\<br />
+\frac{\rho}{\pi}
+\cdot (\mathbf{l} \cdot \mathbf{n})
+\cdot (A + (B \cdot \max[0, \cos(\phi_{i} - \phi_{v})]
+\cdot \sin\alpha
+\cdot \tan\beta))
+\cdot E_0
+\\\<br>
 A &amp;= 1 - 0.5\frac{\sigma^2}{\sigma^2 + 0.33}
-\\<br />
+\\\<br>
 B &amp;= 0.45 \frac{\sigma^2}{\sigma^2 + 0.09}
-\\<br />
+\\\<br>
 \alpha &amp;= \max(
-    \theta_{\mathbf{l} \cdot \mathbf{n}},
-    \theta_{\mathbf{v} \cdot \mathbf{n}})
-\\<br />
+\theta_{\mathbf{l} \cdot \mathbf{n}},
+\theta_{\mathbf{v} \cdot \mathbf{n}})
+\\\<br>
 \beta &amp;= \min(
-    \theta_{\mathbf{l} \cdot \mathbf{n}},
-    \theta_{\mathbf{v} \cdot \mathbf{n}})
+\theta_{\mathbf{l} \cdot \mathbf{n}},
+\theta_{\mathbf{v} \cdot \mathbf{n}})
 \end{align}
 $$
 しかし僕は2番目のリンクにあるベクトルを使った数式を使いました。
 $$
 \begin{align}
 L_o &amp;= \frac{\rho}{\pi}\cdot(\mathbf{l}\cdot\mathbf{n})(A + B\frac{\mathbf{s}}{t})
-\\<br />
+\\\<br>
 s &amp;= \mathbf{l}\cdot\mathbf{v} - (\mathbf{n}\cdot\mathbf{l})(\mathbf{n}\cdot\mathbf{v})
-\\<br />
+\\\<br>
 t &amp;=
 \begin{cases}
-1 &amp; \text{if $s \le 0$} \\<br />
+1 &amp; \text{if $s \le 0$} \\\<br>
 \max(\mathbf{n}\cdot\mathbf{v}, \mathbf{n}\cdot\mathbf{l}) &amp; \text{if $s \gt 0$}
 \end{cases}
-\\<br />
+\\\<br>
 A &amp;= (1 - 0.5\frac{\sigma^2}{\sigma^2 + 0.33} + 0.17\rho\frac{\sigma^2}{\sigma^2 + 0.13})
-\\<br />
+\\\<br>
 B &amp;= 0.45\frac{\sigma^2}{\sigma^2 + 0.09}
 \end{align}
 $$
 なぜなら、上の数式を直接反映してみたらところどころでバグによる明るい曲線が見えるからです。多分<code>tan()</code>項でバグったりして不具合が描画されると思いますが、直せずに下のベクトル形態の数式を使ってOren-NayarのQuantitive-Modelを実装しました。</p>
-
 <p>数式で見れる<code>\rho</code>（$ \rho $ ）はアルベドを表します。普通Lamberitanのアルベドのように、アルベドカラーを入れます。そして<code>\sigma</code>（$ \sigma $）は表面の粗さ（Roughness）を示します。だいたい０～１の値を持ちます。</p>
-
 <p>上の数式を表したコードは下にあります。</p>
 <div class="highlight"><pre class="chroma"><code class="language-glsl" data-lang="glsl"><span class="k">float</span> <span class="n">OrenNayarAlpha</span><span class="p">(</span><span class="k">in</span> <span class="k">vec3</span> <span class="n">l</span><span class="p">,</span> <span class="k">in</span> <span class="k">vec3</span> <span class="n">n</span><span class="p">,</span> <span class="k">in</span> <span class="k">vec3</span> <span class="n">v</span><span class="p">)</span>
 <span class="p">{</span>
@@ -254,20 +212,16 @@ $$
                       <span class="k">in</span> <span class="k">vec3</span> <span class="n">v</span><span class="p">,</span> <span class="k">in</span> <span class="k">float</span> <span class="n">r</span><span class="p">)</span> 
 <span class="p">{</span>
     <span class="k">return</span> <span class="n">mix</span><span class="p">(</span><span class="n">ambient</span><span class="p">,</span> <span class="n">diffuse</span><span class="p">,</span> <span class="n">FactorDiffOrenNayar</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">r</span><span class="p">)</span> <span class="o">*</span> <span class="n">pi</span><span class="p">);</span>
-<span class="p">}</span></code></pre></div>
-<p>一気にコードの量が増えましたが、分析していただきましたら大したものはないことがわかります。</p>
-
+<span class="p">}</span>
+</code></pre></div><p>一気にコードの量が増えましたが、分析していただきましたら大したものはないことがわかります。</p>
 <p>実は、2番目のリンク先で投稿した方の改良したOren-Nayarモデルも実装はしたんですが、光が表面全体を照らすときの描画が好きじゃなかったので断念してOren-NayarのQuantitive-Modelを最終採用しました。</p>
-
-<h2 id="specular">Specular<a href="#specular" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
-
+<h2 id="specular">Specular</h2>
 <p>SpecularのBRDFも、上のDiffuseのようにMicrofacet理論に基づいたモデルを使っています。Specular（ハイライト）は、Diffuseとは違ってカメラの目線によってある位置にハイライトの陰影がつけられるかが異なります。（なんで、Lambertianみたいな単純なモデルは無いです）</p>
-
 <p>普通に使ってるPBRのSpecularモデルは、以下の<strong>Cook-Torrance Model</strong>です。
 $$
 f_{spec}(\mathbf{l}, \mathbf{v}) = \frac
-    {F(\mathbf{h}, \mathbf{l})G_{2}(\mathbf{l},\mathbf{v},\mathbf{h})D(\mathbf{h})}
-    {4|\mathbf{n}\cdot\mathbf{l}||\mathbf{n}\cdot\mathbf{v}|}
+{F(\mathbf{h}, \mathbf{l})G_{2}(\mathbf{l},\mathbf{v},\mathbf{h})D(\mathbf{h})}
+{4|\mathbf{n}\cdot\mathbf{l}||\mathbf{n}\cdot\mathbf{v}|}
 $$</p>
 <div class="highlight"><pre class="chroma"><code class="language-glsl" data-lang="glsl"><span class="k">float</span> <span class="n">cn</span> <span class="o">=</span> <span class="mf">4.</span><span class="n">f</span> <span class="o">*</span> <span class="n">max</span><span class="p">(</span><span class="mf">.25</span><span class="n">f</span><span class="p">,</span> <span class="n">dot</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">ld</span><span class="p">))</span> <span class="o">*</span> <span class="n">max</span><span class="p">(</span><span class="mf">.25</span><span class="n">f</span><span class="p">,</span> <span class="n">dot</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="o">-</span><span class="n">fwd</span><span class="p">));</span>
             
@@ -275,31 +229,27 @@ $$</p>
 <span class="k">float</span> <span class="n">f</span> <span class="o">=</span> <span class="n">Schlick</span><span class="p">(</span><span class="n">kBx1</span><span class="p">.</span><span class="n">mR0</span><span class="p">,</span> <span class="n">td</span><span class="p">);</span>
 <span class="k">float</span> <span class="n">g</span> <span class="o">=</span> <span class="n">SeparableMaskingShadowing</span><span class="p">(</span><span class="n">tl</span><span class="p">,</span> <span class="n">td</span><span class="p">,</span> <span class="n">kBx1</span><span class="p">.</span><span class="n">mRough</span><span class="p">);</span>
             
-<span class="n">spc</span> <span class="o">=</span> <span class="k">vec3</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">d</span> <span class="o">*</span> <span class="n">f</span> <span class="o">*</span> <span class="n">g</span> <span class="o">/</span> <span class="n">cn</span><span class="p">;</span></code></pre></div>
-<h3 id="fresnel-reflection">Fresnel Reflection<a href="#fresnel-reflection" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
-
+<span class="n">spc</span> <span class="o">=</span> <span class="k">vec3</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">d</span> <span class="o">*</span> <span class="n">f</span> <span class="o">*</span> <span class="n">g</span> <span class="o">/</span> <span class="n">cn</span><span class="p">;</span>
+</code></pre></div><h3 id="fresnel-reflection">Fresnel Reflection</h3>
 <blockquote>
 <p><a href="https://en.wikipedia.org/wiki/Fresnel_equations">https://en.wikipedia.org/wiki/Fresnel_equations</a>
 <a href="https://en.wikipedia.org/wiki/Schlick%27s_approximation">https://en.wikipedia.org/wiki/Schlick%27s_approximation</a></p>
 </blockquote>
-
 <p>上記のCook-Torrance Modelにて、分子の
 $$
 F(\mathbf{h}, \mathbf{l})
 $$
 はフレネルの式を示します。要するに、光の入射光線がある物体の表面にぶつかるときの正反射率を表す数式です。全ての物質は自分のIOR（屈折率）と外部のIORによってそれぞれ違う反射率を持ちます。</p>
-
 <p>ウィキペディアを見ていただきますと正確な数式がありますが、CGでシェーダープログラムにフレネルの式の全部をやらせるには負担がかかりすぎます。なので、下の単純なモデルを使いながらある程度フレネルの式を従います。
 $$
 F(\mathbf{h}, \mathbf{l}) \approx F_0 + (1 - F_0)(1 - (\mathbf{h}\cdot\mathbf{l})^+)^5
 $$
 この数式は<strong>Schlick-Approximation</strong>と言います。空気中の物質に対するフレネルの式の数値を得たいときの使います。もちろん、抽象化されたモデルなので正確ではありません。ですがフレネルの式の数値のグラフでの変動をある程度沿っています。</p>
-
 <p>ここで、
 $$
 F_0
 $$
-は垂直入射の時のFresnel反射係数の実部です。この数値はRGBまたは普通のグレースケールの数値として入れられます。グレースケールになる場合には、物質が金属ではない場合で使えます。RGBは金属の物質のフレネルの数値を求めたい場合に使えます。（大雑把でしたけど、もっと詳しくお調べしたい方々は*Real-Time Rendering 4th*のChapter9をお読みくださいませ）
+は垂直入射の時のFresnel反射係数の実部です。この数値はRGBまたは普通のグレースケールの数値として入れられます。グレースケールになる場合には、物質が金属ではない場合で使えます。RGBは金属の物質のフレネルの数値を求めたい場合に使えます。（大雑把でしたけど、もっと詳しくお調べしたい方々は<em>Real-Time Rendering 4th</em>のChapter9をお読みくださいませ）
 $$
 \mathbf{h} = \text{normalize($\mathbf{l} + \mathbf{v}$)}
 $$
@@ -314,34 +264,27 @@ $$
 <span class="k">float</span> <span class="n">Schlick</span><span class="p">(</span><span class="k">in</span> <span class="k">float</span> <span class="n">r0</span><span class="p">,</span> <span class="k">in</span> <span class="k">float</span> <span class="n">td</span><span class="p">)</span> 
 <span class="p">{</span>
     <span class="k">return</span> <span class="n">r0</span> <span class="o">+</span> <span class="p">(</span><span class="mf">1.</span> <span class="o">-</span> <span class="n">r0</span><span class="p">)</span> <span class="o">*</span> <span class="n">pow</span><span class="p">(</span><span class="mf">1.</span> <span class="o">-</span> <span class="n">max</span><span class="p">(</span><span class="mf">0.</span><span class="n">f</span><span class="p">,</span> <span class="n">cos</span><span class="p">(</span><span class="n">td</span><span class="p">)),</span> <span class="mf">5.</span><span class="n">f</span><span class="p">);</span>
-<span class="p">}</span></code></pre></div>
-<p>上のコードはSchlick Approximationを2つのバージョンで実装したものです。下のバージョンの<code>td</code>は、<code>n</code>と<code>v</code>の角度差を表します。</p>
-
-<h3 id="normal-distribution-function">Normal Distribution Function<a href="#normal-distribution-function" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
-
+<span class="p">}</span>
+</code></pre></div><p>上のコードはSchlick Approximationを2つのバージョンで実装したものです。下のバージョンの<code>td</code>は、<code>n</code>と<code>v</code>の角度差を表します。</p>
+<h3 id="normal-distribution-function">Normal Distribution Function</h3>
 <p>法線分布関数だと呼ばれる<strong>Normal Distribution Function</strong>は、微小面の法線がどうやって分布されているかを示す関数です。この関数は統計的に測定されて使っているか、それともある抽象化した数学関数を用いて使います。詳しくはmicrofacet理論の触れますので割愛します。</p>
-
 <p>ですけどこのNDFに特徴の一つは、あるNDF関数があって、そしてある表面の法線ベクトル <code>N</code> があった時に、球面を覆う単位ベクトルを入れたNDFの値の積分は、<code>N</code> を持つ微細表面の面積になります。ということで、
 $$
 \int_{\mathbf{m} \in \Theta} {D(\mathbf{m})(\mathbf{n} \cdot \mathbf{m})d\mathbf{m}} = 1
 $$
 になります。</p>
-
 <p>また、カメラまたは目線のベクトル<code>v</code>があるとき、ある表面の法線ベクトルが<code>n</code>で、そして微細表面の球体の単位ベクトルが<code>m</code>だとしたら、
 $$
 \int_{\mathbf{m} \in \Theta}{D(\mathbf{m})(\mathbf{v}\cdot\mathbf{m})d\mathbf{m}} = \mathbf{v}\cdot\mathbf{n}
 $$
 です。目によって実際に見える微小面の面積は微小面の凸凹の法線ベクトルたちを目線のベクトルとの内積し、結果値を全部足したのと同じです。<code>v * m</code>で目に見えない微小面はなくなりまし、見える表面は残ります。</p>
-
-<p>一応これもリアルタイムでは計算しにくいので、上の特性から派生した様々な抽象化したモデルがあります。僕はDisney BRDFで使った<strong>GTR (Generalized-Trowbridge-Reitz）</strong>モデルを使いました。このモデルはGGX（Trowbridge-Reitz）モデルを一般化したものです。
+<p>一応これもリアルタイムでは計算しにくいので、上の特性から派生した様々な抽象化したモデルがあります。僕はDisney BRDFで使った**GTR (Generalized-Trowbridge-Reitz）**モデルを使いました。このモデルはGGX（Trowbridge-Reitz）モデルを一般化したものです。
 $$
 D_{GTR} = \frac{c}{(a^2\cos^2(\theta_{h})+\sin^2(\theta_{h}))^\gamma}
 $$</p>
-
 <blockquote>
 <p>実はこの数式も実使用で使うために簡略化された数式です。Realtime-RenderingでGTRの完全数式を見てみますと結構ひどいです。（白目）</p>
 </blockquote>
-
 <p>上の数式で、<code>gamma</code>が2ならGGXと同じになります。以下はGTRをコードに写したものです。</p>
 <div class="highlight"><pre class="chroma"><code class="language-glsl" data-lang="glsl"><span class="k">float</span> <span class="n">GTR</span><span class="p">(</span><span class="k">in</span> <span class="k">float</span> <span class="n">c</span><span class="p">,</span> <span class="k">in</span> <span class="k">float</span> <span class="n">r</span><span class="p">,</span> <span class="k">in</span> <span class="k">float</span> <span class="n">dh</span><span class="p">,</span> <span class="k">in</span> <span class="k">float</span> <span class="n">gamma</span><span class="p">)</span>
 <span class="p">{</span>
@@ -349,34 +292,32 @@ $$</p>
         						 <span class="n">c</span>
     <span class="o">/</span> <span class="c1">//--------------------------------------------------------</span>
         <span class="n">pow</span><span class="p">(</span><span class="n">r</span> <span class="o">*</span> <span class="n">r</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">dh</span><span class="p">)</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">dh</span><span class="p">)</span> <span class="o">+</span> <span class="n">sin</span><span class="p">(</span><span class="n">dh</span><span class="p">)</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">dh</span><span class="p">),</span> <span class="n">gamma</span><span class="p">);</span>
-<span class="p">}</span></code></pre></div>
-<h3 id="joint-masking-shadowing-function">Joint Masking Shadowing Function<a href="#joint-masking-shadowing-function" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
-
+<span class="p">}</span>
+</code></pre></div><h3 id="joint-masking-shadowing-function">Joint Masking Shadowing Function</h3>
 <p>Joint Masking Shadowing Functionを説明する前に、簡単に一般Masking Function <code>G</code>を説明させていただきたいと思います。日本語でいうと<strong>幾何減衰項</strong>（読み方はわかりません）と言います。Masking Functionは微小面（Microfacet）によって発生するシャドウィング（自己陰影）、マスキング（自己遮蔽）を表したものです。</p>
-
 <p>幾何減衰項は上で説明したNDFに（法線分布関数）と密接に関連されます。上の表面の法線・微小面の法線・目線の法線との関係がある数式は、以下のように変形できます。
 $$
 \int_{\in\Theta}{G_1(\mathbf{m}, \mathbf{v})D(\mathbf{m})(\mathbf{v}\cdot\mathbf{m})^+d\mathbf{m}} = \mathbf{v}\cdot\mathbf{n}
 $$
-ここで <code>G_1(m, v)</code>は<strong>Smith Function</strong>といい、<code>v</code>に対して見える<code>m</code>の比率を表します。ですけど、G1は実際には<code>m</code>が目線の反対方向を向いていなければ、G1の数値に全然影響がない特徴を持ちます。なのでSmith Function G1の数式は
+ここで <code>G_1(m, v)</code>は**Smith Function**といい、<code>v</code>に対して見える<code>m</code>の比率を表します。ですけど、G1は実際には<code>m</code>が目線の反対方向を向いていなければ、G1の数値に全然影響がない特徴を持ちます。なのでSmith Function G1の数式は
 $$
 G_1(\mathbf{m}, \mathbf{v}) = \frac{\chi^+(\mathbf{m}\cdot\mathbf{v})}{1 + \Lambda(\mathbf{v})}
 $$
 となります。コードでは上の分子の項は、<code>m</code>と<code>v</code>の内積が0より大きければ1として置換できます。ですがこれをこのまま使うのではなく、BRDFを建てる時には以下のようにG1の代わりにG2を使います。
 $$
 f(\mathbf{l}, \mathbf{v}) =
-    \int_{\mathbf{m}\in\Theta}
-        f_{\mu}(\mathbf{l}, \mathbf{v}, \mathbf{m})
-        G_2(\mathbf{l}, \mathbf{v}, \mathbf{m})
-        D(\mathbf{m})
-        \frac{(\mathbf{m}\cdot\mathbf{l})^+}{|\mathbf{n}\cdot\mathbf{l}|}
-        \frac{(\mathbf{m}\cdot\mathbf{v})^+}{|\mathbf{n}\cdot\mathbf{v}|}
-        d\mathbf{m}
-\\<br />
-\\<br />
+\int_{\mathbf{m}\in\Theta}
+f_{\mu}(\mathbf{l}, \mathbf{v}, \mathbf{m})
+G_2(\mathbf{l}, \mathbf{v}, \mathbf{m})
+D(\mathbf{m})
+\frac{(\mathbf{m}\cdot\mathbf{l})^+}{|\mathbf{n}\cdot\mathbf{l}|}
+\frac{(\mathbf{m}\cdot\mathbf{v})^+}{|\mathbf{n}\cdot\mathbf{v}|}
+d\mathbf{m}
+\\\<br>
+\\\<br>
 G_2(\mathbf{l}, \mathbf{v}, \mathbf{m}) =
-    G_1(\mathbf{v}, \mathbf{m})
-    G_1(\mathbf{l}, \mathbf{m})
+G_1(\mathbf{v}, \mathbf{m})
+G_1(\mathbf{l}, \mathbf{m})
 $$
 上のG2の形以外に、様々な変形数式が存在します。G1を2つくっつけて掛け算する数式が一番だったりしますが、不具合が存在しますので下のも使われるそうです。（下は*Smith Height-Correlated Masking-Shadowing Function*）と言います。
 $$
@@ -400,55 +341,72 @@ $$
 <span class="k">float</span> <span class="n">SeparableMaskingShadowing</span><span class="p">(</span><span class="k">in</span> <span class="k">float</span> <span class="n">tl</span><span class="p">,</span> <span class="k">in</span> <span class="k">float</span> <span class="n">tv</span><span class="p">,</span> <span class="k">in</span> <span class="k">float</span> <span class="n">r</span><span class="p">)</span>
 <span class="p">{</span>
     <span class="k">return</span> <span class="n">SmithMasking</span><span class="p">(</span><span class="n">tl</span><span class="p">,</span> <span class="n">r</span><span class="p">)</span> <span class="o">*</span> <span class="n">SmithMasking</span><span class="p">(</span><span class="n">tv</span><span class="p">,</span> <span class="n">r</span><span class="p">);</span>
-<span class="p">}</span></code></pre></div>
-<h1 id="まとめ">まとめ<a href="#まとめ" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h1>
-
+<span class="p">}</span>
+</code></pre></div><h1 id="まとめ">まとめ</h1>
 <p>以上、大雑把にコードを振り返りながらPBRの書き方、中身についてメモをしてみました。</p>
-
-<h1 id="もっと詳しく調べたい方に">もっと詳しく調べたい方に<a href="#もっと詳しく調べたい方に" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h1>
-
+<h1 id="もっと詳しく調べたい方に">もっと詳しく調べたい方に</h1>
 <ul>
-<li><a href="https://qiita.com/mebiusbox2/items/1cd65993ffb546822213">https://qiita.com/mebiusbox2/items/1cd65993ffb546822213</a></li>
-
-<li><p><a href="https://qiita.com/mebiusbox2/items/8db00cdcaf263992a5ce">https://qiita.com/mebiusbox2/items/8db00cdcaf263992a5ce</a></p></li>
-
-<li><p><a href="https://qiita.com/emadurandal/items/3a8db7bc61438245654d">https://qiita.com/emadurandal/items/3a8db7bc61438245654d</a></p></li>
+<li>
+<p><a href="https://qiita.com/mebiusbox2/items/1cd65993ffb546822213">https://qiita.com/mebiusbox2/items/1cd65993ffb546822213</a></p>
+</li>
+<li>
+<p><a href="https://qiita.com/mebiusbox2/items/8db00cdcaf263992a5ce">https://qiita.com/mebiusbox2/items/8db00cdcaf263992a5ce</a></p>
+</li>
+<li>
+<p><a href="https://qiita.com/emadurandal/items/3a8db7bc61438245654d">https://qiita.com/emadurandal/items/3a8db7bc61438245654d</a></p>
+</li>
 </ul>
-
-			</div>
-			<hr class="post-end">
-			<footer class="post-info">
-				<p>
-					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-tag meta-icon"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7" y2="7"></line></svg><span class="tag"><a href="https://liliilli.github.io/tags/untagged">untagged</a></span>
-				</p>
-				<p><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>4934 Words</p>
-				<p><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>2019-11-16 19:51 &#43;0900</p>
-			</footer>
-		</article>
-		<div class="post-nav thin">
-			<a class="next-post" href="https://liliilli.github.io/posts/cpp_concept/">
-				<span class="post-nav-label"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-left"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>&nbsp;Newer</span><br><span>C&#43;&#43;2aのconceptsを使ってみた。</span>
-			</a>
-			<a class="prev-post" href="https://liliilli.github.io/posts/chained-group-allocation/">
-				<span class="post-nav-label">Older&nbsp;<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-right"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg></span><br><span>Chained-Group Allocationパターンについてメモ</span>
-			</a>
-		</div>
-		<div id="comments" class="thin">
 </div>
-	</main>
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://liliilli.github.io/tags/untagged">untagged</a></li>
+    </ul>
+  </footer>
+</article>
+    </main><footer class="footer">
+    <span>&copy; 2020 <a href="https://liliilli.github.io">neuromantic</a></span>
+    <span>&middot;</span>
+    <span>Powered by <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo️️</a>️</span>
+    <span>&middot;</span>
+    <span>Theme️ <a href="https://git.io/hugopapermod" rel="noopener" target="_blank">PaperMod</a></span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top">
+    <button class="top-link" id="top-link" type="button">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6">
+            <path d="M12 6H0l6-6z" /></svg>
+    </button>
+</a>
+<script src="https://liliilli.github.io/assets/js/highlight.min.e7afc2928c0925d65c4732dfebe147014d91299a98e819e4b42f25c4fa68e91c.js" integrity="sha256-56/CkowJJdZcRzLf6&#43;FHAU2RKZqY6BnktC8lxPpo6Rw="></script>
+<script>hljs.initHighlightingOnLoad();</script>
+<script>
+    window.onload = function () {
+        if (localStorage.getItem("menu-scroll-position")) {
+            document.getElementById('menu').scrollLeft = localStorage.getItem("menu-scroll-position");
+        }
+    }
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
 
-	<footer id="site-footer" class="section-inner thin animated fadeIn faster">
-		<p>&copy; 2020 <a href="https://liliilli.github.io">jongmin yun - neu.</a> &#183; <a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC BY-NC 4.0</a></p>
-		<p>
-			Made with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> &#183; Theme <a href="https://github.com/Track3/hermit" target="_blank" rel="noopener">Hermit</a> &#183; <a href="https://liliilli.github.io/posts/index.xml" target="_blank" title="rss"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-rss"><path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1"></circle></svg></a>
-		</p>
-	</footer>
-
-
-
-	<script src="https://liliilli.github.io/js/bundle.min.4a9a0ac3d2217822c7865b4161e6c2a71de1d70492264337755427898dd718f6.js" integrity="sha256-SpoKw9IheCLHhltBYebCpx3h1wSSJkM3dVQniY3XGPY=" crossorigin="anonymous"></script>
-	
-
+            document.querySelector(this.getAttribute("href")).scrollIntoView({
+                behavior: "smooth"
+            });
+        });
+    });
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+    function menu_on_scroll() {
+        localStorage.setItem("menu-scroll-position", document.getElementById('menu').scrollLeft);
+    }
+</script>
 </body>
 
 </html>

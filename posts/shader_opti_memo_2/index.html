@@ -1,393 +1,319 @@
 <!DOCTYPE html>
-<html lang="en-us">
+<html lang="en">
 
-<head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<meta http-equiv="X-UA-Compatible" content="ie=edge">
-	<meta name="theme-color" content="#494f5c">
-	<meta name="msapplication-TileColor" content="#494f5c">
-<meta itemprop="name" content="Low-level shader optimization for next-gen and D3D11のメモ">
-<meta itemprop="description" content="メモの基になる原文は2014年GDCで発表されたもので、翻訳ミスによる間違いがある可能性があります。また、GCN（AMD）アーキテクチャの重">
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
+<title>Low-level shader optimization for next-gen and D3D11のメモ - neuromantic</title>
 
-<meta itemprop="datePublished" content="2020-06-18T10:27:48&#43;09:00" />
-<meta itemprop="dateModified" content="2020-06-18T19:42:58&#43;09:00" />
-<meta itemprop="wordCount" content="7646">
+<meta name="description" content="メモの基になる原文は2014年GDCで発表されたもので、翻訳ミスによる間違いがある可能性があります。また、GCN（AMD）アーキテクチャの重">
+<meta name="keywords" content= />
+<meta name="author" content="Jongmin Yun, Neu.">
+<link rel="canonical" href="https://liliilli.github.io/posts/shader_opti_memo_2/" />
+<link href="https://liliilli.github.io/assets/css/stylesheet.min.a3b13905fd4b98ea165a18374ae5215d9de97a04f187f789736c56858296ba12.css" integrity="sha256-o7E5Bf1LmOoWWhg3SuUhXZ3pegTxh/eJc2xWhYKWuhI=" rel="preload stylesheet"
+    as="style">
+<link rel="apple-touch-icon" href="https://liliilli.github.io/apple-touch-icon.png">
+<link rel="icon" href="https://liliilli.github.io/favicon.ico">
+<meta name="generator" content="Hugo 0.75.1" />
 
-
-
-<meta itemprop="keywords" content="" />
-<meta property="og:title" content="Low-level shader optimization for next-gen and D3D11のメモ" />
-<meta property="og:description" content="メモの基になる原文は2014年GDCで発表されたもので、翻訳ミスによる間違いがある可能性があります。また、GCN（AMD）アーキテクチャの重" />
-<meta property="og:type" content="article" />
-<meta property="og:url" content="https://liliilli.github.io/posts/shader_opti_memo_2/" />
-<meta property="article:published_time" content="2020-06-18T10:27:48+09:00" />
-<meta property="article:modified_time" content="2020-06-18T19:42:58+09:00" />
-<meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="Low-level shader optimization for next-gen and D3D11のメモ"/>
-<meta name="twitter:description" content="メモの基になる原文は2014年GDCで発表されたもので、翻訳ミスによる間違いがある可能性があります。また、GCN（AMD）アーキテクチャの重"/>
-
-	<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-	<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-	<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-	<link rel="manifest" href="/site.webmanifest">
-	<link rel="mask-icon" href="/safari-pinned-tab.svg" color="">
-	<link rel="shortcut icon" href="/favicon.ico">
-
-	<title>Low-level shader optimization for next-gen and D3D11のメモ</title>
-	<link rel="stylesheet" href="https://liliilli.github.io/css/style.min.eac77496566fd7d5768fd650ddb0b2b181ca6a2d7c5fdd6fe6b8ba4bf47e566f.css" integrity="sha256-6sd0llZv19V2j9ZQ3bCysYHKai18X91v5ri6S/R+Vm8=" crossorigin="anonymous">
-	
 </head>
 
-<body id="page">
-	
-	<header id="site-header" class="animated slideInUp">
-		<div class="hdr-wrapper section-inner">
-			<div class="hdr-left">
-				<div class="site-branding">
-					<a href="https://liliilli.github.io">neuromantic</a>
-				</div>
-				<nav class="site-nav hide-in-mobile">
-					
-				<a href="https://liliilli.github.io/posts/">Posts</a>
-				<a href="https://liliilli.github.io/about-hugo/">About</a>
+<body class="single" id="top">
+<header class="header">
+    <nav class="nav">
+        <p class="logo"><a href="https://liliilli.github.io">neuromantic</a></p>
+        <ul class="menu" id="menu" onscroll="menu_on_scroll()">
+            <li>
+                <a href="https://liliilli.github.io/archives/">
+                    <span>
+                        Archives
+                    </span>
+                </a>
+            </li>
+            <li>
+                <a href="https://liliilli.github.io/tags/">
+                    <span>
+                        Tags
+                    </span>
+                </a>
+            </li>
+            <li>
+                <a href="https://liliilli.github.io/series/">
+                    <span>
+                        Series
+                    </span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+    <main class="main">
 
-				</nav>
-			</div>
-			<div class="hdr-right hdr-icons">
-				<span class="hdr-social hide-in-mobile"><a href="https://twitter.com/NeuliliilliD" target="_blank" rel="noopener me" title="Twitter"><svg xmlns="http://www.w3.org/2000/svg" class="feather" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg></a><a href="https://github.com/liliilli" target="_blank" rel="noopener me" title="Github"><svg xmlns="http://www.w3.org/2000/svg" class="feather" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg></a></span><button id="menu-btn" class="hdr-btn" title="Menu"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-menu"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg></button>
-			</div>
-		</div>
-	</header>
-	<div id="mobile-menu" class="animated fast">
-		<ul>
-			<li><a href="https://liliilli.github.io/posts/">Posts</a></li>
-			<li><a href="https://liliilli.github.io/about-hugo/">About</a></li>
-		</ul>
-	</div>
-
-
-
-
-	<main class="site-main section-inner animated fadeIn faster">
-		<article class="thin">
-			<header class="post-header">
-				<div class="post-meta"><span>Jun 18, 2020</span></div>
-				<h1>Low-level shader optimization for next-gen and D3D11のメモ</h1>
-			</header>
-			<div class="content">
-				
-
-<p>メモの基になる<a href="https://www.gdcvault.com/browse/gdc-14/play/1020352">原文</a>は2014年GDCで発表されたもので、翻訳ミスによる間違いがある可能性があります。また、GCN（AMD）アーキテクチャの重点的に扱っているので、NVIDIAなどのハードウェアについては挙動が違うかもしれません。</p>
-
-<hr />
-
-<h1 id="本文">本文<a href="#本文" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h1>
-
+<article class="post-single">
+  <header class="post-header">
+    <h1 class="post-title">
+      Low-level shader optimization for next-gen and D3D11のメモ
+    </h1>
+    <div class="post-meta">
+      <time>June 18, 2020</time>&nbsp;·&nbsp;Jongmin Yun, Neu.
+    </div>
+  </header>
+  <div class="post-content"><p>メモの基になる<a href="https://www.gdcvault.com/browse/gdc-14/play/1020352">原文</a>は2014年GDCで発表されたもので、翻訳ミスによる間違いがある可能性があります。また、GCN（AMD）アーキテクチャの重点的に扱っているので、NVIDIAなどのハードウェアについては挙動が違うかもしれません。</p>
+<hr>
+<h1 id="本文">本文</h1>
 <p><a href="https://liliilli.github.io/posts/shader_opti_memo/">Low Level Thinking in High Shader Languages</a>の原文が出てから１年後、2014年に現世代（Xbox One、PS4）で搭載されたGCNアーキテクチャの登場、DirectX11の本格的な使用（当時SteamでのD3D11使用割合が70%）によって以前までの最適化も新しく考えなかればならなくなったそうだ。</p>
-
-<h2 id="introduction-more-lessons">Introduction ~ More Lessons<a href="#introduction-more-lessons" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
-
+<h2 id="introduction--more-lessons">Introduction ~ More Lessons</h2>
 <ul>
-<li>Xbox One（Durango）、PS4（Orbis）はAMDのスーパーSIMDのGCNを使っている。（GCNの前まではVLIWを使い回していた）＋次世代もAMDのNAVI（GCN1.5として分類されるらしい）を使ってるので基本的な骨子は変わらないのでは…と</li>
-<li>コンパイラが高級言語で書いたコードをなんでも最適化してくれると思わないでほしい。コンパイラは文法的な部分を破壊せず出来るだけの最適化だけ行う。</li>
-<li>以前まではできれば<code>MAD</code>命令になるようにコードを書くべきであった。</li>
-<li>スカラとベクトルの演算を分離すべき。ビルトイン関数の中ではベクトルとスカラを混じって使ってる実装があるので、注意すべき。</li>
-
-<li><p>VLIWを採用したアーキテクチャの場合には演算の依存性が強いので、できれば分類して「（）」を取ること。</p></li>
-
-<li><p><code>abs()</code>と<code>-</code>符号（Negation）を使う際には既存の変数に、<code>saturate()</code>は演算したものを入れて使わなければ命令の最適化がされない。</p></li>
-
-<li><p><code>rcp()</code>、<code>rsqrt()</code>、<code>sqrt()</code>、<code>exp2()</code>、<code>log2()</code>、そして一般三角関数はHWにマッピングされている。ただ、逆三角関数は慎重に使うこと。</p></li>
-
-<li><p>高級言語での最適化はローレベルの最適化に影響をする。</p></li>
+<li>
+<p>Xbox One（Durango）、PS4（Orbis）はAMDのスーパーSIMDのGCNを使っている。（GCNの前まではVLIWを使い回していた）＋次世代もAMDのNAVI（GCN1.5として分類されるらしい）を使ってるので基本的な骨子は変わらないのでは…と</p>
+</li>
+<li>
+<p>コンパイラが高級言語で書いたコードをなんでも最適化してくれると思わないでほしい。コンパイラは文法的な部分を破壊せず出来るだけの最適化だけ行う。</p>
+</li>
+<li>
+<p>以前まではできれば<code>MAD</code>命令になるようにコードを書くべきであった。</p>
+</li>
+<li>
+<p>スカラとベクトルの演算を分離すべき。ビルトイン関数の中ではベクトルとスカラを混じって使ってる実装があるので、注意すべき。</p>
+</li>
+<li>
+<p>VLIWを採用したアーキテクチャの場合には演算の依存性が強いので、できれば分類して「（）」を取ること。</p>
+</li>
+<li>
+<p><code>abs()</code>と<code>-</code>符号（Negation）を使う際には既存の変数に、<code>saturate()</code>は演算したものを入れて使わなければ命令の最適化がされない。</p>
+</li>
+<li>
+<p><code>rcp()</code>、<code>rsqrt()</code>、<code>sqrt()</code>、<code>exp2()</code>、<code>log2()</code>、そして一般三角関数はHWにマッピングされている。ただ、逆三角関数は慎重に使うこと。</p>
+</li>
+<li>
+<p>高級言語での最適化はローレベルの最適化に影響をする。</p>
+</li>
 </ul>
-
-<h2 id="a-look-at-modern-hardware-sampling-a-cubemap">A look at modern hardware ~ Sampling a cubemap<a href="#a-look-at-modern-hardware-sampling-a-cubemap" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
-
+<h2 id="a-look-at-modern-hardware--sampling-a-cubemap">A look at modern hardware ~ Sampling a cubemap</h2>
 <p>キューブマップから３次元UVWでサンプリングをするコードがあるとして、</p>
-<div class="highlight"><pre class="chroma"><code class="language-hlsl" data-lang="hlsl">TextureCube Cube;
+<pre><code class="language-hlsl" data-lang="hlsl">TextureCube Cube;
 SamplerState Samp;
 
 float4 main(float3 tex_coord: TEXCOORD) : SV_Target
 {
 	return Cube.Sample(Samp, tex_coord);
-}</code></pre></div>
-<p>D3D9までは射影マッピング（<code>tex2Dproj</code>）と同じく、一つの命令としてテクセルをサンプリングすることが出来た。しかしD3D10からは射影マッピングをさせる関数がなくなり、実装するためには直接<code>w</code>で割り算しなければならなかった。</p>
-
+}
+</code></pre><p>D3D9までは射影マッピング（<code>tex2Dproj</code>）と同じく、一つの命令としてテクセルをサンプリングすることが出来た。しかしD3D10からは射影マッピングをさせる関数がなくなり、実装するためには直接<code>w</code>で割り算しなければならなかった。</p>
 <p>ハードウェアが発展するにつれて射影マッピングなどをするための特殊なトランジスターなどを植え込む必要がなくなり、その代わりにいくつかの演算で同じことを出来るようALUをもっと植え付けるようになったそうだ。</p>
-
 <p>これはキューブマップも同じで、キューブマップで使うUVWを平準化（ノーマライズ）するに特殊なトランジスターなどを使わず以前より沢山になったALUの一部を使って演算させるようになったらしい。もちろん原文（p5）の右画像のバイトコードは、命令が一つしか生成されなくてこれでOKのようだが、実際に生成されるコードは結構グロいようだ。（もちろんハードウェアによって生成されるインストラクションはそれぞれ違う）</p>
-
 <p>画像ではベクトル演算が15個、スカラ演算が6個、テクスチャに接近して色をとり、またそれを返す命令がそれぞれ1個で色々と膨らんでいることがわかる。</p>
-
-<h2 id="hardware-evolution">Hardware evolution<a href="#hardware-evolution" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
-
+<h2 id="hardware-evolution">Hardware evolution</h2>
 <p>固定関数（Fixed Function）のためのユニットがALUに編入されつつある傾向が持続しているそうだ。<code>D3D11_FILTER</code>（ミップマップのフィルタリング）で線形補間などをすることもD3D11からはALUに任せているらしい。（またハードウェアによって挙動は違うかもしれない）</p>
-
 <p>Vertex Fetchも見た目は固定関数で、実はシェーダーの中でFetchingを行っているそうだ。（前世代のXbox 360は既にやっていたと…）</p>
-
 <blockquote>
 <p><a href="https://stackoverflow.com/questions/56581141/direct3d11-gradient-instruction-used-in-a-loop-with-varying-iteration-forcing">https://stackoverflow.com/questions/56581141/direct3d11-gradient-instruction-used-in-a-loop-with-varying-iteration-forcing</a></p>
 </blockquote>
-
 <p>射影とキューブマップのための演算もALUに移り、テクスチャのサンプリングをする時に内部で使う<code>ddx/ddy</code>などのグラディエント（Gradient）もGCNでは最終的にはALUの方で演算されるようになったそうだ。</p>
-
 <p>こういった固定関数のような要素たちがALUの演算に全部依存することになって、比較的コストが増えてしまってるので、それに関する注意もやらざるを得なくなった。</p>
-
 <p>また以前までのGPUハードウェアは内部でいくつかの全域状態を保持するためのレジスターなどを持って、そこからハードウェアが必要となる時に読んだりして演算を処理したらしい。（多分SM3までの話だと思う）最新（当時）のハードウェアはそれがなくなり、ほぼすべてのリソースをVRAMメモリまたはL1、L2キャッシュから読み込んで演算しなければならない。（Constant Bufferなどが生まれた理由かな…と思ってる）</p>
-
 <p>またSM6（D3D12）になってもリソースを割り当てる時にはスロット（Slot）を書かなければならないが、実際のHWではスロットというのはもうなくなり、その代わりにメモリにスロットの代わりに使えるリストを作って、そこにシェーダーのリソースまたは何らかのポインターを入れて使うようにしているそうだ。</p>
-
 <p>ということは、数の制約がなければシェーダーから接近できるリソースの数の制約っていうのはもうなくなっていたということである。また、リソースのアクセスには関連したサンプラーの状態（Sampler state）とリソーステクスチャへのディスクリプタ（Descriptor）への明示的に参照をするための追加コストが要るようになったことでもある。しかしGCNアーキテクチャではVALUが動いてる途中で独立的にSALUでやってくれるのでコストはないらしい。</p>
-
 <p>またGCNのCompute Unitは完全な無状態（Stateless）である。ということで一つのCompute Shaderで使うリソースなどはほかのCompute Shaderに干渉されてなく、データレースなどをうまくコントロールすればほぼ並列でシェーダーを動作させることが出来るという。</p>
-
 <p>しかしGraphics pipelineはCompute Shaderとは違ってパイプライン制御のための状態を保持しなければならないため、並列に演算させることは出来ないらしい。（RDNA2とかAmpereではどうなのかな）</p>
-
-<h2 id="null-shader-not-so-null-shader-anymore">NULL shader ~ Not so NULL shader anymore<a href="#null-shader-not-so-null-shader-anymore" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
-<div class="highlight"><pre class="chroma"><code class="language-hlsl" data-lang="hlsl">float4 main(float4 tex_coord: TEXCOORD0) : SV_Target
+<h2 id="null-shader--not-so-null-shader-anymore">NULL shader ~ Not so NULL shader anymore</h2>
+<pre><code class="language-hlsl" data-lang="hlsl">float4 main(float4 tex_coord: TEXCOORD0) : SV_Target
 {
 	return tex_coord;
-}</code></pre></div>
-<p>NULL shaderはハードウェア上でAPIの基本的な基本的な特性を把握するに適切だ。原文によれば、AMDのD3D10ではR0レジスタをピクセルに書き込むだけの一つ命令で終わるが、AMDのD3D11からは補完（interpolation）自体がシェーダーの方で行っているため、p10の画像のようにインストラクションが増えたことがわかる。（またGCNの最後でf32→f16のexport conversionをしていることもわかる）</p>
-
+}
+</code></pre><p>NULL shaderはハードウェア上でAPIの基本的な基本的な特性を把握するに適切だ。原文によれば、AMDのD3D10ではR0レジスタをピクセルに書き込むだけの一つ命令で終わるが、AMDのD3D11からは補完（interpolation）自体がシェーダーの方で行っているため、p10の画像のようにインストラクションが増えたことがわかる。（またGCNの最後でf32→f16のexport conversionをしていることもわかる）</p>
 <p>ということで、AMDのD3D11でD3D10のようなNULL Shaderを作るには以下のようにしなければならないらしい。</p>
-<div class="highlight"><pre class="chroma"><code class="language-hlsl" data-lang="hlsl">float4 main(float4 scr_pos: SV_Position) : SV_Target
+<pre><code class="language-hlsl" data-lang="hlsl">float4 main(float4 scr_pos: SV_Position) : SV_Target
 {
 	return scr_pos;
 }
 
 // in GCN...
 // exp mrt0, v2, v3, v4, v5 vm done (v0 and v1 are for barycentric coords for interpolation)
-// s_endpgm</code></pre></div>
-<blockquote>
+// s_endpgm
+</code></pre><blockquote>
 <p><a href="https://www.dictionary.com/browse/freebees">https://www.dictionary.com/browse/freebees</a></p>
 </blockquote>
-
-<h2 id="shader-inputs">Shader inputs<a href="#shader-inputs" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
-
+<h2 id="shader-inputs">Shader inputs</h2>
 <p>シェーダーを実行するスケジューラでは書くシェーダーステージごとにコストがないリソースを用意している。上のPSコードで使った<code>SV_Position</code>もその一部である。</p>
-
 <ul>
 <li>VS - Vertex Index（SV_VertexID）</li>
 <li>PS - Barycentric coordinates、SV_Position</li>
 <li>CS - SV_DispatchThreadID、SV_GroupID</li>
 </ul>
-
 <p>しかし使っているハードウェアまたはAPIによって上のリストとはサポートするものが違うかもしれない。兎に角、コストがないリソース以外のリソースはメモリに載っており、接近しようとしたらコストが発生する。</p>
-
 <p>また前述の通りAPIはVertex Fetchを固定関数の扱いしているが、GCN以降のHWでは固定関数ではなくなり、シェーダーから直接命令を叩いて実行するようになった。実はこれはXbox 360でも同じでシェーダーから頂点をFetchしているそうだ。ただ、Xbox 360の場合にはそれを実現するための大量のインストラクションを入れておかないといけないらしく、相当コストがあったそうだ。</p>
-
 <p>GCNでは普通に<code>s_swappc_b64</code>というSubroutineにジャンプする命令を使って頂点を取得している。しかしVertex組を使わないとこのジャンプはいらないためなくなっている。</p>
-
 <p>またドライバーソフトはリソースの数が少なく、16個のユーザーSGPR（Scalar General Purpose Register）に収めることが出来たら、ポインターでリソースを探させるのではなくリソースのディスクリプタを直接シェーダーの中に入れて参照させる。しかしテクスチャのディスクリプタは８SGRPを消耗するため、１個だけ入れられるっていう結構厳しい感じはある。</p>
-
 <p>p17）昔にはUV座標の補完の命令を減らすためにUV２個を<code>float4</code>のようなベクトルに全部入れとく最適化があったが、GCNでは通用しないらしい。すなわち最適化してないコードとコストが同じになってしまう。解決策は低数値に補完をしないようにフラグをかけることである。</p>
-
 <p>また<code>SV_Position</code>のことだが、短いコードなどで使おうとするとシステムから<code>SV_Position</code>を生成する時間によってボトルネックになることがあるそうだ。勿論<code>SV_</code>系は予めシェーダーのレジスタにロードされるようになるため、シェーダーから見るとコスト無しに見えるけれど実際にはそうではないらしい。長いコードで使うのは、どこかでの要素によってボトルネックが掛かることがある可能性が高いため、気にしなくて良いらしい。</p>
-
 <blockquote>
 <p><a href="https://docs.microsoft.com/en-us/windows/win32/direct3dhlsl/dx-graphics-hlsl-struct">https://docs.microsoft.com/en-us/windows/win32/direct3dhlsl/dx-graphics-hlsl-struct</a></p>
-
 <p>Do not perform perspective-correction during interpolation. The <strong>noperspective</strong> modifier can be combined with the <strong>centroid</strong> modifier.</p>
 </blockquote>
-
 <p>そして属性として付けられる<code>[noperspective]</code>はGCNではあんまり影響がないそうだ。ただ、Rasterizer以前の段階で<code>w</code>をPSまで持っていって、そこで割り算などを使う時にはこれを入れると<code>xyz(w)</code>へのPerspective-Correctionをしないため、ALUの軽減が低下するらしい。</p>
-<div class="highlight"><pre class="chroma"><code class="language-hlsl" data-lang="hlsl">float4 main(nointerpolation float4 tc: TC) : SV_Target
+<pre><code class="language-hlsl" data-lang="hlsl">float4 main(nointerpolation float4 tc: TC) : SV_Target
 {
 	return tc * rcp(tc.w);
-}</code></pre></div>
-<p>GCNアーキテクチャではboolが実装されていないらしく、そして全てのレジスタは32bitであるため<code>SV_IsFrontFace</code>のような<code>bool</code>は<code>0xFFFFFFFF</code>か<code>0x0</code>になる。これを使って<code>back-face lighting</code>が最適化できる。</p>
-<div class="highlight"><pre class="chroma"><code class="language-hlsl" data-lang="hlsl">return face ? normal : -normal;
+}
+</code></pre><p>GCNアーキテクチャではboolが実装されていないらしく、そして全てのレジスタは32bitであるため<code>SV_IsFrontFace</code>のような<code>bool</code>は<code>0xFFFFFFFF</code>か<code>0x0</code>になる。これを使って<code>back-face lighting</code>が最適化できる。</p>
+<pre><code class="language-hlsl" data-lang="hlsl">return face ? normal : -normal;
 // or...
-return asfloat(BitFieldInsert(face, asuint(normal), asuint(-normal)));</code></pre></div>
-<h2 id="gcn-instructions">GCN instructions<a href="#gcn-instructions" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
-
+return asfloat(BitFieldInsert(face, asuint(normal), asuint(-normal)));
+</code></pre><h2 id="gcn-instructions">GCN instructions</h2>
 <p>GCNアーキテクチャは以前のVLIWのようなものすごく長い命令を持たなく、32bitまたは64bitの命令だけを持つようになっている。そして命令一つに一つのスカラレジスタだけ読み込みできるようになったため、<code>MAD</code>が効率が悪くなる可能性ができてしまう。</p>
-
 <p>ただ、ハードウェア的にコスト無しの定数をいくつ内蔵している。</p>
-
 <ul>
 <li>0.5, 1.0, 2.0, 4.0, -0.5, -1.0, -2.0, -4.0（Single-point floating）</li>
 <li>[-64, 64]（Integer）</li>
 </ul>
-
 <p>最初にも技術したあったがGCNは以前までのAMDのVLIW-4から完全に変わったScalarベースのSIMDアーキテクチャである。ということはシェーダーで演算の単位をスカラ数値一つとして扱うことになる。（ベクトル命令がなくなるということではない）</p>
-
 <p>しかしハードウェアではWavefrontという64個のスレッド組があって、スレッド一つ一つがスカラ値を演算するように構成されている。そしてこれをSIMD化されたベクトルという。ここでベクトル命令が働き出すそうだ。</p>
-
 <p>ベクトル命令で構成されないスカラは、スカラ演算を行うユニットで演算される。そしてスカラ演算のためのユニットはベクトルとは独立的に動くので、もしシェーダーでベクトル演算またはテクスチャのサンプリングが多かったら負荷はあんまりない。</p>
-
 <p>p22）ハードウェア命令とはどの命令かによって実行速度が違う。2014年以降のGPUでは単精度浮動小数点数の演算は割り算を除き最大限の速度で演算される。しかしGCNでは整数に限って32bitsの<code>MUL</code>と<code>MAD</code>はフールではない。</p>
-
 <p>それと、タイプの変換は以前までのAMDでは1/4の速度だったが、GCNからは最大限の速度になる。また<code>floor()</code>、<code>ceil()</code>、<code>round()</code>も速度低下がない。</p>
-
 <ul>
 <li>Full Rate
-
 <ul>
 <li>Float add/sub/mul/mad/fma</li>
 <li>Integer add/sub/mul24/mad24/logic</li>
 <li>Type conversion, floor, ceil, round</li>
-</ul></li>
-<li><sup>1</sup>&frasl;<sub>2</sub> Rate
-
+</ul>
+</li>
+<li>1/2 Rate
 <ul>
 <li>Double add</li>
-</ul></li>
-<li><sup>1</sup>&frasl;<sub>4</sub> Rate
-
+</ul>
+</li>
+<li>1/4 Rate
 <ul>
 <li>rcp, rsqrt, sqrt</li>
 <li>Double mul/fma</li>
 <li>Integer 32-bit mul</li>
-</ul></li>
+</ul>
+</li>
 <li>Super Expensive
-
 <ul>
 <li>Integer div</li>
 <li>asin, acos, atan&hellip;</li>
-</ul></li>
 </ul>
-
+</li>
+</ul>
 <p>スカラ値の場合にはベクトル演算とは違うユニットで独立で演算されるため、シェーダーがどのような演算が主な演算になっているかによってコストなしまたはコストありに分かれる。</p>
-
 <p>また以前までのAMDハードウェアではVLIWスロットの個数などで処理速度を測ることが出来たが、GCNからは命令の速度がそれぞれ違うし、命令の個数が表示されなくなったため（普通のx86のようになった）処理速度を測るには一つ一つ判別するしかなくなった。</p>
-
 <p>p25）そして<code>MAD</code>の対してGCNではVLIWのように長い命令を持てなくなったため、MADが下手すると一つの64bit命令に収まらなくむしろ<code>ADD + MUL</code>より速度が落ちてしまう。</p>
-
 <blockquote>
 <p>画像での<code>v_mac_f32 v1, s0, v0</code>はv1 = s0 * v0 + v1を実装している。つまい本来のMADのように命令になる。</p>
 </blockquote>
-
 <p>ただアーキテクチャが変わったといって<code>MAD</code>はまだ使えるし、注意して書けば効率はよくなるそうだ。ただ注意するところがあって、</p>
-
 <ul>
 <li>inline constantを使う時</li>
 <li>インプットがベクトルである時</li>
 <li>適合した命令に被演算子が入れられる時</li>
 </ul>
-
 <p>といった条件下で<code>MAD</code>は効率を保障する。</p>
-<div class="highlight"><pre class="chroma"><code class="language-gcn" data-lang="gcn">return x * 3.0f + y; // x and y is scalar =&gt; v_madmk_f32 v0, v2, 0x40400000, v0
-return x * 0.5f + 1.5f // x is scalar =&gt; v_madak_f32 v0, 0.5(l), v0, 0x3fc00000</code></pre></div>
-<p>下の<code>0.5</code>はliteral constantであるため、<code>MAD</code>になれた。上は<code>3.0f</code>だけ定数であるため、ギリギリで<code>MAD</code>することが出来た。</p>
-
+<pre><code class="language-gcn" data-lang="gcn">return x * 3.0f + y; // x and y is scalar =&gt; v_madmk_f32 v0, v2, 0x40400000, v0
+return x * 0.5f + 1.5f // x is scalar =&gt; v_madak_f32 v0, 0.5(l), v0, 0x3fc00000
+</code></pre><p>下の<code>0.5</code>はliteral constantであるため、<code>MAD</code>になれた。上は<code>3.0f</code>だけ定数であるため、ギリギリで<code>MAD</code>することが出来た。</p>
 <p>しかしベクトルを使ってる時には若干最適化が劣るけど、<code>v_mad_f32</code>と<code>v_mac_f32</code>を使ってある程度の速度向上となっている。</p>
-<div class="highlight"><pre class="chroma"><code class="language-gcn" data-lang="gcn">return v4 * c.x + c.y;
+<pre><code class="language-gcn" data-lang="gcn">return v4 * c.x + c.y;
 // v_mov_b32 v1, s1
 // 3 of v_mad_f32
-// and v_mac_f32 end...</code></pre></div>
-<h2 id="vectorization">Vectorization<a href="#vectorization" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
-
+// and v_mac_f32 end...
+</code></pre><h2 id="vectorization">Vectorization</h2>
 <p>昔GPUのアーキテクチャ自体がSuper-ScalarまたはVLIWベースではなかった時には、ベクトル演算の力を借りて<code>return 1.0f - dot(v.xy, v.xy)</code>みたいにむりやり最適化を催そうとしたが、今のGPUはだいたいSuper-ScalarまたはモバイルさえもVLIWベースであるため、やらない方がむしろ最適化されやすい。</p>
-
-<h2 id="rops">ROPs<a href="#rops" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
-
-<h3 id="ropとは">ROPとは？<a href="#ropとは" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
-
+<h2 id="rops">ROPs</h2>
+<h3 id="ropとは">ROPとは？</h3>
 <blockquote>
 <p><a href="https://en.wikipedia.org/wiki/Render_output_unit">https://en.wikipedia.org/wiki/Render_output_unit</a></p>
 </blockquote>
-
 <p>レンダリングパイプラインのRasterization、そしてフレームバッファにピクセルを書き込む時に使われるもので、ブレンディング、AAなどに使われる。</p>
-
 <p>クロックごとにどれだけのピクセルを表示することが出来るかの指標として扱える。（後はメモリBandwidth）</p>
-
-<hr />
-
+<hr>
 <p>2020年今までゲーミンググラボの中で一番高いやつの「2080ti」はROPが88個だが、PS4は32個（PROはわからない）、そしてXBOX ONEは16個であるため、短いシェーダーの場合には性能が発揮しにくい。また性能のボトルネックを測るにはVRAMメモリへの帯域幅も念頭しなければならない。</p>
-
 <p>原文では「GPUのクロック＊ROPs＊フレームバッファの各ピクセルのBytes」で理論上の処理速度を測定している。</p>
-
 <p>とにかくなんとかかんとか大体のフレームバッファはRGBA8であるため（HDRなどは例外）、普通の状況ではROPsボトルネックになってしまう。出来ればメモリのボトルネックにする方が良いので、演算速度を上げるにはCompute Shaderをものすごく使うのが良いらしい。</p>
-
-<h2 id="branching-registers">Branching ~ Registers<a href="#branching-registers" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
-
+<h2 id="branching--registers">Branching ~ Registers</h2>
 <p>GCNでの分岐の処理は基本的に一番遅いレーンに合わせることと、ThenとElseの分岐を全部試してみるという骨子からあんまり変わっていないが、速いので速度が落ちることがあんまりないそうだ。分岐の処理はスカラ演算ユニットで処理される。</p>
-
 <p>しかし問題は分岐によってGRP（General Purpose Register）の使用が増えてしまうことである。分岐よりはこのGRPの使用増加により性能が落ちるらしい。</p>
-
 <p>小さい分岐にはFull branchを防ぐため<code>?:</code>を使う。ただ、あるプラットフォームまたはHWでは<code>?:</code>さえFull branchされてしまい、GRPの増加による性能落ちが発生するらしく、その時には<code>CndMask()</code>を使うと言っている。（拡張か、それともなんらかのIntrinsicみたい）</p>
-
 <p>p34）整数で<code>mul24()</code>が使えるなら、普通の<code>MUL</code>の代わりに<code>mul24(a,b)</code>を使う方が速い。24bitだけを取り出し、32bitをの結果値を返す。またはハードウェアのサポートによって<code>mul24_hi()</code>もあるという。</p>
-
 <p>またHWのサポートによって<code>MAD</code>を24bits、24bits、そしてADDに使う32bitsとして1サイクルを終わらせるものもあるらしい。</p>
-
 <p>そして整数への割り算はデバイスからサポートしてない場合が多く、やるとしても最適化がかからなかったら~40サイクルまで掛かるのでやらないべきであるという。最適化されるとしても、5~8クロックはかかるそうだ。</p>
-
 <p>p38）GCNは倍精度浮動小数点（Double）をサポートするが、使うとこがない。</p>
-
 <blockquote>
 <p><a href="https://docs.microsoft.com/en-us/windows/win32/direct3dhlsl/f32tof16--sm5---asm-">https://docs.microsoft.com/en-us/windows/win32/direct3dhlsl/f32tof16--sm5---asm-</a></p>
 </blockquote>
-
 <p>D3D11以上でdoubleとfloatを変換する際には<code>f32tof16()</code>または<code>f16tof32()</code>を使う。</p>
-
 <p>R5G5B5圧縮カラー（DXT1）から各チャンネルの色を取りたい時には以下のようにする。</p>
-<div class="highlight"><pre class="chroma"><code class="language-hlsl" data-lang="hlsl">int r = s &amp; 0x1F;         // 1 cycle maybe
+<pre><code class="language-hlsl" data-lang="hlsl">int r = s &amp; 0x1F;         // 1 cycle maybe
 int g = (s &gt;&gt; 5) &amp; 0x3F;  // 1 cycle maybe
-int b = (s &gt;&gt; 11) &amp; 0x1F; // 1 cycle maybe</code></pre></div>
-<p>p41）<code>sign()</code>と<code>step()</code>の代わりに<code>?:</code>を使うこと。（in D3D11）原文では<code>sign()</code>ビルトイン関数は遅いのでいっそ<code>(x &gt;= 0) ? 1 : -1</code>のように使うべきだと言っている。また<code>step()</code>も<code>(x &gt;= a) ? 1 : 0</code>にすべきらしい。</p>
-
+int b = (s &gt;&gt; 11) &amp; 0x1F; // 1 cycle maybe
+</code></pre><p>p41）<code>sign()</code>と<code>step()</code>の代わりに<code>?:</code>を使うこと。（in D3D11）原文では<code>sign()</code>ビルトイン関数は遅いのでいっそ<code>(x &gt;= 0) ? 1 : -1</code>のように使うべきだと言っている。また<code>step()</code>も<code>(x &gt;= a) ? 1 : 0</code>にすべきらしい。</p>
 <p>GCNはベクトルに対して実行サイクルをへらすために<code>min3()</code>、<code>max3()</code>、<code>med3()</code>らしきものを実装している。</p>
-
 <p>p44）シェーダーの各ステージで使っているレジスタの数は処理速度に影響を与える。しかしレジスタの使用を最適化することはブラックボックス化された中身を最適化することと同じで、もっとも難しい。ただ、経験上からはシェーダーの横負荷を減らして、ある時点で使っているレジスタの数を減らせば性能は上がるらしい。（HWによって違う可能性ある）</p>
-<div class="highlight"><pre class="chroma"><code class="language-hlsl" data-lang="hlsl">for (each) { WorkA(); }
+<pre><code class="language-hlsl" data-lang="hlsl">for (each) { WorkA(); }
 for (each) { WorkB(); }
-// not for (each) { WorkA(); WorkB(); }</code></pre></div>
-<p>そしてこの最適化はCPUの方でも通用されるのだが、変数データの寿命を最大限に短くすること。また、<code>#ifdef</code>を積極的に活用してランタイムの分岐よりはシェーダープログラムを作る際に静的に分岐して性能の低下を防ぐようにすること。最悪<a href="https://www.gamedev.net/forums/topic/659145-what-is-a-uber-shader/">Uber-shader</a>の中にマクロ分岐を仕込んでレンダリングさせるほうが良い。</p>
-
-<h2 id="things-shader-author-should-stop-doing">Things shader author should stop doing<a href="#things-shader-author-should-stop-doing" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
-
+// not for (each) { WorkA(); WorkB(); }
+</code></pre><p>そしてこの最適化はCPUの方でも通用されるのだが、変数データの寿命を最大限に短くすること。また、<code>#ifdef</code>を積極的に活用してランタイムの分岐よりはシェーダープログラムを作る際に静的に分岐して性能の低下を防ぐようにすること。最悪<a href="https://www.gamedev.net/forums/topic/659145-what-is-a-uber-shader/">Uber-shader</a>の中にマクロ分岐を仕込んでレンダリングさせるほうが良い。</p>
+<h2 id="things-shader-author-should-stop-doing">Things shader author should stop doing</h2>
 <p>やるなスペシャル</p>
-
 <ul>
 <li><code>pow(color, 2.2f)</code></li>
 <li><code>normal = Normal.Sample(...) * 2.0f - 1.0f</code></li>
 </ul>
-
-<h1 id="参考">参考<a href="#参考" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h1>
-
+<h1 id="参考">参考</h1>
 <p><a href="https://gpuopen.com/wp-content/uploads/2017/03/GDC2017-Advanced-Shader-Programming-On-GCN.pdf">GDC2017-Advanced-Shader-Programming-On-GCN</a></p>
-
 <p><a href="https://www.slideshare.net/DevCentralAMD/gs4106-the-amd-gcn-architecture-a-crash-course-by-layla-mah">GS-4106 The AMD GCN Architecture - A Crash Course, by Layla Mah</a></p>
-
 <p><a href="https://developer.amd.com/wordpress/media/2012/12/AMD_Southern_Islands_Instruction_Set_Architecture.pdf">AMD Southern Island Instruction Set Architecture</a></p>
-
-			</div>
-			<hr class="post-end">
-			<footer class="post-info">
-				<p><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>7646 Words</p>
-				<p><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>2020-06-18 10:27 &#43;0900</p>
-			</footer>
-		</article>
-		<div class="post-nav thin">
-			<a class="next-post" href="https://liliilli.github.io/posts/week25_2020/">
-				<span class="post-nav-label"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-left"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>&nbsp;Newer</span><br><span>最近簡単に読んだポスト</span>
-			</a>
-			<a class="prev-post" href="https://liliilli.github.io/posts/sfinae_afaid/">
-				<span class="post-nav-label">Older&nbsp;<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-right"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg></span><br><span>SFINAEの活用、ざっくりメモ</span>
-			</a>
-		</div>
-		<div id="comments" class="thin">
 </div>
-	</main>
+  <footer class="post-footer">
+  </footer>
+</article>
+    </main><footer class="footer">
+    <span>&copy; 2020 <a href="https://liliilli.github.io">neuromantic</a></span>
+    <span>&middot;</span>
+    <span>Powered by <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo️️</a>️</span>
+    <span>&middot;</span>
+    <span>Theme️ <a href="https://git.io/hugopapermod" rel="noopener" target="_blank">PaperMod</a></span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top">
+    <button class="top-link" id="top-link" type="button">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6">
+            <path d="M12 6H0l6-6z" /></svg>
+    </button>
+</a>
+<script src="https://liliilli.github.io/assets/js/highlight.min.e7afc2928c0925d65c4732dfebe147014d91299a98e819e4b42f25c4fa68e91c.js" integrity="sha256-56/CkowJJdZcRzLf6&#43;FHAU2RKZqY6BnktC8lxPpo6Rw="></script>
+<script>hljs.initHighlightingOnLoad();</script>
+<script>
+    window.onload = function () {
+        if (localStorage.getItem("menu-scroll-position")) {
+            document.getElementById('menu').scrollLeft = localStorage.getItem("menu-scroll-position");
+        }
+    }
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
 
-	<footer id="site-footer" class="section-inner thin animated fadeIn faster">
-		<p>&copy; 2020 <a href="https://liliilli.github.io">jongmin yun - neu.</a> &#183; <a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC BY-NC 4.0</a></p>
-		<p>
-			Made with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> &#183; Theme <a href="https://github.com/Track3/hermit" target="_blank" rel="noopener">Hermit</a> &#183; <a href="https://liliilli.github.io/posts/index.xml" target="_blank" title="rss"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-rss"><path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1"></circle></svg></a>
-		</p>
-	</footer>
-
-
-
-	<script src="https://liliilli.github.io/js/bundle.min.4a9a0ac3d2217822c7865b4161e6c2a71de1d70492264337755427898dd718f6.js" integrity="sha256-SpoKw9IheCLHhltBYebCpx3h1wSSJkM3dVQniY3XGPY=" crossorigin="anonymous"></script>
-	
-
+            document.querySelector(this.getAttribute("href")).scrollIntoView({
+                behavior: "smooth"
+            });
+        });
+    });
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+    function menu_on_scroll() {
+        localStorage.setItem("menu-scroll-position", document.getElementById('menu').scrollLeft);
+    }
+</script>
 </body>
 
 </html>

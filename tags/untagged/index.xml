@@ -5,20 +5,16 @@
     <link>https://liliilli.github.io/tags/untagged/</link>
     <description>Recent content in untagged on neuromantic</description>
     <generator>Hugo -- gohugo.io</generator>
-    <language>en-us</language>
-    <copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright>
-    <lastBuildDate>Sun, 15 Mar 2020 19:13:14 +0900</lastBuildDate>
-    
-	<atom:link href="https://liliilli.github.io/tags/untagged/index.xml" rel="self" type="application/rss+xml" />
-    
-    
+    <language>en</language>
+    <copyright>Copyright © 2008–2019, Steve Francia and the Hugo Authors; all rights reserved.</copyright>
+    <lastBuildDate>Sun, 15 Mar 2020 19:13:14 +0900</lastBuildDate><atom:link href="https://liliilli.github.io/tags/untagged/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>TLSF Allocatorを作ってみた</title>
       <link>https://liliilli.github.io/posts/tlsf_basic/</link>
       <pubDate>Sun, 15 Mar 2020 19:13:14 +0900</pubDate>
       
       <guid>https://liliilli.github.io/posts/tlsf_basic/</guid>
-      <description>TLSFとは何なのか http://www.gii.upv.es/tlsf/ http://www.gii.upv.es/tlsf/files/ecrts04_tlsf.pdf https://www.researchgate.net/publication/234785757_A_comparison_of_memory_allocators_for_real-time_applications TLSF（Two-Level Segregate Fit）は、リアルタイムで要求される速度、安定性、決定性（Deterministic</description>
+      <description>TLSFとは何なのか http://www.gii.upv.es/tlsf/http://www.gii.upv.es/tlsf/files/ecrts04_tlsf.pdfhttps://www.researchgate.net/publication/234785757_A_comparison_of_memory_allocators_for_real-time_applications TLSF（Two-Level Segregate Fit）は、リアルタイムで要求される速度、安定性、決定性（Deterministic）を</description>
     </item>
     
     <item>
@@ -45,7 +41,7 @@
       <pubDate>Tue, 03 Mar 2020 23:59:05 +0900</pubDate>
       
       <guid>https://liliilli.github.io/posts/cmake_memo/</guid>
-      <description>https://cliutils.gitlab.io/modern-cmake/chapters/intro/dodonot.html https://gist.github.com/mbinna/c61dbb39bca0e4fb7d1f73b0d66a4fd1 Do&amp;rsquo;s and Don&amp;rsquo;ts CMakeで避けるべきのパターン https://cliutils.gitlab.io/modern-cmake/chapters/intro/dodonot.html https://gist.github.com/mbinna/c61dbb39bca0e4fb7d1f73b0d66a4fd1 link_directories、include_librariesなどのグローバル関数を使わ</description>
+      <description>https://cliutils.gitlab.io/modern-cmake/chapters/intro/dodonot.html https://gist.github.com/mbinna/c61dbb39bca0e4fb7d1f73b0d66a4fd1 Do&amp;rsquo;s and Don&amp;rsquo;ts CMakeで避けるべきのパターン https://cliutils.gitlab.io/modern-cmake/chapters/intro/dodonot.htmlhttps://gist.github.com/mbinna/c61dbb39bca0e4fb7d1f73b0d66a4fd1 link_directories、include_librariesなどのグローバル関数を使わな</description>
     </item>
     
     <item>
@@ -63,7 +59,7 @@
       <pubDate>Sat, 16 Nov 2019 19:51:58 +0900</pubDate>
       
       <guid>https://liliilli.github.io/posts/shadertoy_pbr/</guid>
-      <description>実は2週前に、ShaderToyというウェブでGLSLがかけて、それをレンダリングすることができるサイトで、上のシェーダーを書いてました。前</description>
+      <description>なんで、このシェーダーを書きながら、どうやってPBRのDiffuseとSpecularを実装したのかを簡単と大雑把に書きたいと思います。図形</description>
     </item>
     
   </channel>

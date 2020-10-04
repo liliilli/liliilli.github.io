@@ -1,103 +1,76 @@
 <!DOCTYPE html>
-<html lang="en-us">
+<html lang="en">
 
-<head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<meta http-equiv="X-UA-Compatible" content="ie=edge">
-	<meta name="theme-color" content="#494f5c">
-	<meta name="msapplication-TileColor" content="#494f5c">
-<meta itemprop="name" content="C&#43;&#43;で実装するDelegateコードの分析（Don Clugston）">
-<meta itemprop="description" content="ざっくりとコードを読みながら分析したものに過ぎないと思いますが、気になるコードを抜粋して解説して行きたいと思います。 リンク https://www.codeproject.com/Articles/7150/Member-Function-Pointers-and-the-Fastest-Possible 元ソースコードと">
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
+<title>C&#43;&#43;で実装するDelegateコードの分析（Don Clugston） - neuromantic</title>
 
-<meta itemprop="datePublished" content="2020-08-27T09:30:34&#43;09:00" />
-<meta itemprop="dateModified" content="2020-09-15T00:23:05&#43;09:00" />
-<meta itemprop="wordCount" content="9971">
+<meta name="description" content="ざっくりとコードを読みながら分析したものに過ぎないと思いますが、気になるコードを抜粋して解説して行きたいと思います。 リンク https://www.codeproject.com/Articles/7150/Member-Function-Pointers-and-the-Fastest-Possible 元ソースコードと">
+<meta name="keywords" content= />
+<meta name="author" content="Jongmin Yun, Neu.">
+<link rel="canonical" href="https://liliilli.github.io/posts/donclugston_delegate/" />
+<link href="https://liliilli.github.io/assets/css/stylesheet.min.a3b13905fd4b98ea165a18374ae5215d9de97a04f187f789736c56858296ba12.css" integrity="sha256-o7E5Bf1LmOoWWhg3SuUhXZ3pegTxh/eJc2xWhYKWuhI=" rel="preload stylesheet"
+    as="style">
+<link rel="apple-touch-icon" href="https://liliilli.github.io/apple-touch-icon.png">
+<link rel="icon" href="https://liliilli.github.io/favicon.ico">
+<meta name="generator" content="Hugo 0.75.1" />
 
-
-
-<meta itemprop="keywords" content="" />
-<meta property="og:title" content="C&#43;&#43;で実装するDelegateコードの分析（Don Clugston）" />
-<meta property="og:description" content="ざっくりとコードを読みながら分析したものに過ぎないと思いますが、気になるコードを抜粋して解説して行きたいと思います。 リンク https://www.codeproject.com/Articles/7150/Member-Function-Pointers-and-the-Fastest-Possible 元ソースコードと" />
-<meta property="og:type" content="article" />
-<meta property="og:url" content="https://liliilli.github.io/posts/donclugston_delegate/" />
-<meta property="article:published_time" content="2020-08-27T09:30:34+09:00" />
-<meta property="article:modified_time" content="2020-09-15T00:23:05+09:00" />
-<meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="C&#43;&#43;で実装するDelegateコードの分析（Don Clugston）"/>
-<meta name="twitter:description" content="ざっくりとコードを読みながら分析したものに過ぎないと思いますが、気になるコードを抜粋して解説して行きたいと思います。 リンク https://www.codeproject.com/Articles/7150/Member-Function-Pointers-and-the-Fastest-Possible 元ソースコードと"/>
-
-	<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-	<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-	<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-	<link rel="manifest" href="/site.webmanifest">
-	<link rel="mask-icon" href="/safari-pinned-tab.svg" color="">
-	<link rel="shortcut icon" href="/favicon.ico">
-
-	<title>C&#43;&#43;で実装するDelegateコードの分析（Don Clugston）</title>
-	<link rel="stylesheet" href="https://liliilli.github.io/css/style.min.eac77496566fd7d5768fd650ddb0b2b181ca6a2d7c5fdd6fe6b8ba4bf47e566f.css" integrity="sha256-6sd0llZv19V2j9ZQ3bCysYHKai18X91v5ri6S/R+Vm8=" crossorigin="anonymous">
-	
 </head>
 
-<body id="page">
-	
-	<header id="site-header" class="animated slideInUp">
-		<div class="hdr-wrapper section-inner">
-			<div class="hdr-left">
-				<div class="site-branding">
-					<a href="https://liliilli.github.io">neuromantic</a>
-				</div>
-				<nav class="site-nav hide-in-mobile">
-					
-				<a href="https://liliilli.github.io/posts/">Posts</a>
-				<a href="https://liliilli.github.io/about-hugo/">About</a>
+<body class="single" id="top">
+<header class="header">
+    <nav class="nav">
+        <p class="logo"><a href="https://liliilli.github.io">neuromantic</a></p>
+        <ul class="menu" id="menu" onscroll="menu_on_scroll()">
+            <li>
+                <a href="https://liliilli.github.io/archives/">
+                    <span>
+                        Archives
+                    </span>
+                </a>
+            </li>
+            <li>
+                <a href="https://liliilli.github.io/tags/">
+                    <span>
+                        Tags
+                    </span>
+                </a>
+            </li>
+            <li>
+                <a href="https://liliilli.github.io/series/">
+                    <span>
+                        Series
+                    </span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+    <main class="main">
 
-				</nav>
-			</div>
-			<div class="hdr-right hdr-icons">
-				<span class="hdr-social hide-in-mobile"><a href="https://twitter.com/NeuliliilliD" target="_blank" rel="noopener me" title="Twitter"><svg xmlns="http://www.w3.org/2000/svg" class="feather" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg></a><a href="https://github.com/liliilli" target="_blank" rel="noopener me" title="Github"><svg xmlns="http://www.w3.org/2000/svg" class="feather" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg></a></span><button id="menu-btn" class="hdr-btn" title="Menu"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-menu"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg></button>
-			</div>
-		</div>
-	</header>
-	<div id="mobile-menu" class="animated fast">
-		<ul>
-			<li><a href="https://liliilli.github.io/posts/">Posts</a></li>
-			<li><a href="https://liliilli.github.io/about-hugo/">About</a></li>
-		</ul>
-	</div>
-
-
-
-
-	<main class="site-main section-inner animated fadeIn faster">
-		<article class="thin">
-			<header class="post-header">
-				<div class="post-meta"><span>Aug 27, 2020</span></div>
-				<h1>C&#43;&#43;で実装するDelegateコードの分析（Don Clugston）</h1>
-			</header>
-			<div class="content">
-				
-
-<p>ざっくりとコードを読みながら分析したものに過ぎないと思いますが、気になるコードを抜粋して解説して行きたいと思います。</p>
-
-<h1 id="リンク">リンク<a href="#リンク" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h1>
-
+<article class="post-single">
+  <header class="post-header">
+    <h1 class="post-title">
+      C&#43;&#43;で実装するDelegateコードの分析（Don Clugston）
+    </h1>
+    <div class="post-meta">
+      <time>August 27, 2020</time>&nbsp;·&nbsp;Jongmin Yun, Neu.
+    </div>
+  </header>
+  <div class="post-content"><p>ざっくりとコードを読みながら分析したものに過ぎないと思いますが、気になるコードを抜粋して解説して行きたいと思います。</p>
+<h1 id="リンク">リンク</h1>
 <blockquote>
 <p><a href="https://www.codeproject.com/Articles/7150/Member-Function-Pointers-and-the-Fastest-Possible">https://www.codeproject.com/Articles/7150/Member-Function-Pointers-and-the-Fastest-Possible</a></p>
 </blockquote>
-
 <p>元ソースコードと、説明があります。理論的な部分はチョットワカラナイですので、申し訳ないのですがご自分でお読みください。</p>
-
-<h1 id="分析">分析<a href="#分析" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h1>
-
-<h2 id="注意点">注意点?<a href="#注意点" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
-
+<h1 id="分析">分析</h1>
+<h2 id="注意点">注意点?</h2>
 <ul>
 <li>コードをざっくり見ると、「FastDelegate」タイプが0から7まであるが、これはあくまでも可変長型引数がなかった時に（C++03時代）引数の数ごとの関数を制御するために作られた特殊化されたクラスにすぎません。</li>
 </ul>
-
-<h2 id="非メンバ関数">非メンバ関数<a href="#非メンバ関数" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
+<h2 id="非メンバ関数">非メンバ関数</h2>
 <div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="n">FastDelegate0</span><span class="o">&lt;&gt;</span> <span class="n">noparameterdelegate</span><span class="p">(</span><span class="o">&amp;</span><span class="n">SimpleVoidFunction</span><span class="p">);</span>
 <span class="c1">// ...
 </span><span class="c1"></span><span class="n">noparameterdelegate</span><span class="p">();</span> <span class="c1">// invoke the delegate - this calls SimpleVoidFunction()
@@ -105,8 +78,7 @@
 <span class="c1">// 結果として
 </span><span class="c1">// 0 :In SimpleMemberFunction in Base A. Num=0, str = Looking for equal delegate
 </span><span class="c1">// が出力される
-</span></code></pre></div>
-<p>まずmain.cppの関数で上のコールで非メンバ関数のデリゲートが作成されます。１番目行の<code>FastDelegate0</code>を作成するとこの内部を見ると、</p>
+</span></code></pre></div><p>まずmain.cppの関数で上のコールで非メンバ関数のデリゲートが作成されます。１番目行の<code>FastDelegate0</code>を作成するとこの内部を見ると、</p>
 <div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="k">template</span><span class="o">&lt;</span><span class="k">class</span> <span class="nc">RetType</span><span class="o">&gt;</span>
 <span class="k">class</span> <span class="nc">FastDelegate0</span> 
 <span class="p">{</span>
@@ -124,29 +96,20 @@
         <span class="n">m_Closure</span><span class="p">.</span><span class="n">bindstaticfunc</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">FastDelegate0</span><span class="o">::</span><span class="n">InvokeStaticFunction</span><span class="p">,</span> <span class="n">function_to_bind</span><span class="p">);</span> 
     <span class="p">}</span>
 <span class="p">};</span>
-</code></pre></div>
-<p>のように上から下へコードが通ることがわかります。ちなみに<code>FastDelegate</code>は0から7、そして何らかの特殊化された型組で構成されています。最後を除き、0から7までの違いは単純に型引数を何個持てるかになります。</p>
-
+</code></pre></div><p>のように上から下へコードが通ることがわかります。ちなみに<code>FastDelegate</code>は0から7、そして何らかの特殊化された型組で構成されています。最後を除き、0から7までの違いは単純に型引数を何個持てるかになります。</p>
 <p><code>bind</code>関数はメンバ関数、非メンバ関数などでオーバーロードされてあって、コンストラクタからの渡された関数を適切な形としてまとめてデリケートを作ってくれます。上のコードでは非メンバ関数を取るようオーバーロードされた関数が実行されます。</p>
-
 <p>ですが、渡された関数の情報を保持するのは変数<code>m_Closure</code>です。これのタイプ<code>ClosurePtr</code>は関数シグニチャー（Function Signiture）を保持する役割を持ちます。</p>
-
-<h3 id="closureptr-genericmemfunc-staticfuncptr-unvoidstaticfuncptr"><code>ClosurePtr&lt;GenericMemFunc, StaticFuncPtr, UnvoidStaticFuncPtr&gt;</code><a href="#closureptr-genericmemfunc-staticfuncptr-unvoidstaticfuncptr" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
+<h3 id="closureptrgenericmemfunc-staticfuncptr-unvoidstaticfuncptr"><code>ClosurePtr&lt;GenericMemFunc, StaticFuncPtr, UnvoidStaticFuncPtr&gt;</code></h3>
 <div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">GenericMemFunc</span><span class="p">,</span> <span class="k">class</span> <span class="nc">StaticFuncPtr</span><span class="p">,</span> <span class="k">class</span> <span class="nc">UnvoidStaticFuncPtr</span><span class="o">&gt;</span>
 <span class="k">class</span> <span class="nc">ClosurePtr</span> <span class="o">:</span> <span class="k">public</span> <span class="n">DelegateMemento</span>
-</code></pre></div>
-<ul>
+</code></pre></div><ul>
 <li><code>GenericMemFunc</code>：<code>GenericClass</code>というクラスの何らかのメンバ関数のポインタをタイプとして持たせます。</li>
 <li><code>StaticFuncPtr</code>：<code>GenericMemFunc</code>と同じくの一般関数ポインタタイプ。</li>
 <li><code>UnvoidStaticFuncPtr</code>：VC6で挙動がおかしくなるのを制御するための特殊タイプ。VC6（古すぎる…）以外には<code>StaticFuncPtr</code>と同じタイプを持ちます。</li>
 </ul>
-
 <p>厳密に<code>ClosurePtr&lt;,,&gt;</code>は<code>DelegateMemento</code>というクラスを継承します。実はこれがあらゆる関数の情報を保持するクラスとなります。<code>ClosurePtr&lt;,,&gt;</code>は渡された関数を適切に変形して親クラスに送るようにしてます。</p>
-
-<h3 id="delegatememento"><code>DelegateMemento</code><a href="#delegatememento" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
-
+<h3 id="delegatememento"><code>DelegateMemento</code></h3>
 <p>特殊化されていないが、ともかく任意のデリケートを保持することができる（闇）クラスです。ということで、このクラス自体はビルドしているコンパイラーの関数呼び出し規約、引数のリストは保持しません。</p>
-
 <p>このMementoはコンパイラーによって２つの実装に分かれます。一つは安全（Safe）、もう一つは非安全（Evil）です。使う基準はコンパイラーがC++標準に従っているか、ないかです。説明に入る前に、このクラスの変数は最大３つで構成されています。</p>
 <div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="k">class</span> <span class="nc">DelegateMemento</span>
 <span class="p">{</span>
@@ -161,13 +124,9 @@
 </span><span class="cp"></span>    <span class="k">typedef</span> <span class="nf">void</span> <span class="p">(</span><span class="o">*</span><span class="n">GenericFuncPtr</span><span class="p">)();</span> <span class="c1">// arbitrary code pointer
 </span><span class="c1"></span>    <span class="n">GenericFuncPtr</span> <span class="n">m_pStaticFunction</span><span class="p">;</span>
 <span class="cp">#endif
-</span></code></pre></div>
-<p>３つ目の<code>m_pStaticFunction</code>はトリックを使えば使わなくなり、実装も簡単になるそうです。しかしその代わりに標準に従った実装じゃなくなります。</p>
-
-<h4 id="安全なバージョン">安全なバージョン<a href="#安全なバージョン" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h4>
-
+</span></code></pre></div><p>３つ目の<code>m_pStaticFunction</code>はトリックを使えば使わなくなり、実装も簡単になるそうです。しかしその代わりに標準に従った実装じゃなくなります。</p>
+<h4 id="安全なバージョン">安全なバージョン</h4>
 <p>安全なバージョンでは上で説明した３つの変数は以下のような構成図を持ちます。</p>
-
 <table>
 <thead>
 <tr>
@@ -177,7 +136,6 @@
 <th>意味</th>
 </tr>
 </thead>
-
 <tbody>
 <tr>
 <td>0</td>
@@ -185,14 +143,12 @@
 <td>0</td>
 <td>空っぽ</td>
 </tr>
-
 <tr>
 <td>0じゃない時</td>
 <td>意味無し</td>
 <td>単純関数コールの役割</td>
 <td>非メンバ関数を持つ</td>
 </tr>
-
 <tr>
 <td>0</td>
 <td>0じゃない時</td>
@@ -201,11 +157,8 @@
 </tr>
 </tbody>
 </table>
-
 <p>非安全なバージョン</p>
-
 <p>非安全実装では３つ目の<code>m_pStaticFunction</code>は使わなくなります。</p>
-
 <table>
 <thead>
 <tr>
@@ -214,14 +167,12 @@
 <th>意味</th>
 </tr>
 </thead>
-
 <tbody>
 <tr>
 <td>0</td>
 <td>0</td>
 <td>空っぽ</td>
 </tr>
-
 <tr>
 <td>0じゃない時</td>
 <td>0じゃない何らか</td>
@@ -229,17 +180,11 @@
 </tr>
 </tbody>
 </table>
-
 <p>ちなみにMSVCでは<code>void*</code>と関数ポインタとの<code>static_cast&lt;&gt;</code>をサポートするそうです。（非標準ですが）</p>
-
-<hr />
-
+<hr>
 <p>とにかく以前説明してた<code>ClosurePtr&lt;,,&gt;</code>に戻って説明し続きます。</p>
-
 <p>Mementoクラスがコンパイラーまたは前処理によって実装が違うようになりますので、<code>ClosurePtr&lt;,,&gt;</code>もそれに合わせる必要があります。このブログでは安全ルートだけ説明します。</p>
-
-<h4 id="安全な-closureptr-の場合での挙動">安全な<code>ClosurePtr</code>の場合での挙動<a href="#安全な-closureptr-の場合での挙動" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h4>
-
+<h4 id="安全なclosureptrの場合での挙動">安全な<code>ClosurePtr</code>の場合での挙動</h4>
 <p>このバージョンはC++標準に準ずるそうです。ですが実装がちょっとトリッキーです。</p>
 <div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="k">template</span> <span class="o">&lt;</span> <span class="k">class</span> <span class="nc">DerivedClass</span><span class="p">,</span> <span class="k">class</span> <span class="nc">ParentInvokerSig</span> <span class="o">&gt;</span>
 <span class="kr">inline</span> <span class="kt">void</span> <span class="n">bindstaticfunc</span><span class="p">(</span>
@@ -255,14 +200,12 @@
 	<span class="p">}</span>
 	<span class="n">m_pStaticFunction</span> <span class="o">=</span> <span class="k">reinterpret_cast</span><span class="o">&lt;</span><span class="n">GenericFuncPtr</span><span class="o">&gt;</span><span class="p">(</span><span class="n">function_to_bind</span><span class="p">);</span>
 <span class="p">}</span>
-</code></pre></div>
-<p>今は非メンバ関数をデリケートにしようとしたので、<code>ClosurePtr&lt;,,&gt;::bindstaticfunc</code>が呼ばれました。今のコードで特殊化された関数の型引数は</p>
 
+</code></pre></div><p>今は非メンバ関数をデリケートにしようとしたので、<code>ClosurePtr&lt;,,&gt;::bindstaticfunc</code>が呼ばれました。今のコードで特殊化された関数の型引数は</p>
 <ul>
 <li><code>DerivedClass</code>：<code>FastDelegate0</code></li>
 <li><code>ParentInvokerSig</code>：<code>FastDelegate0::RetType FastDelegate0::*(void)</code></li>
 </ul>
-
 <p>になり、各引数は<code>FastDelegate0</code>のインスタンスのポインタ、クロージャーとして使おうとしているメンバ関数、そして外の世界から渡された非メンバ関数のポインタとなります。今は<code>function_to_bind</code>が有効なので<code>bindmemfunc()</code>で関数をラッピングします。</p>
 <div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="k">template</span> <span class="o">&lt;</span> <span class="k">class</span> <span class="nc">X</span><span class="p">,</span> <span class="k">class</span> <span class="nc">XMemFunc</span> <span class="o">&gt;</span>
 <span class="kr">inline</span> <span class="kt">void</span> <span class="n">bindmemfunc</span><span class="p">(</span><span class="n">X</span><span class="o">*</span> <span class="n">pthis</span><span class="p">,</span> <span class="n">XMemFunc</span> <span class="n">function_to_bind</span><span class="p">)</span> 
@@ -270,10 +213,8 @@
 	<span class="n">m_pthis</span> <span class="o">=</span> <span class="n">SimplifyMemFunc</span><span class="o">&lt;</span><span class="k">sizeof</span><span class="p">(</span><span class="n">function_to_bind</span><span class="p">)</span><span class="o">&gt;::</span><span class="n">Convert</span><span class="p">(</span><span class="n">pthis</span><span class="p">,</span> <span class="n">function_to_bind</span><span class="p">,</span> <span class="n">m_pFunction</span><span class="p">);</span>
 	<span class="n">m_pStaticFunction</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
 <span class="p">}</span>
-</code></pre></div>
-<p>この関数の型引数は、必ず任意クラス<code>X</code>とそしてそのクラスのメンバ関数になります。この関数でラッピングするメンバ関数（外からの渡された関数ポインタではない）色々と処理して<code>m_pThis</code>と<code>m_pFunction</code>を更新するらしいです。また新しい構造体の<code>SimplyMemFunc</code>を使います。</p>
-
-<h3 id="simplymemfunc-int-n"><code>SimplyMemFunc&lt;int N&gt;</code><a href="#simplymemfunc-int-n" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
+</code></pre></div><p>この関数の型引数は、必ず任意クラス<code>X</code>とそしてそのクラスのメンバ関数になります。この関数でラッピングするメンバ関数（外からの渡された関数ポインタではない）色々と処理して<code>m_pThis</code>と<code>m_pFunction</code>を更新するらしいです。また新しい構造体の<code>SimplyMemFunc</code>を使います。</p>
+<h3 id="simplymemfuncint-n"><code>SimplyMemFunc&lt;int N&gt;</code></h3>
 <div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="c1">// The size of a single inheritance member function pointer.
 </span><span class="c1"></span><span class="k">const</span> <span class="kt">int</span> <span class="n">SINGLE_MEMFUNCPTR_SIZE</span> <span class="o">=</span> <span class="k">sizeof</span><span class="p">(</span><span class="kt">void</span> <span class="p">(</span><span class="n">GenericClass</span><span class="o">::*</span><span class="p">)());</span>
 
@@ -290,29 +231,19 @@
 		<span class="k">return</span> <span class="k">reinterpret_cast</span><span class="o">&lt;</span><span class="n">GenericClass</span><span class="o">*&gt;</span><span class="p">(</span><span class="n">pthis</span><span class="p">);</span>
 	<span class="p">}</span>
 <span class="p">};</span>
-</code></pre></div>
-<p>この構造体と<code>Convert</code>関数は渡された特定クラスポインタとメンバ関数を<code>GenericClass</code>をウィッシュとしたクラスポインタとメンバ関数ポインタへ変換します。</p>
-
+</code></pre></div><p>この構造体と<code>Convert</code>関数は渡された特定クラスポインタとメンバ関数を<code>GenericClass</code>をウィッシュとしたクラスポインタとメンバ関数ポインタへ変換します。</p>
 <p>ただこの特殊化された構造体がビルドされるには条件が合致されることが必要で、ラッピングする時に使うメンバ関数（ここでは<code>void (__thiscall fastdelegate::FastDelegate0&lt;void&gt;::*)(void)const</code>）ポインタのサイズが抽象化に使うクラスのメンバ関数のサイズと同じじゃなければコンパイルは失敗します。</p>
-
 <p><code>GenericClass</code>とはなんぞやなんでこの謎いクラスも説明したいと思います。</p>
-
-<h3 id="class-genericclass"><code>class GenericClass</code><a href="#class-genericclass" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
-
+<h3 id="class-genericclass"><code>class GenericClass</code></h3>
 <p><code>GenericClass</code>はデリゲートを実装するために使われるだけのクラスです。コンパイラーごとに違うメンバ関数のポインタのサイズを全部カーバーするために、前処理と非標準キーワードを使ってこのクラスからのメンバ関数のサイズが今使ってるコンパイラーから出せるメンバ関数のサイズの最大値になるようにします。</p>
-
 <blockquote>
 <p><a href="https://devblogs.microsoft.com/oldnewthing/20040209-00/?p=40713">https://devblogs.microsoft.com/oldnewthing/20040209-00/?p=40713</a></p>
 </blockquote>
-
 <p>たとえば、MSVCではクラスの継承がどの形となったかによって<code>this</code>の判断基準、クラスごと持てる<code>this</code>の数が違うらしいです。ということで、一列に継承した場合ではなく、多重継承した場合のメンバ関数は、「関数のポインタ」と「アジャスター（Adjuster）」２つの内蔵された変数を持って関数を呼び出すそうです。このアジャスターにより、クラスの<code>this</code>が調整され、適切なメンバ関数を呼び出すようにしてくれます。</p>
-
 <p>ということで、MSVCでの多重継承したクラスのメンバ関数のサイズはポインタのサイズと<code>size_t</code>のサイズを足したサイズとなります。単純に継承した場合にはクラスによってサイズが違うそうです。（4、8、12…）なのでMSVCの中でメンバ変数のポインタを他のクラスのメンバ変数のポインタタイプに変換することはタイプのサイズが変わる可能性があります。</p>
-
 <blockquote>
 <p>ちなみにMSVCでは<code>this</code>ポインタをレジスターECXへ保持させてるようです。（上のリンクのアセンブリを見たらわかります。）</p>
 </blockquote>
-
 <p>このデリゲートでは、<code>this</code>自体を事前に調整してから変数にセーブして使う時にはメンバ変数だけを呼びたいので（最適化のため）一番簡単な継承で成されるメンバ関数ポインタサイズを使うようにします。</p>
 <div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="cp">#ifdef FASTDLGT_MICROSOFT_MFP
 </span><span class="cp">#ifdef FASTDLGT_HASINHERITANCE_KEYWORDS
@@ -322,25 +253,17 @@
 <span class="cp">#else
 </span><span class="cp"></span><span class="k">class</span> <span class="nc">GenericClass</span><span class="p">;</span>
 <span class="cp">#endif
-</span></code></pre></div>
-<p>これで<code>GenericClass</code>のメンバ変数ポインタのサイズは普通のポインタのサイズと同様になります。（GCC、clangなどの他のコンパイラーではサイズは違うかもしれません）</p>
-
-<hr />
-
+</span></code></pre></div><p>これで<code>GenericClass</code>のメンバ変数ポインタのサイズは普通のポインタのサイズと同様になります。（GCC、clangなどの他のコンパイラーではサイズは違うかもしれません）</p>
+<hr>
 <p>ということで<code>SimplyMemFunc&lt;int N&gt;</code>の<code>bound_func</code>とリターン値は次に変形され格納されます。</p>
 <div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="c1">// function_to_bind =&gt; void (__thiscall FastDelegate0&lt;void&gt;::*)(void)const
 </span><span class="c1"></span><span class="n">bound_func</span> <span class="o">=</span> <span class="k">reinterpret_cast</span><span class="o">&lt;</span><span class="kt">void</span> <span class="p">(</span><span class="n">detail</span><span class="o">::</span><span class="n">GenericClass</span><span class="o">::*</span><span class="p">)(</span><span class="kt">void</span><span class="p">)</span><span class="o">&gt;</span><span class="p">(</span><span class="n">function_to_bind</span><span class="p">);</span>
 <span class="c1">// pthis =&gt; FastDelegate0
 </span><span class="c1"></span><span class="k">return</span> <span class="k">reinterpret_cast</span><span class="o">&lt;</span><span class="n">GenericClass</span><span class="o">*&gt;</span><span class="p">(</span><span class="n">pthis</span><span class="p">);</span>
-</code></pre></div>
-<hr />
-
+</code></pre></div><hr>
 <p><code>ClosurePtr&lt;,,&gt;::bindstaticfunc</code>に戻って、最後に非メンバ関数を<code>m_pStaticFunction</code>に保存します。これで非メンバ関数をデリケート化して呼び出す準備は終わります。</p>
-
-<hr />
-
-<h2 id="fastdelegate0-のメンバ変数の現状"><code>FastDelegate0</code>のメンバ変数の現状<a href="#fastdelegate0-のメンバ変数の現状" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
-
+<hr>
+<h2 id="fastdelegate0のメンバ変数の現状"><code>FastDelegate0</code>のメンバ変数の現状</h2>
 <pre><code>// 安全な場合
 FastDelegate0&lt;RetType&gt;
 L   m_Closure: detail::ClosurePtr&lt;
@@ -351,21 +274,15 @@ L   m_Closure: detail::ClosurePtr&lt;
     	m_pFunction: void (detail::GenericClass::*)(void) 
             := &amp;FastDelegate0::InvokeStaticFunction: void (__thiscall FastDelegate0::*)() const
         m_pStaticFunction: void (*)(void) := &amp;SimpleVoidFunction: void (__cdecl*)()
-</code></pre>
-
-<h2 id="デリケート呼び出し">デリケート呼び出し<a href="#デリケート呼び出し" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
-
+</code></pre><h2 id="デリケート呼び出し">デリケート呼び出し</h2>
 <p><code>FastDelegate0</code>の呼び出し（<code>operator()</code>）の中身は以下のようになっています。</p>
 <div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="n">RetType</span> <span class="nf">operator</span><span class="p">()</span> <span class="p">()</span> <span class="k">const</span> 
 <span class="p">{</span>
     <span class="k">return</span> <span class="p">(</span><span class="n">m_Closure</span><span class="p">.</span><span class="n">GetClosureThis</span><span class="p">()</span><span class="o">-&gt;*</span><span class="p">(</span><span class="n">m_Closure</span><span class="p">.</span><span class="n">GetClosureMemPtr</span><span class="p">()))();</span>
 <span class="p">}</span>
-</code></pre></div>
-<p>上までのデリゲート生成で、<code>m_Closure-&gt;m_pThis</code>は<code>FastDelegate0</code>のポインタを自分で持つようになりました。また、デリゲートの関数ポインタ<code>m_pFunction</code>も<code>&amp;FastDelegate0::InvokeStaticFunction</code>関数ポインタを持ち、これで最終的にはクロージャーの非メンバ関数呼び出し関数が呼ばれるようになります。</p>
-
+</code></pre></div><p>上までのデリゲート生成で、<code>m_Closure-&gt;m_pThis</code>は<code>FastDelegate0</code>のポインタを自分で持つようになりました。また、デリゲートの関数ポインタ<code>m_pFunction</code>も<code>&amp;FastDelegate0::InvokeStaticFunction</code>関数ポインタを持ち、これで最終的にはクロージャーの非メンバ関数呼び出し関数が呼ばれるようになります。</p>
 <p>ですが、前に安全と非安全実装の違いで<code>m_pStaticFunction</code>に非メンバ関数が格納されたか、変数がなくてちょっと変わった方法で実際の関数ポインタを格納したかにより呼び出し方法も少し違います。ですが、ここでも安全なルートだけ説明します。</p>
-
-<h3 id="安全な場合">安全な場合<a href="#安全な場合" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
+<h3 id="安全な場合">安全な場合</h3>
 <div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="n">RetType</span> <span class="nf">InvokeStaticFunction</span><span class="p">()</span> <span class="k">const</span> <span class="c1">// RetType = void
 </span><span class="c1"></span><span class="p">{</span>
     <span class="k">return</span> <span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="n">m_Closure</span><span class="p">.</span><span class="n">GetStaticFunction</span><span class="p">()))();</span>
@@ -375,11 +292,8 @@ L   m_Closure: detail::ClosurePtr&lt;
 </span><span class="c1"></span><span class="p">{</span>
     <span class="k">return</span> <span class="k">reinterpret_cast</span><span class="o">&lt;</span><span class="n">UnvoidStaticFuncPtr</span><span class="o">&gt;</span><span class="p">(</span><span class="n">m_pStaticFunction</span><span class="p">);</span>
 <span class="p">}</span>
-</code></pre></div>
-<p><code>m_pStaticFunction</code>を元の型に普通に戻すことでOKです。<code>DelegateMemento</code>の<code>m_pStaticFunction</code>が最初に入れた非メンバ関数のポインターを保持しているので、それを呼び出して関数コールします。</p>
-
-<h2 id="引数がある単純なメンバ関数-static-関数">引数がある単純なメンバ関数・<code>static</code>関数<a href="#引数がある単純なメンバ関数-static-関数" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
-
+</code></pre></div><p><code>m_pStaticFunction</code>を元の型に普通に戻すことでOKです。<code>DelegateMemento</code>の<code>m_pStaticFunction</code>が最初に入れた非メンバ関数のポインターを保持しているので、それを呼び出して関数コールします。</p>
+<h2 id="引数がある単純なメンバ関数static関数">引数がある単純なメンバ関数・<code>static</code>関数</h2>
 <p>次は下のコードを分析します。</p>
 <div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="k">class</span> <span class="nc">CBaseClass</span>
 <span class="p">{</span>
@@ -415,13 +329,9 @@ L   m_Closure: detail::ClosurePtr&lt;
  <span class="mi">9</span><span class="o">|</span> <span class="n">funclist</span><span class="p">[</span><span class="mi">2</span><span class="p">].</span><span class="n">bind</span><span class="p">(</span><span class="o">&amp;</span><span class="n">CBaseClass</span><span class="o">::</span><span class="n">StaticMemberFunction</span><span class="p">);</span>
 <span class="mi">10</span><span class="o">|</span> <span class="n">funclist</span><span class="p">[</span><span class="mi">11</span><span class="p">].</span><span class="n">bind</span><span class="p">((</span><span class="k">const</span> <span class="n">CBaseClass</span><span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">a</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">CBaseClass</span><span class="o">::</span><span class="n">ConstMemberFunction</span><span class="p">);</span>
 <span class="mi">11</span><span class="o">|</span> <span class="n">funclist</span><span class="p">[</span><span class="mi">3</span><span class="p">].</span><span class="n">bind</span><span class="p">(</span><span class="o">&amp;</span><span class="n">a</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">CBaseClass</span><span class="o">::</span><span class="n">ConstMemberFunction</span><span class="p">);</span>
-</code></pre></div>
-<h3 id="メンバ関数-３-８">メンバ関数（３，８）<a href="#メンバ関数-３-８" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
-
+</code></pre></div><h3 id="メンバ関数３８">メンバ関数（３，８）</h3>
 <p>まず３行目のコードで見える<code>MakeDelegate</code>関数は、単純にDelegateを生成してくれるヘルパー関数です。C++03仕様なんで書く<code>FastDelegate0~7</code>ごとにオーバーロードしたものが書かれていたので、中身を見てるとめちゃくちゃな書き方になってますが、C++11からは可変長型引数を使うことでだいぶ減らせます。</p>
-
 <p>とにかく<code>&amp;CBaseClass::SimpleMemberFunctionReturnsInt</code>で生成される<code>FastDelegate2</code>の特殊化された型リストは次のようになります。</p>
-
 <pre><code>FastDelegate2&lt;int, char const*, int&gt;
 L   DesiredRetType: int
     StaticFunctionPtr: int(*)(int, char const*)
@@ -431,9 +341,7 @@ L   DesiredRetType: int
         int(detail::GenericClass::*)(int, char const*),
         int(*)(int, char const*),
         int(*)(int, char const*)&gt;
-</code></pre>
-
-<p><code>FastDelegate2</code>の中身は下のような関数コールルーティンを持ちます。</p>
+</code></pre><p><code>FastDelegate2</code>の中身は下のような関数コールルーティンを持ちます。</p>
 <div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="c1">// as Constructor of FastDelegate2&lt;,,&gt;
 </span><span class="c1"></span><span class="k">template</span> <span class="o">&lt;</span> <span class="k">class</span> <span class="nc">X</span><span class="p">,</span> <span class="k">class</span> <span class="nc">Y</span> <span class="o">&gt;</span>
 <span class="n">FastDelegate2</span><span class="p">(</span><span class="n">Y</span><span class="o">*</span> <span class="n">pthis</span><span class="p">,</span> <span class="n">DesiredRetType</span><span class="p">(</span><span class="n">X</span><span class="o">::*</span> <span class="n">function_to_bind</span><span class="p">)(</span><span class="n">Param1</span><span class="p">,</span> <span class="n">Param2</span><span class="p">))</span> 
@@ -448,9 +356,7 @@ L   DesiredRetType: int
     <span class="n">m_pthis</span> <span class="o">=</span> <span class="n">SimplifyMemFunc</span><span class="o">&lt;</span><span class="k">sizeof</span><span class="p">(</span><span class="n">function_to_bind</span><span class="p">)</span><span class="o">&gt;::</span><span class="n">Convert</span><span class="p">(</span><span class="n">pthis</span><span class="p">,</span> <span class="n">function_to_bind</span><span class="p">,</span> <span class="n">m_pFunction</span><span class="p">);</span>
     <span class="n">m_pStaticFunction</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="c1">// 安全な場合だけ`m_pStaticFunction`が更新されます。
 </span><span class="c1"></span><span class="p">}</span>
-</code></pre></div>
-<p>非メンバ関数をデリケート化する時との違いは、非メンバ関数は代わりに<code>FastDelegate</code>のメンバ関数をラッピングした反面、メンバ関数は渡されたインスタンスとそのインスタンスから呼べる（ダウンキャストせず）メンバ関数のポインタをMementoの変数に保存するのが違いです。</p>
-
+</code></pre></div><p>非メンバ関数をデリケート化する時との違いは、非メンバ関数は代わりに<code>FastDelegate</code>のメンバ関数をラッピングした反面、メンバ関数は渡されたインスタンスとそのインスタンスから呼べる（ダウンキャストせず）メンバ関数のポインタをMementoの変数に保存するのが違いです。</p>
 <p><code>&amp;CBaseClass::SimpleMemberFunctionReturnsInt</code>がデリゲートにバインドされると、デリゲートの変数は以下の状態を持ちます。</p>
 <div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="n">FastDelegate2</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span> <span class="kt">char</span> <span class="k">const</span><span class="o">*</span><span class="p">,</span> <span class="kt">int</span><span class="o">&gt;</span>
 <span class="n">L</span>   <span class="nl">m_Closure</span><span class="p">:</span> <span class="n">detail</span><span class="o">::</span><span class="n">ClosurePtr</span><span class="o">&lt;</span>
@@ -461,8 +367,7 @@ L   DesiredRetType: int
     	<span class="nl">m_pFunction</span><span class="p">:</span> <span class="kt">void</span> <span class="p">(</span><span class="n">detail</span><span class="o">::</span><span class="n">GenericClass</span><span class="o">::*</span><span class="p">)(</span><span class="kt">void</span><span class="p">)</span> 
             <span class="o">:=</span> <span class="o">&amp;</span><span class="n">CBaseClass</span><span class="o">::</span><span class="nl">SimpleMemberFunctionReturnsInt</span><span class="p">:</span> <span class="kt">int</span> <span class="p">(</span><span class="n">CBaseClass0</span><span class="o">::*</span><span class="p">)(</span><span class="kt">int</span><span class="p">,</span> <span class="kt">char</span> <span class="k">const</span><span class="o">*</span><span class="p">)</span> 
         <span class="nl">m_pStaticFunction</span><span class="p">:</span> <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="p">)(</span><span class="kt">void</span><span class="p">)</span> <span class="o">:=</span> <span class="k">nullptr</span>
-</code></pre></div>
-<p>そして<code>return (m_Closure.GetClosureThis()-&gt;*(m_Closure.GetClosureMemPtr()))()</code>によって登録した関数が呼ばれます。ただ今度はリターン型が<code>int</code>だし、そして２つの引数を渡さないと行けないため、<code>operator()</code>は下のような形となりました。</p>
+</code></pre></div><p>そして<code>return (m_Closure.GetClosureThis()-&gt;*(m_Closure.GetClosureMemPtr()))()</code>によって登録した関数が呼ばれます。ただ今度はリターン型が<code>int</code>だし、そして２つの引数を渡さないと行けないため、<code>operator()</code>は下のような形となりました。</p>
 <div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="kr">inline</span> <span class="n">GenericClass</span> <span class="o">*</span><span class="nf">GetClosureThis</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="k">return</span> <span class="n">m_pthis</span><span class="p">;</span> <span class="p">}</span>
 <span class="kr">inline</span> <span class="n">GenericMemFunc</span> <span class="nf">GetClosureMemPtr</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span> <span class="k">return</span> <span class="k">reinterpret_cast</span><span class="o">&lt;</span><span class="n">GenericMemFunc</span><span class="o">&gt;</span><span class="p">(</span><span class="n">m_pFunction</span><span class="p">);</span> <span class="p">}</span>
 
@@ -470,15 +375,10 @@ L   DesiredRetType: int
 <span class="p">{</span>
     <span class="k">return</span> <span class="p">(</span><span class="n">m_Closure</span><span class="p">.</span><span class="n">GetClosureThis</span><span class="p">()</span><span class="o">-&gt;*</span><span class="p">(</span><span class="n">m_Closure</span><span class="p">.</span><span class="n">GetClosureMemPtr</span><span class="p">()))(</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">);</span>
 <span class="p">}</span>
-</code></pre></div>
-<p>最初にも言いましたけど、C++11からは可変長方引数を使って冗長なオーバーロードされたコードを一つに纏められます。</p>
-
-<h3 id="const-または-volatile-のあるメンバ関数-１０-１１"><code>const</code>または<code>volatile</code>のあるメンバ関数（１０，１１）<a href="#const-または-volatile-のあるメンバ関数-１０-１１" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
-
+</code></pre></div><p>最初にも言いましたけど、C++11からは可変長方引数を使って冗長なオーバーロードされたコードを一つに纏められます。</p>
+<h3 id="constまたはvolatileのあるメンバ関数１０１１"><code>const</code>または<code>volatile</code>のあるメンバ関数（１０，１１）</h3>
 <p><code>const</code>または<code>volatile</code>キーワードは独立した関数タイプに入ります。つまり、<code>int (A::*)(int, char const*)</code>と<code>int (A::*)(int, char const*) const</code>は違います。</p>
-
 <p>なのでもし、上の<code>FastDelegate2&lt;int, char const*, int&gt;</code>で<strong>cv-qualifier</strong>がついたメンバ関数を入れようとしても、オーバーロードされた適切なコンストラクタが無いとそのままビルドエラーになります。</p>
-
 <p>Don Clugstonさんのコードではすでに<code>const</code>メンバ関数もデリゲートに入れる為にオーバーロードしたコンストラクタがありました。</p>
 <div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">X</span><span class="p">,</span> <span class="k">class</span> <span class="nc">Y</span><span class="o">&gt;</span>
 <span class="n">FastDelegate2</span><span class="p">(</span><span class="k">const</span> <span class="n">Y</span> <span class="o">*</span><span class="n">pthis</span><span class="p">,</span> <span class="n">DesiredRetType</span> <span class="p">(</span><span class="n">X</span><span class="o">::*</span><span class="n">function_to_bind</span><span class="p">)(</span><span class="n">Param1</span> <span class="n">p1</span><span class="p">,</span> <span class="n">Param2</span> <span class="n">p2</span><span class="p">)</span> <span class="k">const</span><span class="p">)</span>
@@ -491,11 +391,8 @@ L   DesiredRetType: int
 <span class="p">{</span>
     <span class="n">m_Closure</span><span class="p">.</span><span class="n">bindconstmemfunc</span><span class="p">(</span><span class="n">detail</span><span class="o">::</span><span class="n">implicit_cast</span><span class="o">&lt;</span><span class="k">const</span> <span class="n">X</span> <span class="o">*&gt;</span><span class="p">(</span><span class="n">pthis</span><span class="p">),</span> <span class="n">function_to_bind</span><span class="p">);</span>
 <span class="p">}</span>
-</code></pre></div>
-<p>上のデリゲート化する関数のポインターを受け取るパラメータのタイプを見ると、最後に<code>const</code>がついてあるのが分かります。こういう感じでオーバーロードして対応して行くようになっています。</p>
-
+</code></pre></div><p>上のデリゲート化する関数のポインターを受け取るパラメータのタイプを見ると、最後に<code>const</code>がついてあるのが分かります。こういう感じでオーバーロードして対応して行くようになっています。</p>
 <p>ちなみに<code>volatile</code>と<code>const volatile</code>があるオーバーロードされた関数はありませんでした。今どきには<code>volatile</code>なんてあんまり使わないですが、2000年代中半のコードで<code>volatile</code>を使わないってちょっと以外でした。</p>
-
 <p>そして<code>const</code>なしのバージョンとの違いは、<code>DelegateMemento::bindconstmemfunc</code>関数を変わりに使っていることです。</p>
 <div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="k">template</span> <span class="o">&lt;</span><span class="k">class</span> <span class="nc">X</span><span class="p">,</span> <span class="k">class</span> <span class="nc">XMemFunc</span><span class="o">&gt;</span>
 <span class="kr">inline</span> <span class="kt">void</span> <span class="n">bindconstmemfunc</span><span class="p">(</span><span class="k">const</span> <span class="n">X</span> <span class="o">*</span><span class="n">pthis</span><span class="p">,</span> <span class="n">XMemFunc</span> <span class="n">function_to_bind</span><span class="p">)</span>
@@ -503,54 +400,38 @@ L   DesiredRetType: int
     <span class="n">m_pthis</span> <span class="o">=</span> <span class="n">SimplifyMemFunc</span><span class="o">&lt;</span><span class="k">sizeof</span><span class="p">(</span><span class="n">function_to_bind</span><span class="p">)</span><span class="o">&gt;::</span><span class="n">Convert</span><span class="p">(</span><span class="k">const_cast</span><span class="o">&lt;</span><span class="n">X</span> <span class="o">*&gt;</span><span class="p">(</span><span class="n">pthis</span><span class="p">),</span> <span class="n">function_to_bind</span><span class="p">,</span> <span class="n">m_pFunction</span><span class="p">);</span>
     <span class="n">m_pStaticFunction</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
 <span class="p">}</span>
-</code></pre></div>
-<blockquote>
+</code></pre></div><blockquote>
 <p><a href="https://en.cppreference.com/w/cpp/language/noexcept_spec">https://en.cppreference.com/w/cpp/language/noexcept_spec</a></p>
-
 <p>ちなみに、C++11から追加された<code>noexcept</code>キーワードは関数のタイプには含まれません。（C++17からは関数シグニチャーには含まれるようになってはいます。）ので、<code>noexcept</code>までオーバーロードする必要はない…と思ってます。</p>
 </blockquote>
-
-<h3 id="static-関数-９"><code>static</code>関数（９）<a href="#static-関数-９" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
-
+<h3 id="static関数９"><code>static</code>関数（９）</h3>
 <p><code>static</code>関数は上記の非メンバ関数と同じ挙動になってます。終わりー</p>
-
-<h2 id="virtual-メンバ関数"><code>virtual</code>メンバ関数<a href="#virtual-メンバ関数" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
-
+<h2 id="virtualメンバ関数"><code>virtual</code>メンバ関数</h2>
 <p>ここからもっと少し難しくなります。<code>virtual</code>関数の標準実装構造は簡単ですが、MSVCの非標準<code>virutal</code>関数の実装は色々とあります。</p>
-
-<h3 id="msvcの-virtual-関数実装">MSVCの<code>virtual</code>関数実装<a href="#msvcの-virtual-関数実装" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
+<h3 id="msvcのvirtual関数実装">MSVCの<code>virtual</code>関数実装</h3>
 <div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="k">class</span> <span class="nc">__single_inheritance</span> <span class="n">class_name</span><span class="p">;</span>
 <span class="k">class</span> <span class="nc">__multiple_inheritance</span> <span class="n">class_name</span><span class="p">;</span>
 <span class="k">class</span> <span class="nc">__virtual_inheritance</span> <span class="n">class_name</span><span class="p">;</span>
-</code></pre></div>
-<p>この非標準キーワードはクラスが指定された非標準継承キーワードの条件を満足した場合に、各キーワードの独自の関数構造でクラスのメンバーの実装を作ってくれます。</p>
-
-<h4 id="1-single-inheritance">1. <code>__single_inheritance</code><a href="#1-single-inheritance" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h4>
-
+</code></pre></div><p>この非標準キーワードはクラスが指定された非標準継承キーワードの条件を満足した場合に、各キーワードの独自の関数構造でクラスのメンバーの実装を作ってくれます。</p>
+<h4 id="1-__single_inheritance">1. <code>__single_inheritance</code></h4>
 <p>標準実装と同じ継承構造になります。メンバの要素のポインターの実装構造が標準と同じくなります。</p>
-
-<h4 id="2-multiple-inheritance">2. <code>__multiple_inheritance</code><a href="#2-multiple-inheritance" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h4>
+<h4 id="2-__multiple_inheritance">2. <code>__multiple_inheritance</code></h4>
 <div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="k">struct</span>
 <span class="p">{</span>
     <span class="n">GenericMemFuncType</span> <span class="n">funcaddress</span><span class="p">;</span> <span class="c1">// points to the actual member function
 </span><span class="c1"></span>    <span class="kt">int</span> <span class="n">delta</span><span class="p">;</span> <span class="c1">// #BYTES to be added to the &#39;this&#39; pointer
 </span><span class="c1"></span><span class="p">};</span>
-</code></pre></div>
-<p>多重継承する時に指定されます。標準とは違って多重継承してる１番目じゃない親クラスの的確な<code>this</code>のポインタを取得する為に使われる<code>delta</code>（<code>i32</code>）を更に使います。ということでこの場合、メンバ関数ポインタはx64では12バイトを使います。</p>
-
-<h4 id="3-virtual-inheritance">3. <code>__virtual_inheritance</code><a href="#3-virtual-inheritance" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h4>
+</code></pre></div><p>多重継承する時に指定されます。標準とは違って多重継承してる１番目じゃない親クラスの的確な<code>this</code>のポインタを取得する為に使われる<code>delta</code>（<code>i32</code>）を更に使います。ということでこの場合、メンバ関数ポインタはx64では12バイトを使います。</p>
+<h4 id="3-__virtual_inheritance">3. <code>__virtual_inheritance</code></h4>
 <div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="k">struct</span> <span class="nc">MicrosoftVirtualMFP</span>
 <span class="p">{</span>
     <span class="kt">void</span> <span class="p">(</span><span class="n">GenericClass</span><span class="o">::*</span><span class="n">codeptr</span><span class="p">)();</span> <span class="c1">// points to the actual member function
 </span><span class="c1"></span>    <span class="kt">int</span> <span class="n">delta</span><span class="p">;</span> <span class="c1">// #bytes to be added to the &#39;this&#39; pointer
 </span><span class="c1"></span>    <span class="kt">int</span> <span class="n">vtable_index</span><span class="p">;</span> <span class="c1">// or 0 if no virtual inheritance
 </span><span class="c1"></span><span class="p">};</span>
-</code></pre></div>
-<p>仮想関数を持った状態で継承した場合、そして子クラスでオーバーライドした関数を使う時に使われると思います。これが使われた場合ではvtableの中で関数ポインタを参照して、それを呼び出す形となります。<code>i32</code>の<code>vtable_index</code>が更に加わるのでx64では16バイトを使います。ちなみに<code>virtual</code>関数だけではなく、メンバ関数をシャドーイングした関数でもこの規約が使われます。</p>
-
+</code></pre></div><p>仮想関数を持った状態で継承した場合、そして子クラスでオーバーライドした関数を使う時に使われると思います。これが使われた場合ではvtableの中で関数ポインタを参照して、それを呼び出す形となります。<code>i32</code>の<code>vtable_index</code>が更に加わるのでx64では16バイトを使います。ちなみに<code>virtual</code>関数だけではなく、メンバ関数をシャドーイングした関数でもこの規約が使われます。</p>
 <p>ただ、仮想メンバ関数のポインタから<code>this</code>を取得するにはちょっとややこしい手順を踏まなければなりません。</p>
-
-<h3 id="single-inheritance-の例分析"><code>__single_inheritance</code>の例分析<a href="#single-inheritance-の例分析" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
+<h3 id="__single_inheritanceの例分析"><code>__single_inheritance</code>の例分析</h3>
 <div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="k">class</span> <span class="nc">CBaseClass</span>
 <span class="p">{</span>
 <span class="k">protected</span><span class="o">:</span>
@@ -572,9 +453,7 @@ L   DesiredRetType: int
 
 <span class="n">CDerivedClass</span> <span class="n">d</span><span class="p">;</span>
 <span class="n">funclist</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="n">MakeDelegate</span><span class="p">(</span><span class="o">&amp;</span><span class="n">d</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">CBaseClass</span><span class="o">::</span><span class="n">SimpleVirtualFunction</span><span class="p">);</span>
-</code></pre></div>
-<p><code>funclist</code>は<code>void(*)(int, char const*)</code>の関数ポインタを受け取ってデリゲート化します。デリゲートリストの７番目に入るインスタンスは<code>CBaseClass</code>を継承した、多重継承の子クラス<code>CDerivedClass</code>の<code>d</code>となります。ですが、今は<code>SimpleVirtualFunction</code>は子クラスでオーバーライドされず、<code>CBaseClass</code>だけ定義されています。</p>
-
+</code></pre></div><p><code>funclist</code>は<code>void(*)(int, char const*)</code>の関数ポインタを受け取ってデリゲート化します。デリゲートリストの７番目に入るインスタンスは<code>CBaseClass</code>を継承した、多重継承の子クラス<code>CDerivedClass</code>の<code>d</code>となります。ですが、今は<code>SimpleVirtualFunction</code>は子クラスでオーバーライドされず、<code>CBaseClass</code>だけ定義されています。</p>
 <p>ベースとなる<code>virtual</code>関数のポインタをデリゲートにバインドする場合、以下のコードブロックで上から下の手順でバインドされます。</p>
 <div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="k">template</span> <span class="o">&lt;</span> <span class="k">class</span> <span class="nc">X</span><span class="p">,</span> <span class="k">class</span> <span class="nc">Y</span> <span class="o">&gt;</span>
 <span class="n">FastDelegate2</span><span class="p">(</span><span class="n">Y</span><span class="o">*</span> <span class="n">pthis</span><span class="p">,</span> <span class="n">DesiredRetType</span><span class="p">(</span><span class="n">X</span><span class="o">::*</span> <span class="n">function_to_bind</span><span class="p">)(</span><span class="n">Param1</span> <span class="n">p1</span><span class="p">,</span> <span class="n">Param2</span> <span class="n">p2</span><span class="p">)</span> <span class="cm">/* const */</span><span class="p">)</span> 
@@ -588,17 +467,12 @@ L   DesiredRetType: int
 <span class="c1">// v
 </span><span class="c1"></span><span class="k">template</span> <span class="o">&lt;&gt;</span>
 <span class="k">struct</span> <span class="nc">SimplifyMemFunc</span><span class="o">&lt;</span><span class="n">SINGLE_MEMFUNCPTR_SIZE</span><span class="o">&gt;</span> <span class="p">{</span> <span class="cm">/* ... */</span> <span class="p">};</span>
-</code></pre></div>
-<p>親クラスの<code>virutal</code>関数の型サイズが普通のメンバ関数ポインタのサイズと同じになることから見れば、<code>virtual</code>関数かないかに関係せず、なにも継承してない親からの関数であれば<code>vtable</code>を辿る必要なくコールするだけで呼び出しができるように見えました。</p>
-
-<p>*何も継承していない親クラス*からの関数だけ一般関数と同じサイズになって、子クラスから新しい仮想関数を定義してそれをバインドする場合には全然違う、<code>__virtual_inheritance</code>の規約を沿うことになります。（よって効率が落ちます）</p>
-
-<h3 id="multiple-inheritance-の例分析"><code>__multiple_inheritance</code>の例分析…？<a href="#multiple-inheritance-の例分析" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
-
+</code></pre></div><p>親クラスの<code>virutal</code>関数の型サイズが普通のメンバ関数ポインタのサイズと同じになることから見れば、<code>virtual</code>関数かないかに関係せず、なにも継承してない親からの関数であれば<code>vtable</code>を辿る必要なくコールするだけで呼び出しができるように見えました。</p>
+<p><em>何も継承していない親クラス</em>からの関数だけ一般関数と同じサイズになって、子クラスから新しい仮想関数を定義してそれをバインドする場合には全然違う、<code>__virtual_inheritance</code>の規約を沿うことになります。（よって効率が落ちます）</p>
+<h3 id="__multiple_inheritanceの例分析"><code>__multiple_inheritance</code>の例分析…？</h3>
 <blockquote>
 <p><a href="https://blog.mozilla.org/nfroyd/2014/02/20/finding-addresses-of-virtual-functions/">https://blog.mozilla.org/nfroyd/2014/02/20/finding-addresses-of-virtual-functions/</a></p>
 </blockquote>
-
 <p>残念ながらDon clugstonさんのデモコードでは<code>__multiple_inheritance</code>の規約を使ってるコードは見つかりませんでした。ですが、このMFP（Member Function Pointer）規約はItanium C++ ABIのMFPの構造と同じに見えます。</p>
 <div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="k">template</span><span class="o">&lt;&gt;</span>
 <span class="k">struct</span> <span class="nc">SimplifyMemFunc</span><span class="o">&lt;</span><span class="n">SINGLE_MEMFUNCPTR_SIZE</span> <span class="o">+</span> <span class="k">sizeof</span><span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="o">&gt;</span>
@@ -623,13 +497,9 @@ L   DesiredRetType: int
         <span class="k">return</span> <span class="k">reinterpret_cast</span><span class="o">&lt;</span><span class="n">GenericClass</span><span class="o">*&gt;</span><span class="p">(</span><span class="k">reinterpret_cast</span><span class="o">&lt;</span><span class="kt">char</span><span class="o">*&gt;</span><span class="p">(</span><span class="n">pthis</span><span class="p">)</span> <span class="o">+</span> <span class="n">u</span><span class="p">.</span><span class="n">s</span><span class="p">.</span><span class="n">delta</span><span class="p">);</span>
     <span class="p">}</span>
 <span class="p">};</span>
-</code></pre></div>
-<p><code>delta</code>は関数コールをする前に、<code>this</code>ポインタがどれだけ動かさなければならないかを示します。デリゲート化した後の関数コールは、<code>virtual</code>関数かそうじゃないかを全然考慮しないまま、保持している関数ポインタらしきものをただ呼ぶだけとなります。なので<code>Convert</code>関数の中で適切な<code>this</code>ポインタを返そうとしたら、<code>delta</code>を使って位置を動かして返す必要があります。</p>
-
+</code></pre></div><p><code>delta</code>は関数コールをする前に、<code>this</code>ポインタがどれだけ動かさなければならないかを示します。デリゲート化した後の関数コールは、<code>virtual</code>関数かそうじゃないかを全然考慮しないまま、保持している関数ポインタらしきものをただ呼ぶだけとなります。なので<code>Convert</code>関数の中で適切な<code>this</code>ポインタを返そうとしたら、<code>delta</code>を使って位置を動かして返す必要があります。</p>
 <p><code>funcaddress</code>はvtable上の関数の位置を指します。もし<code>func</code>が仮想関数ではないとしたら、これは実質の関数ポインタとなります。</p>
-
-<h3 id="virtual-inheritance-の例分析"><code>__virtual_inheritance</code>の例分析<a href="#virtual-inheritance-の例分析" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
-
+<h3 id="__virtual_inheritanceの例分析"><code>__virtual_inheritance</code>の例分析</h3>
 <blockquote>
 <p><a href="http://www.openrce.org/articles/files/jangrayhood.pdf">http://www.openrce.org/articles/files/jangrayhood.pdf</a></p>
 </blockquote>
@@ -691,9 +561,7 @@ L   DesiredRetType: int
  <span class="mi">4</span><span class="o">|</span> <span class="n">funclist</span><span class="p">[</span><span class="mi">8</span><span class="p">].</span><span class="n">bind</span><span class="p">(</span><span class="o">&amp;</span><span class="n">c</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">COtherClass</span><span class="o">::</span><span class="n">TrickyVirtualFunction</span><span class="p">);</span>
  <span class="mi">5</span><span class="o">|</span> <span class="n">funclist</span><span class="p">[</span><span class="mi">10</span><span class="p">]</span> <span class="o">=</span> <span class="n">MakeDelegate</span><span class="p">(</span><span class="o">&amp;</span><span class="n">c</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">CDerivedClass</span><span class="o">::</span><span class="n">AnotherUnusedVirtualFunction</span><span class="p">);</span>
  <span class="mi">6</span><span class="o">|</span> <span class="n">funclist</span><span class="p">[</span><span class="mi">9</span><span class="p">]</span> <span class="o">=</span> <span class="n">MakeDelegate</span><span class="p">(</span><span class="o">&amp;</span><span class="n">c</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">CDerivedClass</span><span class="o">::</span><span class="n">SimpleDerivedFunction</span><span class="p">);</span>
-</code></pre></div>
-<p>子クラスでシャドーイングしてオーバーライドした一般関数、また仮想関数をオーバーライドした場合などなどには大体こっちの規約に従って関数コールがされます。</p>
-
+</code></pre></div><p>子クラスでシャドーイングしてオーバーライドした一般関数、また仮想関数をオーバーライドした場合などなどには大体こっちの規約に従って関数コールがされます。</p>
 <p><code>__virtual_inheritance</code>でのConvert処理ロジックは下にあります。</p>
 <div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="k">struct</span> <span class="nc">MicrosoftVirtualMFP</span>
 <span class="p">{</span>
@@ -735,89 +603,87 @@ L   DesiredRetType: int
         <span class="k">return</span> <span class="p">(</span><span class="n">pthis</span><span class="o">-&gt;*</span><span class="n">u</span><span class="p">.</span><span class="n">ProbeFunc</span><span class="p">)();</span>
     <span class="p">}</span>
 <span class="p">};</span>
-</code></pre></div>
-<p>MSVCでの<code>__virtual_inheritance</code>規約を従うメンバ関数ポインタの仕組みはもっと複雑です。各メンバ関数は最大16Bytesのサイズを持ちます（x64基準）。</p>
-
+</code></pre></div><p>MSVCでの<code>__virtual_inheritance</code>規約を従うメンバ関数ポインタの仕組みはもっと複雑です。各メンバ関数は最大16Bytesのサイズを持ちます（x64基準）。</p>
 <p>まず、適切な<code>this</code>を求めることさえもトリッキーです。<code>this</code>を返還する仕組みは、<code>__multiple_inheritance</code>のように適切な関数ポインタに<code>delta</code>を足すのと大体同じです。しかしちょっと特異なのが、最初の<code>union U</code>に適切な<code>this</code>を返還するための変数の数値を更新した後、即ち規約を満足してからジェネリッククラスのジェネリック<code>virtual</code>関数を呼び出してその中で<code>this</code>を返還するようにしています。</p>
-
 <p>そこが気になってならなくて、ディスアセンブラで<code>x86-64</code>アセンブリを見たのですが、それっぽい違いは見つかりませんでした。もし違いがあるからわざと関数コールをして<code>this</code>を返すのだったら実力不足です。</p>
-
 <p>関数ポインタのアドレスを返すのは<code>__multiple_inheritance</code>のと同じです。</p>
-
-<h3 id="子クラスのメンバ関数を呼ぶ時-１">子クラスのメンバ関数を呼ぶ時（１）<a href="#子クラスのメンバ関数を呼ぶ時-１" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
-
+<h3 id="子クラスのメンバ関数を呼ぶ時１">子クラスのメンバ関数を呼ぶ時（１）</h3>
 <p>MSVC環境で子クラスでシャドーイングした関数を呼ぶ場合、普通の関数ポインタの扱いをして関数を呼び出すと思ったら<code>__virtual_inheritance</code>の規約に沿ってコールすることが分かりました。</p>
-
 <blockquote>
 <p>ちなみに私の環境での<code>d</code>の<code>delta</code>は<code>10h = 16Bytes</code>でした。</p>
 </blockquote>
-
-<h3 id="子クラスで親からオーバーライドした仮想関数を呼ぶ時-２-３-４">子クラスで親からオーバーライドした仮想関数を呼ぶ時（２，３，４）<a href="#子クラスで親からオーバーライドした仮想関数を呼ぶ時-２-３-４" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
-
+<h3 id="子クラスで親からオーバーライドした仮想関数を呼ぶ時２３４">子クラスで親からオーバーライドした仮想関数を呼ぶ時（２，３，４）</h3>
 <ul>
-<li><p>2のコードの場合、たとえ子クラスのポインタが渡されても親の最初仮想関数が呼ばれるようとしたら（<code>funclist[6] = MakeDelegate(&amp;d, &amp;CBaseClass::SimpleVirtualFunction);</code>）そのまま<code>__single_inheritance</code>の規約に従ってポインタが保存されます。</p>
-
-<p>ただ、仮想関数をオーバーライドした場合には<code>__virtual_inheritance</code>の規約になります。親じゃない適切な子クラスの<code>this</code>を求める必要があるからです。</p></li>
-
-<li><p>3のほうが個人的には面白かったのですが、親仮想関数が完全な純粋仮想関数の場合でも<code>__single_inheritance</code>規約になります。多分ですが親の<code>this</code>をわざと<code>__virtual_inheritance</code>を使いながら取得する必要がないから…？と思います。</p></li>
+<li>
+<p>2のコードの場合、たとえ子クラスのポインタが渡されても親の最初仮想関数が呼ばれるようとしたら（<code>funclist[6] = MakeDelegate(&amp;d, &amp;CBaseClass::SimpleVirtualFunction);</code>）そのまま<code>__single_inheritance</code>の規約に従ってポインタが保存されます。</p>
+<p>ただ、仮想関数をオーバーライドした場合には<code>__virtual_inheritance</code>の規約になります。親じゃない適切な子クラスの<code>this</code>を求める必要があるからです。</p>
+</li>
+<li>
+<p>3のほうが個人的には面白かったのですが、親仮想関数が完全な純粋仮想関数の場合でも<code>__single_inheritance</code>規約になります。多分ですが親の<code>this</code>をわざと<code>__virtual_inheritance</code>を使いながら取得する必要がないから…？と思います。</p>
+</li>
 </ul>
-
-<h3 id="子クラスで新規の仮想関数-一般関数を呼ぶ時-５-６">子クラスで新規の仮想関数、一般関数を呼ぶ時（５、６）<a href="#子クラスで新規の仮想関数-一般関数を呼ぶ時-５-６" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h3>
-
+<h3 id="子クラスで新規の仮想関数一般関数を呼ぶ時５６">子クラスで新規の仮想関数、一般関数を呼ぶ時（５、６）</h3>
 <ul>
 <li><code>&amp;CDerivedClass::AnotherUnusedVirtualFunction</code>の関数自体は<code>DerivedClass</code>で定義された新しい仮想関数で、親自体は<code>DerivedClass</code>になります。しかし<code>this</code>を求める必要がある為<code>__virtual_inheritance</code>の規約をそって保存されます。</li>
 <li>子クラスの一般関数の場合にも<code>__virtual_inhertiance</code>の規約になります。（まいったな…）</li>
 </ul>
-
-<h1 id="まとめ">まとめ<a href="#まとめ" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h1>
-
+<h1 id="まとめ">まとめ</h1>
 <p>以上、15年もなったDon ClugstonさんのDelegateコードを分析して見ました。個人としてはこれの仕組みがちょっと好きになって、自分の個人プロジェクトにC++11のパラメータパックを支援する形として書き直して使わせていただいてます。</p>
-
 <p>実はDon Clugstonのデリゲート実装以降、もっと静的に出来るデリゲートのやり方が提案されたり、２つを組み合わせたやり方が提案されたりしたそうです。ですけど、性能面としては最初のDon Clugstonのほうが一番良かったらしいです。</p>
-
 <p>時間があれば他のデリゲートも分析してみたいですね。では終わらせていただきます。</p>
-
-<h1 id="リンク-1">リンク<a href="#リンク-1" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h1>
-
+<h1 id="リンク-1">リンク</h1>
 <p><a href="https://www.codeproject.com/Articles/7150/Member-Function-Pointers-and-the-Fastest-Possible">Member Function Pointers and the Fastest Possible C++ Delegates</a></p>
-
 <p><a href="https://stackoverflow.com/questions/18633697/fastdelegate-and-lambdas-cant-get-them-to-work-don-clugstons-fastest-possib">FastDelegate and labmdas</a></p>
-
 <p><a href="https://www.codeproject.com/Articles/18389/Fast-C-Delegate-Boost-Function-drop-in-replacement">Fast C++ Delegate: Boost.Function &lsquo;drop-in&rsquo; replacement and multicast</a></p>
-
 <p><a href="https://www.codeproject.com/Articles/1170503/The-Impossibly-Fast-Cplusplus-Delegates-Fixed">The Impossibly Fast C++ Delegates, Fixed</a></p>
-
-			</div>
-			<hr class="post-end">
-			<footer class="post-info">
-				<p><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>9971 Words</p>
-				<p><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>2020-08-27 09:30 &#43;0900</p>
-			</footer>
-		</article>
-		<div class="post-nav thin">
-			<a class="next-post" href="https://liliilli.github.io/posts/doxygen_memo/">
-				<span class="post-nav-label"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-left"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>&nbsp;Newer</span><br><span>C&#43;&#43;でのDoxygenの書き方のメモ</span>
-			</a>
-			<a class="prev-post" href="https://liliilli.github.io/posts/rust_winapi_memo/">
-				<span class="post-nav-label">Older&nbsp;<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-right"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg></span><br><span>Rust＋Winapiで窓を生成してみた</span>
-			</a>
-		</div>
-		<div id="comments" class="thin">
 </div>
-	</main>
+  <footer class="post-footer">
+  </footer>
+</article>
+    </main><footer class="footer">
+    <span>&copy; 2020 <a href="https://liliilli.github.io">neuromantic</a></span>
+    <span>&middot;</span>
+    <span>Powered by <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo️️</a>️</span>
+    <span>&middot;</span>
+    <span>Theme️ <a href="https://git.io/hugopapermod" rel="noopener" target="_blank">PaperMod</a></span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top">
+    <button class="top-link" id="top-link" type="button">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6">
+            <path d="M12 6H0l6-6z" /></svg>
+    </button>
+</a>
+<script src="https://liliilli.github.io/assets/js/highlight.min.e7afc2928c0925d65c4732dfebe147014d91299a98e819e4b42f25c4fa68e91c.js" integrity="sha256-56/CkowJJdZcRzLf6&#43;FHAU2RKZqY6BnktC8lxPpo6Rw="></script>
+<script>hljs.initHighlightingOnLoad();</script>
+<script>
+    window.onload = function () {
+        if (localStorage.getItem("menu-scroll-position")) {
+            document.getElementById('menu').scrollLeft = localStorage.getItem("menu-scroll-position");
+        }
+    }
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
 
-	<footer id="site-footer" class="section-inner thin animated fadeIn faster">
-		<p>&copy; 2020 <a href="https://liliilli.github.io">jongmin yun - neu.</a> &#183; <a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC BY-NC 4.0</a></p>
-		<p>
-			Made with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> &#183; Theme <a href="https://github.com/Track3/hermit" target="_blank" rel="noopener">Hermit</a> &#183; <a href="https://liliilli.github.io/posts/index.xml" target="_blank" title="rss"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-rss"><path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1"></circle></svg></a>
-		</p>
-	</footer>
-
-
-
-	<script src="https://liliilli.github.io/js/bundle.min.4a9a0ac3d2217822c7865b4161e6c2a71de1d70492264337755427898dd718f6.js" integrity="sha256-SpoKw9IheCLHhltBYebCpx3h1wSSJkM3dVQniY3XGPY=" crossorigin="anonymous"></script>
-	
-
+            document.querySelector(this.getAttribute("href")).scrollIntoView({
+                behavior: "smooth"
+            });
+        });
+    });
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+    function menu_on_scroll() {
+        localStorage.setItem("menu-scroll-position", document.getElementById('menu').scrollLeft);
+    }
+</script>
 </body>
 
 </html>

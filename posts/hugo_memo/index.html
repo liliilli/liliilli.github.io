@@ -1,174 +1,158 @@
 <!DOCTYPE html>
-<html lang="en-us">
+<html lang="en">
 
-<head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<meta http-equiv="X-UA-Compatible" content="ie=edge">
-	<meta name="theme-color" content="#494f5c">
-	<meta name="msapplication-TileColor" content="#494f5c">
-<meta itemprop="name" content="Hugoブログを使いこなせるためのメモ">
-<meta itemprop="description" content="すごく久しぶりにHugoのブログを使おうとしましたが、ブログに記事を書くどころかHugoの使い方すらすっかり忘れてしまいました。だもんで自分">
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
+<title>Hugoブログを使いこなせるためのメモ - neuromantic</title>
 
-<meta itemprop="datePublished" content="2020-03-03T23:10:28&#43;09:00" />
-<meta itemprop="dateModified" content="2020-03-03T23:48:07&#43;09:00" />
-<meta itemprop="wordCount" content="1175">
+<meta name="description" content="すごく久しぶりにHugoのブログを使おうとしましたが、ブログに記事を書くどころかHugoの使い方すらすっかり忘れてしまいました。だもんで自分">
+<meta name="keywords" content= />
+<meta name="author" content="Jongmin Yun, Neu.">
+<link rel="canonical" href="https://liliilli.github.io/posts/hugo_memo/" />
+<link href="https://liliilli.github.io/assets/css/stylesheet.min.a3b13905fd4b98ea165a18374ae5215d9de97a04f187f789736c56858296ba12.css" integrity="sha256-o7E5Bf1LmOoWWhg3SuUhXZ3pegTxh/eJc2xWhYKWuhI=" rel="preload stylesheet"
+    as="style">
+<link rel="apple-touch-icon" href="https://liliilli.github.io/apple-touch-icon.png">
+<link rel="icon" href="https://liliilli.github.io/favicon.ico">
+<meta name="generator" content="Hugo 0.75.1" />
 
-
-
-<meta itemprop="keywords" content="untagged," />
-<meta property="og:title" content="Hugoブログを使いこなせるためのメモ" />
-<meta property="og:description" content="すごく久しぶりにHugoのブログを使おうとしましたが、ブログに記事を書くどころかHugoの使い方すらすっかり忘れてしまいました。だもんで自分" />
-<meta property="og:type" content="article" />
-<meta property="og:url" content="https://liliilli.github.io/posts/hugo_memo/" />
-<meta property="article:published_time" content="2020-03-03T23:10:28+09:00" />
-<meta property="article:modified_time" content="2020-03-03T23:48:07+09:00" />
-<meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="Hugoブログを使いこなせるためのメモ"/>
-<meta name="twitter:description" content="すごく久しぶりにHugoのブログを使おうとしましたが、ブログに記事を書くどころかHugoの使い方すらすっかり忘れてしまいました。だもんで自分"/>
-
-	<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-	<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-	<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-	<link rel="manifest" href="/site.webmanifest">
-	<link rel="mask-icon" href="/safari-pinned-tab.svg" color="">
-	<link rel="shortcut icon" href="/favicon.ico">
-
-	<title>Hugoブログを使いこなせるためのメモ</title>
-	<link rel="stylesheet" href="https://liliilli.github.io/css/style.min.eac77496566fd7d5768fd650ddb0b2b181ca6a2d7c5fdd6fe6b8ba4bf47e566f.css" integrity="sha256-6sd0llZv19V2j9ZQ3bCysYHKai18X91v5ri6S/R+Vm8=" crossorigin="anonymous">
-	
 </head>
 
-<body id="page">
-	
-	<header id="site-header" class="animated slideInUp">
-		<div class="hdr-wrapper section-inner">
-			<div class="hdr-left">
-				<div class="site-branding">
-					<a href="https://liliilli.github.io">neuromantic</a>
-				</div>
-				<nav class="site-nav hide-in-mobile">
-					
-				<a href="https://liliilli.github.io/posts/">Posts</a>
-				<a href="https://liliilli.github.io/about-hugo/">About</a>
+<body class="single" id="top">
+<header class="header">
+    <nav class="nav">
+        <p class="logo"><a href="https://liliilli.github.io">neuromantic</a></p>
+        <ul class="menu" id="menu" onscroll="menu_on_scroll()">
+            <li>
+                <a href="https://liliilli.github.io/archives/">
+                    <span>
+                        Archives
+                    </span>
+                </a>
+            </li>
+            <li>
+                <a href="https://liliilli.github.io/tags/">
+                    <span>
+                        Tags
+                    </span>
+                </a>
+            </li>
+            <li>
+                <a href="https://liliilli.github.io/series/">
+                    <span>
+                        Series
+                    </span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+    <main class="main">
 
-				</nav>
-			</div>
-			<div class="hdr-right hdr-icons">
-				<span class="hdr-social hide-in-mobile"><a href="https://twitter.com/NeuliliilliD" target="_blank" rel="noopener me" title="Twitter"><svg xmlns="http://www.w3.org/2000/svg" class="feather" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg></a><a href="https://github.com/liliilli" target="_blank" rel="noopener me" title="Github"><svg xmlns="http://www.w3.org/2000/svg" class="feather" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg></a></span><button id="menu-btn" class="hdr-btn" title="Menu"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-menu"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg></button>
-			</div>
-		</div>
-	</header>
-	<div id="mobile-menu" class="animated fast">
-		<ul>
-			<li><a href="https://liliilli.github.io/posts/">Posts</a></li>
-			<li><a href="https://liliilli.github.io/about-hugo/">About</a></li>
-		</ul>
-	</div>
-
-
-
-
-	<main class="site-main section-inner animated fadeIn faster">
-		<article class="thin">
-			<header class="post-header">
-				<div class="post-meta"><span>Mar 3, 2020</span></div>
-				<h1>Hugoブログを使いこなせるためのメモ</h1>
-			</header>
-			<div class="content">
-				
-
-<p>すごく久しぶりにHugoのブログを使おうとしましたが、ブログに記事を書くどころかHugoの使い方すらすっかり忘れてしまいました。だもんで自分用のメモみたいなことを書いていつでも覚えさせられるようにしたいと思います。</p>
-
+<article class="post-single">
+  <header class="post-header">
+    <h1 class="post-title">
+      Hugoブログを使いこなせるためのメモ
+    </h1>
+    <div class="post-meta">
+      <time>March 3, 2020</time>&nbsp;·&nbsp;Jongmin Yun, Neu.
+    </div>
+  </header>
+  <div class="post-content"><p>すごく久しぶりにHugoのブログを使おうとしましたが、ブログに記事を書くどころかHugoの使い方すらすっかり忘れてしまいました。だもんで自分用のメモみたいなことを書いていつでも覚えさせられるようにしたいと思います。</p>
 <p>ちなみにブログの設定環境はWindowsです。新しくインストールするなら<code>$ brew install hugo</code>みたいなもんは当然出来ないし、Windowsのパッケージをダウンロードして設置するしかないみたいですね。</p>
-
-<h1 id="覚えておくといい-かも-メモリスト">覚えておくといい（かも）メモリスト<a href="#覚えておくといい-かも-メモリスト" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h1>
-
-<h2 id="レポジトリー登録">レポジトリー登録<a href="#レポジトリー登録" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
-
+<h1 id="覚えておくといいかもメモリスト">覚えておくといい（かも）メモリスト</h1>
+<h2 id="レポジトリー登録">レポジトリー登録</h2>
 <ul>
-<li><p>WindowsではHugoをインストールしてから環境変数に登録する必要があります。</p></li>
-
-<li><p>HugoはDeployで生成された本サイトページと、そのページを生成するためのリソースが一つのディレクトリの中にまとまっているので、遠隔リポジトリーなどにリソースをセーブする為には２つのリポジトリーを作ることが一番良いらしい。</p>
-
+<li>
+<p>WindowsではHugoをインストールしてから環境変数に登録する必要があります。</p>
+</li>
+<li>
+<p>HugoはDeployで生成された本サイトページと、そのページを生成するためのリソースが一つのディレクトリの中にまとまっているので、遠隔リポジトリーなどにリソースをセーブする為には２つのリポジトリーを作ることが一番良いらしい。</p>
 <ul>
 <li>例えば、Hugoの本コンテンツとリソースを入れ込む用途として使う<code>&lt;YOUR-PROJECT&gt;</code>と
-結果としてDeployされた<code>&lt;USERNAME&gt;.github.io</code>レポジトリ。
-<br /></li>
-</ul></li>
-
-<li><p><code>&lt;YOUR-PROJECT&gt;</code>は本プロジェクトとして<br></p>
-<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">$ git remote add origin git@github.com:integerous/blog.git</code></pre></div></li>
-
-<li><p><code>&lt;USERNAME&gt;.github.io</code>はSubmoduleとして登録する。<br></p>
-<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">$ git submodule add -b master <span class="se">\
-</span><span class="se"></span>git@github.com:integerous/integerous.github.io.git public</code></pre></div></li>
+結果としてDeployされた<code>&lt;USERNAME&gt;.github.io</code>レポジトリ。</li>
 </ul>
-
+</li>
+<li>
+<p><code>&lt;YOUR-PROJECT&gt;</code>は本プロジェクトとして<!-- raw HTML omitted --></p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">$ git remote add origin git@github.com:integerous/blog.git
+</code></pre></div></li>
+<li>
+<p><code>&lt;USERNAME&gt;.github.io</code>はSubmoduleとして登録する。<!-- raw HTML omitted --></p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">$ git submodule add -b master <span class="se">\
+</span><span class="se"></span>git@github.com:integerous/integerous.github.io.git public
+</code></pre></div></li>
+</ul>
 <p>上記のようにすることで<code>public</code>っていうDeployされた時に作られるウェブサイトフォルダーは本プロジェクトとは違って<code>&lt;USERNAME&gt;.github.io</code>を持つことになる。</p>
-
-<h2 id="コンテンツ生成">コンテンツ生成<a href="#コンテンツ生成" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
-
+<h2 id="コンテンツ生成">コンテンツ生成</h2>
 <ul>
 <li>コンテンツ生成はブログのフォルダーから<code>$ hugo new posts/test1.md</code>みたいなコマンドを売ってファイルを生成する。Draftで生成したい場合には<code>-D</code>を最後につける。</li>
 <li>コンテンツをローカルで見る為には<code>hugo server</code>または<code>hugo server -D</code>で確認できる。</li>
 </ul>
-
-<h2 id="コンテンツアップロード">コンテンツアップロード<a href="#コンテンツアップロード" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
-
+<h2 id="コンテンツアップロード">コンテンツアップロード</h2>
 <ol>
 <li>まず<code>$ hugo -t テーマの名前</code>で設置されたテーマが適用されたコンテンツを<code>public</code>フォルダーに生成。</li>
 <li><code>public</code>フォルダーに移動し、gitなどで<code>&lt;USERNAME&gt;.github.io</code>にコミットする。</li>
-
-<li><p>ルートフォルダーに戻り、生リソースを<code>&lt;YOUR-PROJECT&gt;</code>にコミットする。</p>
-<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">$ git push origin master</code></pre></div></li>
+<li>ルートフォルダーに戻り、生リソースを<code>&lt;YOUR-PROJECT&gt;</code>にコミットする。</li>
 </ol>
-
-<h1 id="最後に">最後に<a href="#最後に" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h1>
-
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">$ git push origin master
+</code></pre></div><h1 id="最後に">最後に</h1>
 <p>ちなみにほぼ３ヶ月ぐらい放置してたブログをまだ使おうとしたのは、個人プロジェクトの<code>CMakeLists.txt</code>を削除してしまい、また書こうとしても<code>CMake</code>なんてすっかり忘れてしまってブログにメモとりながら再実装する必要があったからです。これで一日無駄使いしてしまいWINAPIのFiberのサンプルを書く時間なんてなくなってしまいました。</p>
-
 <p>ソースコードはちゃんとバックアップしましょうね。</p>
-
-<h1 id="リンク">リンク<a href="#リンク" class="anchor" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h1>
-
+<h1 id="リンク">リンク</h1>
 <p><a href="https://github.com/Integerous/Integerous.github.io">Hugo로 Github.io 블로그 만들기</a></p>
-
-			</div>
-			<hr class="post-end">
-			<footer class="post-info">
-				<p>
-					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-tag meta-icon"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7" y2="7"></line></svg><span class="tag"><a href="https://liliilli.github.io/tags/untagged">untagged</a></span>
-				</p>
-				<p><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>1175 Words</p>
-				<p><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>2020-03-03 23:10 &#43;0900</p>
-			</footer>
-		</article>
-		<div class="post-nav thin">
-			<a class="next-post" href="https://liliilli.github.io/posts/cmake_memo/">
-				<span class="post-nav-label"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-left"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>&nbsp;Newer</span><br><span>CMakeのメモまとめ</span>
-			</a>
-			<a class="prev-post" href="https://liliilli.github.io/posts/cpp_concept/">
-				<span class="post-nav-label">Older&nbsp;<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-right"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg></span><br><span>C&#43;&#43;2aのconceptsを使ってみた。</span>
-			</a>
-		</div>
-		<div id="comments" class="thin">
 </div>
-	</main>
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://liliilli.github.io/tags/untagged">untagged</a></li>
+    </ul>
+  </footer>
+</article>
+    </main><footer class="footer">
+    <span>&copy; 2020 <a href="https://liliilli.github.io">neuromantic</a></span>
+    <span>&middot;</span>
+    <span>Powered by <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo️️</a>️</span>
+    <span>&middot;</span>
+    <span>Theme️ <a href="https://git.io/hugopapermod" rel="noopener" target="_blank">PaperMod</a></span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top">
+    <button class="top-link" id="top-link" type="button">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6">
+            <path d="M12 6H0l6-6z" /></svg>
+    </button>
+</a>
+<script src="https://liliilli.github.io/assets/js/highlight.min.e7afc2928c0925d65c4732dfebe147014d91299a98e819e4b42f25c4fa68e91c.js" integrity="sha256-56/CkowJJdZcRzLf6&#43;FHAU2RKZqY6BnktC8lxPpo6Rw="></script>
+<script>hljs.initHighlightingOnLoad();</script>
+<script>
+    window.onload = function () {
+        if (localStorage.getItem("menu-scroll-position")) {
+            document.getElementById('menu').scrollLeft = localStorage.getItem("menu-scroll-position");
+        }
+    }
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
 
-	<footer id="site-footer" class="section-inner thin animated fadeIn faster">
-		<p>&copy; 2020 <a href="https://liliilli.github.io">jongmin yun - neu.</a> &#183; <a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC BY-NC 4.0</a></p>
-		<p>
-			Made with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> &#183; Theme <a href="https://github.com/Track3/hermit" target="_blank" rel="noopener">Hermit</a> &#183; <a href="https://liliilli.github.io/posts/index.xml" target="_blank" title="rss"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-rss"><path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1"></circle></svg></a>
-		</p>
-	</footer>
-
-
-
-	<script src="https://liliilli.github.io/js/bundle.min.4a9a0ac3d2217822c7865b4161e6c2a71de1d70492264337755427898dd718f6.js" integrity="sha256-SpoKw9IheCLHhltBYebCpx3h1wSSJkM3dVQniY3XGPY=" crossorigin="anonymous"></script>
-	
-
+            document.querySelector(this.getAttribute("href")).scrollIntoView({
+                behavior: "smooth"
+            });
+        });
+    });
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+    function menu_on_scroll() {
+        localStorage.setItem("menu-scroll-position", document.getElementById('menu').scrollLeft);
+    }
+</script>
 </body>
 
 </html>
