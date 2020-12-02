@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+<title>Rustメモ（20-11-20～) - neuromantic</title>
+
+<meta name="description" content="Smart Pointerのあらゆる実装分析 1. Deref trait Box&lt;T&gt;などは基本的にDeref traitを実装している。また、Box&lt;T&g">
+<meta name="keywords" content= />
+<meta name="author" content="Jongmin Yun, Neu.">
+<link rel="canonical" href="https://liliilli.github.io/posts/rust_2_memo/" />
+<link href="https://liliilli.github.io/assets/css/stylesheet.min.a3b13905fd4b98ea165a18374ae5215d9de97a04f187f789736c56858296ba12.css" integrity="sha256-o7E5Bf1LmOoWWhg3SuUhXZ3pegTxh/eJc2xWhYKWuhI=" rel="preload stylesheet"
+    as="style">
+<link rel="apple-touch-icon" href="https://liliilli.github.io/apple-touch-icon.png">
+<link rel="icon" href="https://liliilli.github.io/favicon.ico">
+<meta name="generator" content="Hugo 0.75.1" />
+
+
+</head>
+
+<body class="single" id="top">
+<header class="header">
+    <nav class="nav">
+        <p class="logo"><a href="https://liliilli.github.io">neuromantic</a></p>
+        <ul class="menu" id="menu" onscroll="menu_on_scroll()">
+            <li>
+                <a href="https://liliilli.github.io/posts/">
+                    <span>
+                        Posts
+                    </span>
+                </a>
+            </li>
+            <li>
+                <a href="https://liliilli.github.io/archives/">
+                    <span>
+                        Archives
+                    </span>
+                </a>
+            </li>
+            <li>
+                <a href="https://liliilli.github.io/tags/">
+                    <span>
+                        Tags
+                    </span>
+                </a>
+            </li>
+            <li>
+                <a href="https://liliilli.github.io/series/">
+                    <span>
+                        Series
+                    </span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+
+    <main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <h1 class="post-title">
+      Rustメモ（20-11-20～)
+    </h1>
+    <div class="post-meta">
+      <time>November 19, 2020</time>&nbsp;·&nbsp;Jongmin Yun, Neu.
+    </div>
+  </header>
+  <div class="post-content"><h2 id="smart-pointerのあらゆる実装分析">Smart Pointerのあらゆる実装分析</h2>
+<h3 id="1-deref-trait">1. <code>Deref</code> trait</h3>
+<p><code>Box&lt;T&gt;</code>などは基本的に<code>Deref</code> traitを実装している。また、<code>Box&lt;T&gt;</code>だけじゃなくて基本タイプの<code>&amp;</code>または<code>&amp;mut</code>も中身ロジックとしては<code>Deref</code>を実装する。<code>Deref</code> traitは<em>dereference operator</em>を指して、シンボルの前に<code>*</code>を置くことで参照に接近出来るようになる。</p>
+<blockquote>
+<p>厳密にいうと、<code>Deref</code>と<code>DerefMut</code>というのがそれぞれあり、<code>&amp;mut</code>は<code>DerefMut</code>を実装している。</p>
+</blockquote>
+<p><code>Box&lt;T&gt;</code>は<code>Deref</code>と<code>DerefMut</code>を実装しているため、次のようなコードが書ける。</p>
+<div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="k">fn</span> <span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">5</span><span class="p">;</span><span class="w">
+</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">Box</span>::<span class="n">new</span><span class="p">(</span><span class="n">x</span><span class="p">);</span><span class="w">
+</span><span class="w">    
+</span><span class="w">    </span><span class="n">assert_eq</span><span class="o">!</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="n">x</span><span class="p">);</span><span class="w">
+</span><span class="w">    </span><span class="n">assert_eq</span><span class="o">!</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="n">y</span><span class="p">);</span><span class="w"> </span><span class="c1">// Derefを実装しているため、コンパイルが通る。
+</span><span class="c1"></span><span class="p">}</span><span class="w">
+</span></code></pre></div><p>上の<code>assert_eq!(5, *y)</code>は実はこう紐解かれてビルドするようになる。</p>
+<div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="n">assert_eq</span><span class="o">!</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="p">(</span><span class="n">y</span><span class="p">.</span><span class="n">deref</span><span class="p">()));</span><span class="w">
+</span></code></pre></div><h3 id="2-deref-coercion">2. <code>Deref</code> coercion</h3>
+<p><code>Deref</code> coercionとは、メソッドまたは関数などに入れる引数に自動で行うRustの機能で、<code>&amp;String</code>が<code>&amp;str</code>に変わるように<code>Deref</code>を実装した型に参照型を置換できる他の方に変換することを指す。</p>
+<p><code>std::string::String</code>は<code>Deref</code>の実装でAnnotation Typeの<code>Target</code>を<code>str</code>にしたので、Coercionで<code>&amp;str</code>に変わることが出来る。</p>
+<p><code>Deref</code> coercionで、次のようなコードの書き方が出来る。</p>
+<div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="k">fn</span> <span class="nf">hello</span><span class="p">(</span><span class="n">name</span>: <span class="kp">&amp;</span><span class="kt">str</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="n">println</span><span class="o">!</span><span class="p">(</span><span class="s">&#34;Hello, {}&#34;</span><span class="p">,</span><span class="w"> </span><span class="n">name</span><span class="p">);</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span><span class="w">
+</span><span class="w"></span><span class="k">pub</span><span class="w"> </span><span class="k">struct</span> <span class="nc">MyBox</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="n">string</span>: <span class="nb">String</span>
+<span class="p">}</span><span class="w">
+</span><span class="w">
+</span><span class="w"></span><span class="k">impl</span><span class="w"> </span><span class="n">MyBox</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="k">fn</span> <span class="nf">new</span><span class="p">(</span><span class="n">string</span>: <span class="nb">String</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">Self</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">MyBox</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">string</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">}</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span><span class="w">
+</span><span class="w"></span><span class="k">impl</span><span class="w"> </span><span class="n">Deref</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">MyBox</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="k">type</span> <span class="nc">Target</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kt">str</span><span class="p">;</span><span class="w">
+</span><span class="w">    </span><span class="k">fn</span> <span class="nf">deref</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="kp">&amp;</span><span class="nc">Self</span>::<span class="n">Target</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">string</span><span class="p">.</span><span class="n">deref</span><span class="p">()</span><span class="w"> </span><span class="p">}</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span><span class="w">
+</span><span class="w"></span><span class="k">fn</span> <span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">m</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MyBox</span>::<span class="n">new</span><span class="p">(</span><span class="nb">String</span>::<span class="n">from</span><span class="p">(</span><span class="s">&#34;Rust&#34;</span><span class="p">));</span><span class="w">
+</span><span class="w">    </span><span class="n">hello</span><span class="p">(</span><span class="o">&amp;</span><span class="n">m</span><span class="p">);</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span></code></pre></div><h3 id="3-derefmutとの動作の違い">3. <code>DerefMut</code>との動作の違い</h3>
+<ul>
+<li><code>&amp;T</code>から<code>&amp;U</code>にするには<code>T: Deref&lt;Target=U&gt;</code>で実装すること</li>
+<li><code>&amp;mut T</code>から<code>&amp;mut U</code>にするには<code>T: DerefMut&lt;Target=U&gt;</code>で実装すること</li>
+<li><code>&amp;mut T</code>から<code>&amp;U</code>にするには<code>T: Deref&lt;Target=U&gt;</code>で実装すること。</li>
+</ul>
+<h3 id="4-drop-trait">4. <code>Drop</code> trait</h3>
+<blockquote>
+<p><a href="https://doc.rust-lang.org/std/ops/trait.Drop.html">https://doc.rust-lang.org/std/ops/trait.Drop.html</a></p>
+</blockquote>
+<p><code>Box&lt;T&gt;</code>をウィッシュとしたSmart Pointerは<code>Deref</code>以外にも<code>Drop</code>というtraitも実装する。これを実装することにより変数が今のスコープから離れてしまうと任意ロジックが動作するようにさせることが出来る。いわゆるC++のDestructorなもので、RAIIを実装するものだと思っても良さそう。</p>
+<p><code>Drop</code> traitは<code>fn drop(&amp;mut self)</code>を実装することにより、デストラクタロジックの実装が可能になる。</p>
+<div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="k">struct</span> <span class="nc">CustomPointer</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="n">data</span>: <span class="nb">String</span><span class="p">,</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span><span class="w">
+</span><span class="w"></span><span class="k">impl</span><span class="w"> </span><span class="nb">Drop</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">CustomPointer</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="k">fn</span> <span class="nf">drop</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="bp">self</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">        </span><span class="n">println</span><span class="o">!</span><span class="p">(</span><span class="s">&#34;BlahBlah.&#34;</span><span class="p">);</span><span class="w">
+</span><span class="w">    </span><span class="p">}</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span></code></pre></div><p>ちなみにスコープの中に複数の変数がある時、変数の<code>fn drop()</code>が呼ばれる順は上から変数が初期化された順の逆で呼ばれる。</p>
+<p>また、C++のデストラクタとは違って<code>Drop::drop</code>は手動で読んでスコープを離れて自動で消されるより速く消すのは出来ない。しかし、<code>std::mem::drop&lt;T: Drop&gt;(T)</code>にDropしたい変数を入れるとこの関数が代わりに早めに<code>drop()</code>させるようにしてくれる。</p>
+<blockquote>
+<p><a href="https://doc.rust-lang.org/std/mem/fn.drop.html">https://doc.rust-lang.org/std/mem/fn.drop.html</a></p>
+</blockquote>
+<p>またこの関数はPreludeに属しているので<code>use</code>を使わず使用できる。</p>
+<div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="k">fn</span> <span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CustomPointer</span><span class="p">{</span><span class="w"> </span><span class="n">data</span>: <span class="nb">String</span>::<span class="n">from</span><span class="p">(</span><span class="s">&#34;Hello world!&#34;</span><span class="p">)</span><span class="w"> </span><span class="p">};</span><span class="w">
+</span><span class="w">    </span><span class="n">drop</span><span class="p">(</span><span class="n">c</span><span class="p">);</span><span class="w">
+</span><span class="w">    </span><span class="n">println</span><span class="o">!</span><span class="p">(</span><span class="s">&#34;CustomPoitner dropped before the end of main.&#34;</span><span class="p">);</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span></code></pre></div><div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">$ cargo run
+<span class="s2">&#34;BlahBlah.&#34;</span>
+<span class="s2">&#34;CustomPoitner dropped before the end of main.&#34;</span>
+</code></pre></div><h3 id="5-rct">5. <code>Rc&lt;T&gt;</code></h3>
+<blockquote>
+<p><a href="https://doc.rust-lang.org/std/rc/">https://doc.rust-lang.org/std/rc/</a></p>
+</blockquote>
+<p><code>Rc&lt;T&gt;</code>はC++の<code>smart_ptr&lt;T&gt;</code>のようなもので、次のようなものが通るようにする。</p>
+<div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="k">enum</span> <span class="nc">List</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="n">Cons</span><span class="p">(</span><span class="kt">i32</span><span class="p">,</span><span class="w"> </span><span class="n">Rc</span><span class="o">&lt;</span><span class="n">List</span><span class="o">&gt;</span><span class="p">),</span><span class="w">
+</span><span class="w">    </span><span class="n">Nil</span><span class="p">,</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span><span class="w">
+</span><span class="w"></span><span class="k">use</span><span class="w"> </span><span class="k">crate</span>::<span class="n">List</span>::<span class="p">{</span><span class="n">Cons</span><span class="p">,</span><span class="w"> </span><span class="n">Nil</span><span class="p">};</span><span class="w">
+</span><span class="w"></span><span class="k">use</span><span class="w"> </span><span class="n">std</span>::<span class="n">rc</span>::<span class="n">Rc</span><span class="p">;</span><span class="w">
+</span><span class="w">
+</span><span class="w"></span><span class="k">fn</span> <span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Rc</span>::<span class="n">new</span><span class="p">(</span><span class="n">Cons</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="n">Rc</span>::<span class="n">new</span><span class="p">(</span><span class="n">Cons</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="n">Rc</span>::<span class="n">new</span><span class="p">(</span><span class="n">Nil</span><span class="p">)))));</span><span class="w">
+</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Cons</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="n">Rc</span>::<span class="n">clone</span><span class="p">(</span><span class="o">&amp;</span><span class="n">a</span><span class="p">));</span><span class="w">
+</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Cons</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="n">Rc</span>::<span class="n">clone</span><span class="p">(</span><span class="o">&amp;</span><span class="n">a</span><span class="p">));</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span></code></pre></div><p>しかし<code>Rc&lt;T&gt;</code>の問題としては、複数の変数が一つのメモリ空間を共同所有しているので自然に発生するしかないデータ競合を避けるため、基本的に<code>&amp;</code>（変更出来ない参照）だけをサポートする。もし<code>&amp;mut</code>を返す<code>Rc&lt;T&gt;</code>を作りたいとしたら、型引数を<code>Cell&lt;T&gt;</code>か<code>RefCell&lt;T&gt;</code>にするしかない。</p>
+<p>また、<code>shared_ptr&lt;T&gt;</code>とは違って<code>Rc&lt;T&gt;</code>自体はアトミック演算ではないカウントを使用する。なのでオーバーヘッドは少ないが、スレッド実行のための引数としては送ることが出来ない。すなわち、<code>Rc&lt;T&gt;</code>自体は<code>Send</code>　traitを実装しない。</p>
+<p>もし、アトミック演算のカウントを使って、またマルチスレッドでスレッドの間でデータ共有をさせようとしたら<code>std::Arc&lt;T&gt;</code>を使うほうが良いらしい。</p>
+<p>また、<code>Rc&lt;T&gt;</code>はStrongカウント（<code>Rc&lt;T&gt;</code>として共有されている数）とWeakカウント（<code>Weak&lt;T&gt;</code>として共有されている数）を参照することが出来る。</p>
+<h3 id="6-refcelltとinterior-mutability">6. <code>RefCell&lt;T&gt;</code>とInterior Mutability</h3>
+<blockquote>
+<p><a href="https://doc.rust-lang.org/std/cell/struct.RefCell.html">https://doc.rust-lang.org/std/cell/struct.RefCell.html</a></p>
+</blockquote>
+<p><em>Interior Mutability</em>はデータへの不変な<code>&amp;</code>があるにも関わらず、データの更新が出来るようにするコードパターンだ。一般的にはRust自体のBorrowingルールによって禁止されているが、上のように<code>&amp;</code>になるはずのデータに更新を掛けようとすると、中身で<code>unsafe{}</code>を使うしかなくなる。</p>
+<p>中身で<code>unsafe{}</code>を使ってInterior Mutabilityパターンをさせようとすると、Borrowingルールはビルド時ではなく、ランタイムでやることになってビルドが通るようになる。ただし、そうなるとC++のように各自データ競合が起こさないように注意しなければならない。</p>
+<p>実は<code>RefCell&lt;T&gt;</code>はそのままで使うと一つの所有権だけを持つことになる。しかし、<code>&amp;</code>状態なのに<code>&amp;mut</code>のように中身のデータを更新することが出来る。これを<code>Rc&lt;T&gt;</code>と使って、<code>Rc&lt;RefCell&lt;T&gt;&gt;</code>のようにすれば…？</p>
+<h4 id="a-例">A. 例</h4>
+<div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="k">pub</span><span class="w"> </span><span class="k">trait</span><span class="w"> </span><span class="n">Messenger</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="k">fn</span> <span class="nf">send</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">msg</span>: <span class="kp">&amp;</span><span class="kt">str</span><span class="p">);</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span><span class="w">
+</span><span class="w"></span><span class="k">pub</span><span class="w"> </span><span class="k">struct</span> <span class="nc">LimitTracker</span><span class="o">&lt;</span><span class="na">&#39;a</span><span class="p">,</span><span class="w"> </span><span class="n">T</span>: <span class="nc">Messenger</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="n">messenger</span>: <span class="kp">&amp;</span><span class="na">&#39;a</span><span class="w"> </span><span class="n">T</span><span class="w">
+</span><span class="w">    </span><span class="n">value</span>: <span class="kt">usize</span><span class="p">,</span><span class="w">
+</span><span class="w">    </span><span class="n">max</span>: <span class="kt">usize</span><span class="p">,</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span><span class="w">
+</span><span class="w"></span><span class="k">impl</span><span class="o">&lt;</span><span class="na">&#39;a</span><span class="p">,</span><span class="w"> </span><span class="n">T</span>: <span class="nc">Messenger</span><span class="o">&gt;</span><span class="w"> </span><span class="n">LimitTracker</span><span class="o">&lt;</span><span class="na">&#39;a</span><span class="p">,</span><span class="w"> </span><span class="n">T</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">new</span><span class="p">(</span><span class="n">messenger</span>: <span class="kp">&amp;</span><span class="nc">T</span><span class="p">,</span><span class="w"> </span><span class="n">max</span>: <span class="kt">usize</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">LimiTracker</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">        </span><span class="n">LimitTracker</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">            </span><span class="n">messenger</span><span class="p">,</span><span class="w">
+</span><span class="w">            </span><span class="n">value</span>: <span class="mi">0</span><span class="p">,</span><span class="w">
+</span><span class="w">            </span><span class="n">max</span><span class="w">
+</span><span class="w">        </span><span class="p">}</span><span class="w">
+</span><span class="w">    </span><span class="p">}</span><span class="w">
+</span><span class="w">    
+</span><span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">set_value</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">value</span>: <span class="kt">usize</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">        </span><span class="bp">self</span><span class="p">.</span><span class="n">value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">value</span><span class="p">;</span><span class="w"> 
+</span><span class="w">        </span><span class="c1">// ...
+</span><span class="c1"></span><span class="w">    </span><span class="p">}</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span></code></pre></div><p>のようなコードに</p>
+<div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="k">struct</span> <span class="nc">MockMessenger</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="n">sent_message</span>: <span class="nb">Vec</span><span class="o">&lt;</span><span class="nb">String</span><span class="o">&gt;</span><span class="p">,</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span><span class="w">
+</span><span class="w"></span><span class="k">impl</span><span class="w"> </span><span class="n">MockMessenger</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="cm">/* ... */</span><span class="w"> </span><span class="p">}</span><span class="w">
+</span><span class="w"></span><span class="k">impl</span><span class="w"> </span><span class="n">Messenger</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">MockMessenger</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="k">fn</span> <span class="nf">send</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">message</span>: <span class="kp">&amp;</span><span class="kt">str</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">        </span><span class="bp">self</span><span class="p">.</span><span class="n">sent_message</span><span class="p">.</span><span class="n">push</span><span class="p">(</span><span class="nb">String</span>::<span class="n">from</span><span class="p">(</span><span class="n">message</span><span class="p">));</span><span class="w">
+</span><span class="w">    </span><span class="p">}</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span></code></pre></div><p><code>MockMessenger::send()</code>は<code>&amp;sent_message</code>自体が不変の参照型になるので、今のコードじゃメッセージを入れることができないことがわかる。安全な方法としては<code>send()</code>の最初の参照を<code>&amp;mut self</code>に変えることだけど、あらゆる理由でそう出来ないときには<code>RefCell&lt;T&gt;</code>を使う。</p>
+<div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="k">struct</span> <span class="nc">MockMessenger</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="n">sent_message</span>: <span class="nc">RefCell</span><span class="o">&lt;</span><span class="nb">Vec</span><span class="o">&lt;</span><span class="nb">String</span><span class="o">&gt;&gt;</span><span class="p">,</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span><span class="w">
+</span><span class="w"></span><span class="k">impl</span><span class="w"> </span><span class="n">MockMessenger</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="k">fn</span> <span class="nf">new</span><span class="p">()</span><span class="w"> </span>-&gt; <span class="nc">Self</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">        </span><span class="n">MockMessenger</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">            </span><span class="n">sent_messenger</span>: <span class="nc">RefCell</span>::<span class="n">new</span><span class="p">(</span><span class="n">vec</span><span class="o">!</span><span class="p">[]),</span><span class="w">
+</span><span class="w">        </span><span class="p">}</span><span class="w">
+</span><span class="w">        </span><span class="c1">// すこしコードが煩雑になるのはしかたない…
+</span><span class="c1"></span><span class="w">    </span><span class="p">}</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span><span class="w">
+</span><span class="w"></span><span class="k">impl</span><span class="w"> </span><span class="n">Messenger</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">MockMessenger</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="k">fn</span> <span class="nf">send</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">message</span>: <span class="kp">&amp;</span><span class="kt">str</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">        </span><span class="bp">self</span><span class="p">.</span><span class="n">sent_message</span><span class="p">.</span><span class="n">borrow_mut</span><span class="p">().</span><span class="n">push</span><span class="p">(</span><span class="nb">String</span>::<span class="n">from</span><span class="p">(</span><span class="n">message</span><span class="p">));</span><span class="w">
+</span><span class="w">    </span><span class="p">}</span><span class="w">
+</span><span class="w">    </span><span class="c1">// 上のコードでborrowing ruleはランタイムで動くようになる。
+</span><span class="c1"></span><span class="w">    </span><span class="c1">// マルチスレッドだとすると、CRITICAL_SECTIONなどを貼るなど工夫が必要になってしまう。。。
+</span><span class="c1"></span><span class="p">}</span><span class="w">
+</span></code></pre></div><p><code>RefCell::borrow_mut()</code>または<code>RefCell::borrow()</code>メソッドを呼ぶことにより、ラッピングされた<code>&amp;</code>または<code>&amp;mut</code>に準ずるインスタンスが返され、そしてそれを媒体として中身のデータが更新できるか、接近できるようになる。</p>
+<h4 id="b-ランタイム使用での注意点">B. ランタイム使用での注意点</h4>
+<p>注意すべき点としては、<code>RefCell&lt;T&gt;</code>を使ったらBorrowingルールのコンパイル時チェックが出来なくなり、代わりにランタイムでルールチェックが動くようになる。なので以下のようなコードはコンパイルは通るけどランタイムで<code>panic!</code>になってしまう。</p>
+<div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="k">impl</span><span class="w"> </span><span class="n">Messenger</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">MockMessenger</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="k">fn</span> <span class="nf">send</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">message</span>: <span class="kp">&amp;</span><span class="kt">str</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">one_borrow</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">sent_message</span><span class="p">.</span><span class="n">borrow_mut</span><span class="p">();</span><span class="w">
+</span><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">err_borrow</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">sent_message</span><span class="p">.</span><span class="n">borrow_mut</span><span class="p">();</span><span class="w">
+</span><span class="w">        
+</span><span class="w">        </span><span class="c1">// ...
+</span><span class="c1"></span><span class="w">    </span><span class="p">}</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span></code></pre></div><p>Borrowingルール上、同じスコープでは複数の不変の<code>&amp;</code>だけにするか、それとも可変の単一の<code>&amp;mut</code>しかないとビルドまたはランタイムの動作が出来なくなる。なので<code>RefCell&lt;T&gt;</code>を使う時には注意が必要だ。</p>
+<h3 id="7-rcrefcellt">7. <code>Rc&lt;RefCell&lt;T&gt;&gt;</code></h3>
+<p><code>Rc&lt;T&gt;</code>と<code>RefCell&lt;T&gt;</code>を混ぜて使うことにより、複数の所有権を持たせながらデータの中身が変更できるようになる。ただ、Borrowingルールはランタイム動作に切り替わるので注意が必要だ。</p>
+<div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="cp">#[derive(Debug)]</span><span class="w">
+</span><span class="w"></span><span class="k">enum</span> <span class="nc">List</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="n">Cons</span><span class="p">(</span><span class="n">Rc</span><span class="o">&lt;</span><span class="n">RefCell</span><span class="o">&lt;</span><span class="kt">i32</span><span class="o">&gt;&gt;</span><span class="p">,</span><span class="w"> </span><span class="n">Rc</span><span class="o">&lt;</span><span class="n">List</span><span class="o">&gt;</span><span class="p">),</span><span class="w">
+</span><span class="w">    </span><span class="n">Nil</span><span class="p">,</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span><span class="w">
+</span><span class="w"></span><span class="k">fn</span> <span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Rc</span>::<span class="n">new</span><span class="p">(</span><span class="n">RefCell</span>::<span class="n">new</span><span class="p">(</span><span class="mi">5</span><span class="p">));</span><span class="w"> </span><span class="c1">// 5
+</span><span class="c1"></span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Rc</span>::<span class="n">new</span><span class="p">(</span><span class="n">Cons</span><span class="p">(</span><span class="n">Rc</span>::<span class="n">clone</span><span class="p">(</span><span class="o">&amp;</span><span class="n">value</span><span class="p">),</span><span class="w"> </span><span class="n">Rc</span>::<span class="n">new</span><span class="p">(</span><span class="n">Nil</span><span class="p">)));</span><span class="w"> </span><span class="c1">// 5, Nil
+</span><span class="c1"></span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Cons</span><span class="p">(</span><span class="n">Rc</span>::<span class="n">new</span><span class="p">(</span><span class="n">RefCell</span>::<span class="n">new</span><span class="p">(</span><span class="mi">3</span><span class="p">)),</span><span class="w"> </span><span class="n">Rc</span>::<span class="n">clone</span><span class="p">(</span><span class="o">&amp;</span><span class="n">a</span><span class="p">));</span><span class="w">  </span><span class="c1">// 3, 5, Nil
+</span><span class="c1"></span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Cons</span><span class="p">(</span><span class="n">Rc</span>::<span class="n">new</span><span class="p">(</span><span class="n">RefCell</span>::<span class="n">new</span><span class="p">(</span><span class="mi">4</span><span class="p">)),</span><span class="w"> </span><span class="n">Rc</span>::<span class="n">clone</span><span class="p">(</span><span class="o">&amp;</span><span class="n">a</span><span class="p">));</span><span class="w">  </span><span class="c1">// 4, 5, Nil
+</span><span class="c1"></span><span class="w">    
+</span><span class="w">    </span><span class="o">*</span><span class="n">value</span><span class="p">.</span><span class="n">borrow_mut</span><span class="p">()</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="mi">10</span><span class="p">;</span><span class="w"> </span><span class="c1">// 15 | 15, Nil | 3, 15, Nil | 4, 15, Nil.
+</span><span class="c1"></span><span class="w">    </span><span class="c1">// ...
+</span><span class="c1"></span><span class="p">}</span><span class="w">
+</span></code></pre></div><h3 id="8-weaktでreference-cyclesを防ぐ">8. <code>Weak&lt;T&gt;</code>でReference Cyclesを防ぐ</h3>
+<blockquote>
+<p><a href="https://doc.rust-lang.org/std/rc/struct.Weak.html">https://doc.rust-lang.org/std/rc/struct.Weak.html</a></p>
+</blockquote>
+<p><code>Rc&lt;T&gt;::clone</code>は<code>Rc&lt;T&gt;</code>の<code>strong_count</code>を増加させる。なので、もし<code>Rc&lt;T&gt;</code>が２つあって、それがお互いに強参照として参照されているとしたら、カウントが落ちなくなるので結果的にはメモリリークになる。これを防ぐためには<code>Rc&lt;T&gt;</code>を<code>Weak&lt;T&gt;</code>として変換して、使うしかない。</p>
+<p><code>Rc&lt;T&gt;</code>から<code>Weak&lt;T&gt;</code>に変換するためには、<code>Rc::downgrade()</code>を使う。<code>Weak&lt;T&gt;</code>が生成されると<code>Rc&lt;T&gt;</code>の弱参照のカウントが増加する。しかし弱参照は実質インスタンスの開放には関係がなくて０にならなくてもインスタンスが開放される。</p>
+<p><code>Weak&lt;T&gt;</code>の中身のデータを使うためには、<code>Weak::upgrade()</code>をして<code>Rc&lt;T&gt;</code>に変換してから使うことが必要だ。しかし、<code>Rc&lt;T&gt;</code>はすでに開放されてなくなっている可能性があるので、リターン型は<code>Option&lt;&gt;</code>に包んだ形になる。</p>
+<h2 id="concurrency">Concurrency</h2>
+<h3 id="1-thread">1. Thread</h3>
+<blockquote>
+<p><a href="https://doc.rust-lang.org/std/thread/">https://doc.rust-lang.org/std/thread/</a></p>
+</blockquote>
+<p>Rustでスレッドを生成するためには<code>thread::spawn(P)</code>を使う。</p>
+<div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="k">use</span><span class="w"> </span><span class="n">std</span>::<span class="n">thread</span><span class="p">;</span><span class="w">
+</span><span class="w"></span><span class="k">use</span><span class="w"> </span><span class="n">std</span>::<span class="n">time</span>::<span class="n">Duration</span><span class="p">;</span><span class="w">
+</span><span class="w">
+</span><span class="w"></span><span class="k">fn</span> <span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">handle</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">thread</span>::<span class="n">spawn</span><span class="p">(</span><span class="o">||</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mi">1</span><span class="p">..</span><span class="mi">10</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">            </span><span class="n">println</span><span class="o">!</span><span class="p">(</span><span class="s">&#34;hi number {} from spawned thread!&#34;</span><span class="p">,</span><span class="w"> </span><span class="n">i</span><span class="p">);</span><span class="w">
+</span><span class="w">            </span><span class="n">thread</span>::<span class="n">sleep</span><span class="p">(</span><span class="n">Duration</span>::<span class="n">from_milis</span><span class="p">(</span><span class="mi">1</span><span class="p">));</span><span class="w">
+</span><span class="w">        </span><span class="p">}</span><span class="w">
+</span><span class="w">    </span><span class="p">});</span><span class="w">
+</span><span class="w">    
+</span><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mi">1</span><span class="p">..</span><span class="mi">5</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">        </span><span class="n">println</span><span class="o">!</span><span class="p">(</span><span class="s">&#34;hi number {} from main thread!&#34;</span><span class="p">,</span><span class="w"> </span><span class="n">i</span><span class="p">);</span><span class="w">
+</span><span class="w">        </span><span class="n">thread</span>::<span class="n">sleep</span><span class="p">(</span><span class="n">Duration</span>::<span class="n">from_millis</span><span class="p">(</span><span class="mi">1</span><span class="p">));</span><span class="w">
+</span><span class="w">    </span><span class="p">}</span><span class="w">
+</span><span class="w">    
+</span><span class="w">    </span><span class="n">handle</span><span class="p">.</span><span class="n">join</span><span class="p">().</span><span class="n">unwrap</span><span class="p">();</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span></code></pre></div><p>注意点としては、生成されたスレッドは消滅する時に<code>join</code>をしないので、手動で<code>join()</code>を呼ぶ必要がある。</p>
+<h3 id="2-message-passing">2. Message Passing</h3>
+<blockquote>
+<p><a href="https://doc.rust-lang.org/std/sync/index.html">https://doc.rust-lang.org/std/sync/index.html</a></p>
+</blockquote>
+<p>スレッドの間の安全な処理モデルとして、メッセージキューを使わせて処理をさせるものがある。これをチャンネル（Channel）というけど、Rustは<code>std</code>で基本的なチャンネルを提供している。</p>
+<div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="k">use</span><span class="w"> </span><span class="n">std</span>::<span class="n">sync</span>::<span class="n">mpsc</span><span class="p">;</span><span class="w">
+</span><span class="w">
+</span><span class="w"></span><span class="k">fn</span> <span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="p">(</span><span class="n">tx</span><span class="p">,</span><span class="w"> </span><span class="n">rx</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mpsc</span>::<span class="n">channel</span><span class="p">();</span><span class="w">
+</span><span class="w">    
+</span><span class="w">    </span><span class="n">thread</span>::<span class="n">spawn</span><span class="p">(</span><span class="k">move</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">val</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">String</span>::<span class="n">from</span><span class="p">(</span><span class="s">&#34;Hi&#34;</span><span class="p">);</span><span class="w">
+</span><span class="w">        </span><span class="n">tx</span><span class="p">.</span><span class="n">send</span><span class="p">(</span><span class="n">val</span><span class="p">).</span><span class="n">unwrap</span><span class="p">();</span><span class="w">
+</span><span class="w">    </span><span class="p">})</span><span class="w">
+</span><span class="w">    
+</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">received</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">rx</span><span class="p">.</span><span class="n">recv</span><span class="p">().</span><span class="n">unwrap</span><span class="p">();</span><span class="w">
+</span><span class="w">    </span><span class="n">println</span><span class="o">!</span><span class="p">(</span><span class="s">&#34;Got: {}&#34;</span><span class="p">,</span><span class="w"> </span><span class="n">received</span><span class="p">);</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span></code></pre></div><p><code>mpsc</code>チャンネルはMulti-Producer Single-Consumerのためのチャンネルである。<code>mpsc</code>チャンネルは生成するとき、送信する側の<code>tx</code>と受信する側の<code>rx</code>をTuple形式で生成してくれる。<code>mpsc</code>なので、<code>tx</code>の方は<code>clone()</code>などで複数作ることが出来る。（<code>rx</code>は出来ない）</p>
+<p><code>tx: Sender&lt;T&gt;</code>側は<code>send()</code>メソッドを実装していて、そこに受信側に送りたいものを送ることが出来る。<code>send()</code>メソッド自体は、中で何かが起こるかがわからないため、リターン型としては<code>Result&lt;T, E&gt;</code>になる。もし受信側がもうすでになくなっているか、送り先がなくなっている時にはエラーが起こる。</p>
+<p><code>rx: Receiver&lt;T&gt;</code>側では<code>recv()</code>または<code>try_recv()</code>メソッドがあって、送信されたなにかを受信することが出来る。違いとしては、<code>recv()</code>は送信側が消されてエラーになるか、それとも何かの値が受信されるまでスレッドをブロック状態に入らせる。<code>try_recv()</code>はそうではなく、失敗したらそのまま再開するようになっている。</p>
+<p>また、送信するときの引数は必ず所有権が移動しなければならない。</p>
+<p>また、次のようにイテレータを使って受信側でメッセージを連続的に処理することも可能だ。</p>
+<div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="k">use</span><span class="w"> </span><span class="n">std</span>::<span class="n">sync</span>::<span class="n">mpsc</span><span class="p">;</span><span class="w">
+</span><span class="w"></span><span class="k">use</span><span class="w"> </span><span class="n">std</span>::<span class="n">thread</span><span class="p">;</span><span class="w">
+</span><span class="w"></span><span class="k">use</span><span class="w"> </span><span class="n">std</span>::<span class="n">time</span>::<span class="n">Duration</span><span class="p">;</span><span class="w">
+</span><span class="w">
+</span><span class="w"></span><span class="k">fn</span> <span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="p">(</span><span class="n">tx</span><span class="p">,</span><span class="w"> </span><span class="n">rx</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mpsc</span>::<span class="n">channel</span><span class="p">();</span><span class="w">
+</span><span class="w">
+</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">sender</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">thread</span>::<span class="n">spawn</span><span class="p">(</span><span class="k">move</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">vals</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">vec</span><span class="o">!</span><span class="p">[</span><span class="w">
+</span><span class="w">            </span><span class="nb">String</span>::<span class="n">from</span><span class="p">(</span><span class="s">&#34;hi&#34;</span><span class="p">),</span><span class="w"> </span><span class="nb">String</span>::<span class="n">from</span><span class="p">(</span><span class="s">&#34;from&#34;</span><span class="p">),</span><span class="w">
+</span><span class="w">            </span><span class="nb">String</span>::<span class="n">from</span><span class="p">(</span><span class="s">&#34;the&#34;</span><span class="p">),</span><span class="w"> </span><span class="nb">String</span>::<span class="n">from</span><span class="p">(</span><span class="s">&#34;thread&#34;</span><span class="p">),</span><span class="w">
+</span><span class="w">        </span><span class="p">];</span><span class="w">
+</span><span class="w">
+</span><span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="n">val</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">vals</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">            </span><span class="n">tx</span><span class="p">.</span><span class="n">send</span><span class="p">(</span><span class="n">val</span><span class="p">).</span><span class="n">unwrap</span><span class="p">();</span><span class="w">
+</span><span class="w">            </span><span class="n">thread</span>::<span class="n">sleep</span><span class="p">(</span><span class="n">Duration</span>::<span class="n">from_secs</span><span class="p">(</span><span class="mi">1</span><span class="p">));</span><span class="w">
+</span><span class="w">        </span><span class="p">}</span><span class="w">
+</span><span class="w">    </span><span class="p">});</span><span class="w">
+</span><span class="w">
+</span><span class="w">    </span><span class="n">sender</span><span class="p">.</span><span class="n">join</span><span class="p">().</span><span class="n">unwrap</span><span class="p">();</span><span class="w"> </span><span class="c1">// 安全策
+</span><span class="c1"></span><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="n">received</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">rx</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">println</span><span class="o">!</span><span class="p">(</span><span class="s">&#34;Got: {}&#34;</span><span class="p">,</span><span class="w"> </span><span class="n">received</span><span class="p">);</span><span class="w"> </span><span class="p">}</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span></code></pre></div><p>上のコードで下の結果が取れる。</p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">$ cargo run
+Got: hi
+Got: from
+Got: the
+Got: thread
+</code></pre></div><h3 id="3-mutext">3. <code>Mutex&lt;T&gt;</code></h3>
+<blockquote>
+<p><a href="https://doc.rust-lang.org/std/sync/struct.Mutex.html">https://doc.rust-lang.org/std/sync/struct.Mutex.html</a></p>
+</blockquote>
+<p><em>Mutex</em>は<em>mutual exclusion</em>の略語として、マルチスレッド上で共有メモリに決まった時間内で一つのスレッドしか接近できないようにする。Rustで提供している<code>Mutex&lt;T&gt;</code>はC++のものとはちょっと違って、データを中に含んでいてそれを<code>lock()</code>することによりラッパーを吐き出すようにして、最終的にはデータに接近させる感じとなる。</p>
+<p>また、<code>Mutex&lt;T&gt;</code>はC++の<code>lock_guard&lt;T&gt;</code>を自動で生成してRAIIのような仕組みをするようになっていて、<code>lock()</code>すると<code>MutexGuard&lt;&amp;T&gt;</code>が返されて<code>Deref</code>することでデータに接近させるようにしている。</p>
+<div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="k">use</span><span class="w"> </span><span class="n">std</span>::<span class="n">sync</span>::<span class="n">Mutex</span><span class="p">;</span><span class="w">
+</span><span class="w">
+</span><span class="w"></span><span class="k">fn</span> <span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">m</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Mutex</span>::<span class="n">new</span><span class="p">(</span><span class="mi">5</span><span class="p">);</span><span class="w">
+</span><span class="w">    </span><span class="p">{</span><span class="w">
+</span><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">dat</span>: <span class="nc">LockResult</span><span class="o">&lt;</span><span class="na">&#39;_</span><span class="p">,</span><span class="w"> </span><span class="kt">i32</span><span class="o">&gt;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m</span><span class="p">.</span><span class="n">lock</span><span class="p">().</span><span class="n">unwrap</span><span class="p">();</span><span class="w">
+</span><span class="w">        </span><span class="o">*</span><span class="n">dat</span><span class="w"> </span><span class="o">*=</span><span class="w"> </span><span class="mi">6</span><span class="p">;</span><span class="w">
+</span><span class="w">    </span><span class="p">}</span><span class="w">
+</span><span class="w">    </span><span class="n">println</span><span class="o">!</span><span class="p">(</span><span class="s">&#34;m = {:?}&#34;</span><span class="p">,</span><span class="w"> </span><span class="n">m</span><span class="p">);</span><span class="w"> </span><span class="c1">// 30
+</span><span class="c1"></span><span class="p">}</span><span class="w">
+</span></code></pre></div><p><code>Mutex&lt;T&gt;</code>をマルチスレッドに対応する時に注意すべき点としては、<code>Rc&lt;T&gt;</code>を使わず<code>Arc&lt;T&gt;</code>を使うべきであることだ。なぜなら、<code>Rc&lt;T&gt;</code>のカウンターはアトミック演算をしていないため、スレッドにCloneした変数を渡すとしてもコンパイルエラーが起こってしまう。</p>
+<p>その反面、<code>Arc&lt;T&gt;</code>はアトミック演算を使って参照カウントを実装しているため、渡すことが出来る。</p>
+<blockquote>
+<p><a href="https://doc.rust-lang.org/std/sync/struct.Arc.html">https://doc.rust-lang.org/std/sync/struct.Arc.html</a></p>
+</blockquote>
+<div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="k">use</span><span class="w"> </span><span class="n">std</span>::<span class="n">sync</span>::<span class="p">{</span><span class="n">Arc</span><span class="p">,</span><span class="w"> </span><span class="n">Mutex</span><span class="p">};</span><span class="w">
+</span><span class="w"></span><span class="k">use</span><span class="w"> </span><span class="n">std</span>::<span class="n">thread</span><span class="p">;</span><span class="w">
+</span><span class="w">
+</span><span class="w"></span><span class="k">fn</span> <span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">am_counter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Arc</span>::<span class="n">new</span><span class="p">(</span><span class="n">Mutex</span>::<span class="n">new</span><span class="p">(</span><span class="mi">0</span><span class="p">));</span><span class="w">
+</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">handles</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">vec</span><span class="o">!</span><span class="p">[];</span><span class="w">
+</span><span class="w">    
+</span><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="n">_</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mi">1</span><span class="p">..</span><span class="mi">10</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">am_counter_cloned</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Arc</span>::<span class="n">clone</span><span class="p">(</span><span class="o">&amp;</span><span class="n">am_counter</span><span class="p">);</span><span class="w">
+</span><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">handle</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">thread</span>::<span class="n">spawn</span><span class="p">(</span><span class="k">move</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">            </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">num</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">am_counter_cloned</span><span class="p">.</span><span class="n">lock</span><span class="p">().</span><span class="n">unwrap</span><span class="p">();</span><span class="w">
+</span><span class="w">            </span><span class="o">*</span><span class="k">mut</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w">
+</span><span class="w">        </span><span class="p">})</span><span class="w">
+</span><span class="w">        </span><span class="n">handles</span><span class="p">.</span><span class="n">push</span><span class="p">(</span><span class="n">handle</span><span class="p">);</span><span class="w">
+</span><span class="w">    </span><span class="p">}</span><span class="w">
+</span><span class="w">    
+</span><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="n">handle</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">handles</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">        </span><span class="n">handle</span><span class="p">.</span><span class="n">join</span><span class="p">().</span><span class="n">unwrap</span><span class="p">();</span><span class="w">
+</span><span class="w">    </span><span class="p">}</span><span class="w">
+</span><span class="w">    </span><span class="n">assert_eq</span><span class="o">!</span><span class="p">(</span><span class="o">*</span><span class="n">am_counter</span><span class="p">.</span><span class="n">lock</span><span class="p">().</span><span class="n">unwrap</span><span class="p">(),</span><span class="w"> </span><span class="mi">10</span><span class="p">);</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span></code></pre></div><h3 id="4-syncsend-marker-traits">4. <code>Sync</code>、<code>Send</code> marker traits</h3>
+<p>実は上の<code>Arc&lt;&gt;</code>か<code>Mutex&lt;&gt;</code>、また<code>mpsc::Channel()</code>などはライブラリの機能で、Rust自体の文法的な機能ではない。しかし言語自他が内部的に定義しているコンセプトはあって、それが<code>Sync</code>と<code>Send</code> traitである。</p>
+<h4 id="a-send">a. <code>Send</code></h4>
+<blockquote>
+<p><a href="https://doc.rust-lang.org/std/marker/trait.Send.html">https://doc.rust-lang.org/std/marker/trait.Send.html</a><!-- raw HTML omitted -->This trait is automatically implemented when the compiler determines it&rsquo;s appropriate.</p>
+</blockquote>
+<p><code>Send</code> marker traitは実装した型のデータはスレッド間転送できるようになる。ほぼ全てのRustのタイプは<code>Send</code>を実装しているが、<code>Rc&lt;T&gt;</code>のようにSendできないタイプも存在する。</p>
+<p>上でも書かれたように、ある構造体のすべての変数が<code>Send</code>を実装していれば、その構造体自体も自動に<code>Send</code>を実装したことになる。ほぼ全ての<code>unsafe</code>なpointerタイプを除外したPrimitive Typeは<code>Send</code>をサポートする。</p>
+<h4 id="b-sync">b. <code>Sync</code></h4>
+<p><code>Sync</code>を実装したデータ型は、マルチスレッド環境で複数のスレッドから接近されても安全であることを示す。つまり上の<code>Send</code>と合わせて、もし<code>&amp;T</code>が<code>Send</code>で、そして<code>T</code>が<code>Sync</code>ならば別のスレッドにRefを転送してその中で使わせることが出来るということである。</p>
+<p>ちなみにPrimitive Typeは<code>Sync</code>で、このTraitも構造体の変数が全て<code>Sync</code>ならば自動に<code>Sync</code>が実装される。</p>
+<p>また、<code>Mutex&lt;T&gt;</code>は<code>Sync</code>だけど<code>RefCell&lt;T&gt;</code>か<code>Cell&lt;T&gt;</code>はBorrowingルールがランタイムで動作することもあり、スレッドセーフではないため<code>Sync</code>が実装されない。なので他のスレッドに同時接近させることが出来ない。</p>
+<h4 id="c-sendとsyncの自前実装はunsafe">c. <code>Send</code>と<code>Sync</code>の自前実装は<code>unsafe</code></h4>
+<p><code>Send</code>と<code>Sync</code> marker traitを自前で実装するのは<code>unsafe</code>になる。基本的にはコンパイラが自動で実装してくれる。</p>
+<h2 id="pattern-matching">Pattern Matching</h2>
+<h3 id="1-function-parameters">1. Function Parameters</h3>
+<p>関数のパラメータもパターンに成れる。以下のコードがあったとすると、</p>
+<div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="k">fn</span> <span class="nf">foo</span><span class="p">(</span><span class="n">x</span>: <span class="kt">i32</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="c1">// ...
+</span><span class="c1"></span><span class="p">}</span><span class="w">
+</span></code></pre></div><p><code>x</code>の部分は<code>match</code>か<code>if let, while let</code>のようにパターンとして扱うことが出来る。</p>
+<div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="k">fn</span> <span class="nf">print_coordinates</span><span class="p">(</span><span class="o">&amp;</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="p">)</span>: <span class="kp">&amp;</span><span class="p">(</span><span class="kt">i32</span><span class="p">,</span><span class="w"> </span><span class="kt">i32</span><span class="p">))</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="n">println</span><span class="o">!</span><span class="p">(</span><span class="s">&#34;Current Location : ({}, {})&#34;</span><span class="p">,</span><span class="w"> </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="p">);</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span><span class="w">
+</span><span class="w"></span><span class="k">fn</span> <span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">point</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">);</span><span class="w">
+</span><span class="w">    </span><span class="n">print_coordinates</span><span class="p">(</span><span class="o">&amp;</span><span class="n">point</span><span class="p">);</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span></code></pre></div><h3 id="2-refutableirrefutable">2. refutable、irrefutable</h3>
+<ul>
+<li>refutable pattern：パターンマッチングで、パターンが合わなく該当するロジックがなかったことに見なすことが出来るコードのパターンを指す。例えば、<code>if let</code>とか<code>while let</code>のようなマッチングパターンが含まれる。</li>
+<li>irrefutable pattern：パターンマッチングで、パターンが必ず合って関連したロジックが実行されるか評価される。<code>let</code>、<code>for</code>が含まえる。</li>
+</ul>
+<p>例えば、<code>Option&lt;T&gt;</code>になにかの値がある時に<code>let</code>を使って以下の構文を作るのは出来ない。なぜなら<code>let</code>は必ずirrefutable patternにならなければならないからだ。</p>
+<div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="kd">let</span><span class="w"> </span><span class="nb">Some</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">some_option_value</span><span class="p">;</span><span class="w">
+</span></code></pre></div><p>しかし、<code>it let</code>を使ったらビルドが通る。</p>
+<div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="k">if</span><span class="w"> </span><span class="kd">let</span><span class="w"> </span><span class="nb">Some</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">some_option_value</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="c1">// ...
+</span><span class="c1"></span><span class="p">}</span><span class="w">
+</span></code></pre></div><p>だが、irrefutable patternをrefutable patternに当てはめることは出来ない。</p>
+<div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="k">if</span><span class="w"> </span><span class="kd">let</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">5</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="c1">// BUILD ERROR!
+</span><span class="c1"></span><span class="p">}</span><span class="w">
+</span><span class="w">
+</span><span class="w"></span><span class="cm">/*
+</span><span class="cm">$ cargo run
+</span><span class="cm">warning: irrefutable if-let pattern
+</span><span class="cm"> --&gt; src/main.rs:2:5
+</span><span class="cm">  |
+</span><span class="cm">2 | /     if let x = 5 {
+</span><span class="cm">3 | |         println!(&#34;{}&#34;, x);
+</span><span class="cm">4 | |     };
+</span><span class="cm">  | |_____^
+</span><span class="cm">  |
+</span><span class="cm">  = note: `#[warn(irrefutable_let_patterns)]` on by default
+</span><span class="cm">
+</span><span class="cm">    Finished dev [unoptimized + debuginfo] target(s) in 0.39s
+</span><span class="cm">     Running `target/debug/patterns`
+</span><span class="cm">5
+</span><span class="cm">*/</span><span class="w">
+</span></code></pre></div><h3 id="3-pattern-syntax">3. Pattern Syntax</h3>
+<h4 id="a-matching-named-variables">a. Matching Named Variables</h4>
+<div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="kd">let</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">Some</span><span class="p">(</span><span class="mi">5</span><span class="p">);</span><span class="w">
+</span><span class="w"></span><span class="kd">let</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">10</span><span class="p">;</span><span class="w">
+</span><span class="w"></span><span class="k">match</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="nb">Some</span><span class="p">(</span><span class="mi">50</span><span class="p">)</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">println</span><span class="o">!</span><span class="p">(</span><span class="s">&#34;Got 50&#34;</span><span class="p">),</span><span class="w">
+</span><span class="w">    </span><span class="nb">Some</span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">println</span><span class="o">!</span><span class="p">(</span><span class="s">&#34;Matched, y = {:?}&#34;</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="p">),</span><span class="w"> </span><span class="c1">// ...(1)
+</span><span class="c1"></span><span class="w">    </span><span class="nb">Some</span><span class="p">(</span><span class="n">new_var</span><span class="p">)</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">println</span><span class="o">!</span><span class="p">(</span><span class="s">&#34;Matched, new = {:?}&#34;</span><span class="p">,</span><span class="w"> </span><span class="n">new_var</span><span class="p">),</span><span class="w">
+</span><span class="w">    </span><span class="n">_</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">println</span><span class="o">!</span><span class="p">(</span><span class="s">&#34;Default case. None.&#34;</span><span class="p">),</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span></code></pre></div><p><code>...(1)</code>のように既存の変数を使ってパターンマッチングに使わせることも出来る。</p>
+<h4 id="b-multiple-patterns">b. Multiple Patterns</h4>
+<p>Virtical Pipe文法（<code>|</code>）を使って、複数のパターンをORでマッチングをさせることも出来る。</p>
+<div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="kd">let</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w">
+</span><span class="w"></span><span class="k">match</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="mi">1</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">println</span><span class="o">!</span><span class="p">(</span><span class="s">&#34;one or two&#34;</span><span class="p">),</span><span class="w">
+</span><span class="w">    </span><span class="mi">3</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">println</span><span class="o">!</span><span class="p">(</span><span class="s">&#34;three!&#34;</span><span class="p">),</span><span class="w">
+</span><span class="w">    </span><span class="n">_</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">println</span><span class="o">!</span><span class="p">(</span><span class="s">&#34;whatever&#34;</span><span class="p">),</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span></code></pre></div><h4 id="c-を使ってinclusiveな範囲マッチング">c. <code>..=</code>を使ってInclusiveな範囲マッチング</h4>
+<p><code>..=</code>文法は値の範囲を決めるようにする。しかし、制限があってPrimitive Typeの数型または<code>char</code>タイプしか範囲を決めることが出来ない。</p>
+<div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="kd">let</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="sc">&#39;c&#39;</span><span class="p">;</span><span class="w">
+</span><span class="w"></span><span class="k">match</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="sc">&#39;a&#39;</span><span class="p">..</span><span class="o">=</span><span class="sc">&#39;j&#39;</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">println</span><span class="o">!</span><span class="p">(</span><span class="s">&#34;early ASCII letters&#34;</span><span class="p">),</span><span class="w">
+</span><span class="w">    </span><span class="sc">&#39;k&#39;</span><span class="p">..</span><span class="o">=</span><span class="sc">&#39;z&#39;</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">println</span><span class="o">!</span><span class="p">(</span><span class="s">&#34;late ASCII letters&#34;</span><span class="p">),</span><span class="w">
+</span><span class="w">    </span><span class="n">_</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">println</span><span class="o">!</span><span class="p">(</span><span class="s">&#34;something else&#34;</span><span class="p">),</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span></code></pre></div><p>ちなみにRustのstable版では<code>..=</code>じゃなく<code>..</code>を使ってパターンマッチングさせる文法は実験機能として使えない。</p>
+<blockquote>
+<pre><code class="language-rust_errors" data-lang="rust_errors">error[E0658]: exclusive range pattern syntax is experimental
+</code></pre><p><a href="https://github.com/rust-lang/rust/issues/37854">https://github.com/rust-lang/rust/issues/37854</a></p>
+</blockquote>
+<h4 id="d-構造体の変数の分解">d. 構造体の変数の分解</h4>
+<p>構造体と中の変数が見えてる限り（<code>pub</code>）、構造体の変数を分解することが出来る。</p>
+<div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="k">struct</span> <span class="nc">Point</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="n">x</span>: <span class="kt">i32</span><span class="p">,</span><span class="w"> </span><span class="n">y</span>: <span class="kt">i32</span>
+<span class="p">}</span><span class="w">
+</span><span class="w">
+</span><span class="w"></span><span class="k">fn</span> <span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Point</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">x</span>: <span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">y</span>: <span class="mi">7</span><span class="w"> </span><span class="p">};</span><span class="w">
+</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">Point</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">x</span>: <span class="nc">a</span><span class="p">,</span><span class="w"> </span><span class="n">y</span>: <span class="nc">b</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">p</span><span class="p">;</span><span class="w">
+</span><span class="w">    </span><span class="n">assert_eq</span><span class="o">!</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w">
+</span><span class="w">    </span><span class="n">assert_eq</span><span class="o">!</span><span class="p">(</span><span class="n">b</span><span class="p">,</span><span class="w"> </span><span class="mi">7</span><span class="p">);</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span></code></pre></div><p>または変数の名前をそのまま使ってパターンマッチングさせることも出来る。（irrefutable patternになること）</p>
+<div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="k">fn</span> <span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Point</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">x</span>: <span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">y</span>: <span class="mi">7</span><span class="w"> </span><span class="p">};</span><span class="w">
+</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">Point</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">p</span><span class="p">;</span><span class="w">
+</span><span class="w">    </span><span class="n">assert_eq</span><span class="o">!</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w">
+</span><span class="w">    </span><span class="n">assert_eq</span><span class="o">!</span><span class="p">(</span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="mi">7</span><span class="p">);</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span></code></pre></div><p>このような文法を使って、<code>match</code>にも活かせる。</p>
+<div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="k">fn</span> <span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Point</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">x</span>: <span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">y</span>: <span class="mi">7</span><span class="w"> </span><span class="p">};</span><span class="w">
+</span><span class="w">   	</span><span class="k">match</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">        </span><span class="n">Point</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">y</span>: <span class="mi">0</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="cm">/* ... */</span><span class="p">,</span><span class="w">
+</span><span class="w">        </span><span class="n">Point</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">x</span>: <span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="cm">/* ... */</span><span class="p">,</span><span class="w">
+</span><span class="w">        </span><span class="n">Point</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="cm">/* ... */</span><span class="p">,</span><span class="w">
+</span><span class="w">    </span><span class="p">}</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span></code></pre></div><h4 id="e-多重の構造体またはenumの分解">e. 多重の構造体または<code>enum</code>の分解</h4>
+<div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="k">enum</span> <span class="nc">Color</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="n">Rgb</span><span class="p">(</span><span class="kt">u8</span><span class="p">,</span><span class="w"> </span><span class="kt">u8</span><span class="p">,</span><span class="w"> </span><span class="kt">u8</span><span class="p">),</span><span class="w">
+</span><span class="w">    </span><span class="n">Hsv</span><span class="p">(</span><span class="kt">u8</span><span class="p">,</span><span class="w"> </span><span class="kt">u8</span><span class="p">,</span><span class="w"> </span><span class="kt">u8</span><span class="p">),</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span><span class="w">
+</span><span class="w"></span><span class="k">enum</span> <span class="nc">Message</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="n">Quit</span><span class="p">,</span><span class="w"> 
+</span><span class="w">    </span><span class="n">Move</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">x</span>: <span class="kt">i32</span><span class="p">,</span><span class="w"> </span><span class="n">y</span>: <span class="kt">i32</span> <span class="p">},</span><span class="w">
+</span><span class="w">    </span><span class="n">Write</span><span class="p">(</span><span class="n">std</span>::<span class="nb">String</span><span class="p">),</span><span class="w">
+</span><span class="w">    </span><span class="n">ChangeColor</span><span class="p">(</span><span class="n">Color</span><span class="p">),</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span><span class="w">
+</span><span class="w"></span><span class="k">fn</span> <span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">msg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Message</span>::<span class="n">ChangeColor</span><span class="p">(</span><span class="n">Color</span>::<span class="n">Hsv</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span><span class="w"> </span><span class="mi">128</span><span class="p">,</span><span class="w"> </span><span class="mi">255</span><span class="p">));</span><span class="w">
+</span><span class="w">    </span><span class="k">match</span><span class="w"> </span><span class="n">msg</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">        </span><span class="n">Message</span>::<span class="n">Move</span><span class="p">{</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="p">}</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="cm">/* ... */</span><span class="p">,</span><span class="w">
+</span><span class="w">        </span><span class="n">Message</span>::<span class="n">ChangeColor</span><span class="p">(</span><span class="n">Color</span>::<span class="n">Hsv</span><span class="p">(</span><span class="n">h</span><span class="p">,</span><span class="w"> </span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">))</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="cm">/* ... */</span><span class="p">,</span><span class="w">
+</span><span class="w">        </span><span class="n">Message</span>::<span class="n">ChangeColor</span><span class="p">(</span><span class="n">Color</span>::<span class="n">Rgb</span><span class="p">(</span><span class="n">r</span><span class="p">,</span><span class="w"> </span><span class="n">g</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">))</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="cm">/* ... */</span><span class="p">,</span><span class="w">
+</span><span class="w">        </span><span class="n">_</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="p">(),</span><span class="w">
+</span><span class="w">    </span><span class="p">}</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span></code></pre></div><h4 id="f-を使って使わない変数たちを無視する">f. <code>..</code>を使って使わない変数たちを無視する</h4>
+<p><code>_</code>は単一変数を無視することで、<code>..</code>は変数組を無視する効果を持つ。ただし、<code>..</code>を使う際にはどの変数まで無視して使わないようにするかがはっきりしていなければならない。</p>
+<div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="k">struct</span> <span class="nc">Point</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="n">x</span>: <span class="kt">i32</span><span class="p">,</span><span class="w"> </span><span class="n">y</span>: <span class="kt">i32</span><span class="p">,</span><span class="w"> </span><span class="n">z</span>: <span class="kt">i32</span>
+<span class="p">}</span><span class="w">
+</span><span class="w">
+</span><span class="w"></span><span class="k">fn</span> <span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">origin</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Point</span><span class="p">{</span><span class="w"> </span><span class="n">x</span>: <span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">y</span>: <span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">z</span>: <span class="mi">2</span><span class="w"> </span><span class="p">};</span><span class="w">
+</span><span class="w">    </span><span class="k">match</span><span class="w"> </span><span class="n">origin</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">        </span><span class="n">Point</span><span class="p">{</span><span class="w"> </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="p">..</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">println</span><span class="o">!</span><span class="p">(</span><span class="s">&#34;x is {}&#34;</span><span class="p">,</span><span class="w"> </span><span class="n">x</span><span class="p">),</span><span class="w">
+</span><span class="w">    </span><span class="p">}</span><span class="w">
+</span><span class="w">    
+</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">numbers</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">8</span><span class="p">,</span><span class="w"> </span><span class="mi">16</span><span class="p">,</span><span class="w"> </span><span class="mi">32</span><span class="p">);</span><span class="w">
+</span><span class="w">    </span><span class="k">match</span><span class="w"> </span><span class="n">numbers</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">        </span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="p">..,</span><span class="w"> </span><span class="n">h</span><span class="p">)</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">            </span><span class="n">println</span><span class="o">!</span><span class="p">(</span><span class="s">&#34;Some numbers: {}, {}, and {}&#34;</span><span class="p">,</span><span class="w"> </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="n">h</span><span class="p">);</span><span class="w">
+</span><span class="w">        </span><span class="p">},</span><span class="w">
+</span><span class="w">        </span><span class="c1">// (.., w, ..) =&gt; ERROR STATEMENTS.
+</span><span class="c1"></span><span class="w">    </span><span class="p">}</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span></code></pre></div><h4 id="g-match-guardを使って条件の追加提示">g. <em>match guard</em>を使って条件の追加提示</h4>
+<div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="kd">let</span><span class="w"> </span><span class="n">num</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">Some</span><span class="p">(</span><span class="mi">4</span><span class="p">);</span><span class="w">
+</span><span class="w"></span><span class="k">match</span><span class="w"> </span><span class="n">num</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="nb">Some</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">5</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">4</span><span class="p">)</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">println</span><span class="o">!</span><span class="p">(</span><span class="s">&#34;less than five: {}&#34;</span><span class="p">,</span><span class="w"> </span><span class="n">x</span><span class="p">),</span><span class="w">
+</span><span class="w">    </span><span class="nb">Some</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">println</span><span class="o">!</span><span class="p">(</span><span class="s">&#34;{}&#34;</span><span class="p">,</span><span class="w"> </span><span class="n">x</span><span class="p">),</span><span class="w">
+</span><span class="w">    </span><span class="nb">None</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="p">(),</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span></code></pre></div><h4 id="h--at-operatorを使って同時に変数を生成">h. <code>@</code> at operatorを使って同時に変数を生成</h4>
+<p><em>at</em>演算子（<code>@</code>）はパターンマッチングをやりながら、マッチングされた時に変数を生成して中身で活用するようにする。</p>
+<div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="w">    </span><span class="k">enum</span> <span class="nc">Message</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">        </span><span class="n">Hello</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">id</span>: <span class="kt">i32</span> <span class="p">},</span><span class="w">
+</span><span class="w">    </span><span class="p">}</span><span class="w">
+</span><span class="w">
+</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">msg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Message</span>::<span class="n">Hello</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">id</span>: <span class="mi">5</span><span class="w"> </span><span class="p">};</span><span class="w">
+</span><span class="w">
+</span><span class="w">    </span><span class="k">match</span><span class="w"> </span><span class="n">msg</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">        </span><span class="n">Message</span>::<span class="n">Hello</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">            </span><span class="n">id</span>: <span class="nc">id_variable</span><span class="w"> </span><span class="o">@</span><span class="w"> </span><span class="mi">3</span><span class="p">..</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span><span class="w">
+</span><span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">println</span><span class="o">!</span><span class="p">(</span><span class="s">&#34;Found an id in range: {}&#34;</span><span class="p">,</span><span class="w"> </span><span class="n">id_variable</span><span class="p">),</span><span class="w">
+</span><span class="w">        </span><span class="n">Message</span>::<span class="n">Hello</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">id</span>: <span class="mi">10</span><span class="p">..</span><span class="o">=</span><span class="mi">12</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">            </span><span class="n">println</span><span class="o">!</span><span class="p">(</span><span class="s">&#34;Found an id in another range&#34;</span><span class="p">)</span><span class="w">
+</span><span class="w">        </span><span class="p">}</span><span class="w">
+</span><span class="w">        </span><span class="n">Message</span>::<span class="n">Hello</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">println</span><span class="o">!</span><span class="p">(</span><span class="s">&#34;Found some other id: {}&#34;</span><span class="p">,</span><span class="w"> </span><span class="n">id</span><span class="p">),</span><span class="w">
+</span><span class="w">    </span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+  <footer class="post-footer">
+  </footer>
+</article>
+    </main><footer class="footer">
+    <span>&copy; 2020 <a href="https://liliilli.github.io">neuromantic</a></span>
+    <span>&middot;</span>
+    <span>Powered by <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo️️</a>️</span>
+    <span>&middot;</span>
+    <span>Theme️ <a href="https://git.io/hugopapermod" rel="noopener" target="_blank">PaperMod</a></span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top">
+    <button class="top-link" id="top-link" type="button">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6">
+            <path d="M12 6H0l6-6z" /></svg>
+    </button>
+</a>
+<script src="https://liliilli.github.io/assets/js/highlight.min.e7afc2928c0925d65c4732dfebe147014d91299a98e819e4b42f25c4fa68e91c.js" integrity="sha256-56/CkowJJdZcRzLf6&#43;FHAU2RKZqY6BnktC8lxPpo6Rw="></script>
+<script>hljs.initHighlightingOnLoad();</script>
+<script>
+    window.onload = function () {
+        if (localStorage.getItem("menu-scroll-position")) {
+            document.getElementById('menu').scrollLeft = localStorage.getItem("menu-scroll-position");
+        }
+    }
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+
+            document.querySelector(this.getAttribute("href")).scrollIntoView({
+                behavior: "smooth"
+            });
+        });
+    });
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+    function menu_on_scroll() {
+        localStorage.setItem("menu-scroll-position", document.getElementById('menu').scrollLeft);
+    }
+</script>
+</body>
+
+</html>

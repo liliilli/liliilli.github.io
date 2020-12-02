@@ -7,7 +7,34 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright>Copyright © 2008–2019, Steve Francia and the Hugo Authors; all rights reserved.</copyright>
-    <lastBuildDate>Sun, 04 Oct 2020 11:45:17 +0900</lastBuildDate><atom:link href="https://liliilli.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sat, 21 Nov 2020 23:10:01 +0900</lastBuildDate><atom:link href="https://liliilli.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Rustメモ（2020-11-21~）</title>
+      <link>https://liliilli.github.io/posts/rust_3_memo/</link>
+      <pubDate>Sat, 21 Nov 2020 23:10:01 +0900</pubDate>
+      
+      <guid>https://liliilli.github.io/posts/rust_3_memo/</guid>
+      <description>unsafe unsafeコードブロックを使うことによって、Safeなコード（普通のRustコード）では出来なかったことが出来るようになる。つまり、所有</description>
+    </item>
+    
+    <item>
+      <title>Rustメモ（20-11-20～)</title>
+      <link>https://liliilli.github.io/posts/rust_2_memo/</link>
+      <pubDate>Thu, 19 Nov 2020 22:21:23 +0900</pubDate>
+      
+      <guid>https://liliilli.github.io/posts/rust_2_memo/</guid>
+      <description>Smart Pointerのあらゆる実装分析 1. Deref trait Box&amp;lt;T&amp;gt;などは基本的にDeref traitを実装している。また、Box&amp;lt;T&amp;g</description>
+    </item>
+    
+    <item>
+      <title>Rustメモ（20-11-16～20-11-19)</title>
+      <link>https://liliilli.github.io/posts/rust_1_memo/</link>
+      <pubDate>Mon, 16 Nov 2020 23:46:46 +0900</pubDate>
+      
+      <guid>https://liliilli.github.io/posts/rust_1_memo/</guid>
+      <description>if let if let 文法はある変数（OptionとかResultなどの）パターンマッチングで生じる不必要なインデント、例外処理などの手間を省くために提供</description>
+    </item>
+    
     <item>
       <title>CppCon2017 C&#43;&#43; atomics, from basic to advancedのメモ</title>
       <link>https://liliilli.github.io/posts/cppcon2017_atomics_memo/</link>

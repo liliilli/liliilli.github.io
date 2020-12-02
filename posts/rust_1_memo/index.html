@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+<title>Rustメモ（20-11-16～20-11-19) - neuromantic</title>
+
+<meta name="description" content="if let if let 文法はある変数（OptionとかResultなどの）パターンマッチングで生じる不必要なインデント、例外処理などの手間を省くために提供">
+<meta name="keywords" content= />
+<meta name="author" content="Jongmin Yun, Neu.">
+<link rel="canonical" href="https://liliilli.github.io/posts/rust_1_memo/" />
+<link href="https://liliilli.github.io/assets/css/stylesheet.min.a3b13905fd4b98ea165a18374ae5215d9de97a04f187f789736c56858296ba12.css" integrity="sha256-o7E5Bf1LmOoWWhg3SuUhXZ3pegTxh/eJc2xWhYKWuhI=" rel="preload stylesheet"
+    as="style">
+<link rel="apple-touch-icon" href="https://liliilli.github.io/apple-touch-icon.png">
+<link rel="icon" href="https://liliilli.github.io/favicon.ico">
+<meta name="generator" content="Hugo 0.75.1" />
+
+
+</head>
+
+<body class="single" id="top">
+<header class="header">
+    <nav class="nav">
+        <p class="logo"><a href="https://liliilli.github.io">neuromantic</a></p>
+        <ul class="menu" id="menu" onscroll="menu_on_scroll()">
+            <li>
+                <a href="https://liliilli.github.io/posts/">
+                    <span>
+                        Posts
+                    </span>
+                </a>
+            </li>
+            <li>
+                <a href="https://liliilli.github.io/archives/">
+                    <span>
+                        Archives
+                    </span>
+                </a>
+            </li>
+            <li>
+                <a href="https://liliilli.github.io/tags/">
+                    <span>
+                        Tags
+                    </span>
+                </a>
+            </li>
+            <li>
+                <a href="https://liliilli.github.io/series/">
+                    <span>
+                        Series
+                    </span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+
+    <main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <h1 class="post-title">
+      Rustメモ（20-11-16～20-11-19)
+    </h1>
+    <div class="post-meta">
+      <time>November 16, 2020</time>&nbsp;·&nbsp;Jongmin Yun, Neu.
+    </div>
+  </header>
+  <div class="post-content"><h2 id="if-let"><code>if let</code></h2>
+<p><code>if let</code> 文法はある変数（<code>Option</code>とか<code>Result</code>などの）パターンマッチングで生じる不必要なインデント、例外処理などの手間を省くために提供される文法である。</p>
+<p>ただし、<code>if let</code> だけが普通の<code>match</code>より優れているのではなくて、一長一短があり、適切に選んで書く必要があるそうだ。</p>
+<div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="kd">let</span><span class="w"> </span><span class="n">some_u8_value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">Some</span><span class="p">(</span><span class="mi">0</span><span class="k">u8</span><span class="p">);</span><span class="w">
+</span><span class="w"></span><span class="k">match</span><span class="w"> </span><span class="n">some_u8_value</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="nb">Some</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">println</span><span class="o">!</span><span class="p">(</span><span class="s">&#34;three&#34;</span><span class="p">),</span><span class="w">
+</span><span class="w">    </span><span class="n">_</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="p">(),</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span></code></pre></div><p>のコードを</p>
+<div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="kd">let</span><span class="w"> </span><span class="n">some_u8_value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">Some</span><span class="p">(</span><span class="mi">0</span><span class="k">u8</span><span class="p">);</span><span class="w">
+</span><span class="w"></span><span class="k">if</span><span class="w"> </span><span class="kd">let</span><span class="w"> </span><span class="nb">Some</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">some_u8_value</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="n">println</span><span class="o">!</span><span class="p">(</span><span class="s">&#34;three&#34;</span><span class="p">);</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span></code></pre></div><p>のように書ける。もちろん例外処理を書くこともできる。</p>
+<div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="kd">let</span><span class="w"> </span><span class="n">some_u8_value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">Some</span><span class="p">(</span><span class="mi">0</span><span class="k">u8</span><span class="p">);</span><span class="w">
+</span><span class="w"></span><span class="k">if</span><span class="w"> </span><span class="kd">let</span><span class="w"> </span><span class="nb">Some</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">some_u8_value</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="n">println</span><span class="o">!</span><span class="p">(</span><span class="s">&#34;three&#34;</span><span class="p">);</span><span class="w">
+</span><span class="w">    </span><span class="c1">// and verbose logics too large to write in match pattern matching statements.
+</span><span class="c1"></span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="n">count</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span></code></pre></div><h2 id="cargo"><code>cargo</code></h2>
+<ul>
+<li><code>Package</code>：<code>crate</code>が共有できるようにし、テストとビルドをやってくれるCargoの機能</li>
+<li><code>Crate</code>：ライブラリまたは実行できるファイルを生成してくれるモジュールの木</li>
+<li><code>Module</code>と<code>use</code>：構成、各関数や構造体のスコープ、PublicまたはPrivateの否をコントロールしてくれる。</li>
+<li><code>Path</code>：モジュール、関数と構造体などの各種要素の名前の付け方の方法？</li>
+</ul>
+<h3 id="1-概要">1. 概要</h3>
+<p><code>crate root</code>とは、各<code>crate</code>でRustのコンパイラが最初に解読を始めるソースファイルであり、またCrateのルートモジュールを作ってくれるファイルを指す。</p>
+<p><code>Package</code>（パッケージ）は<code>Cargo.toml</code>を持っており、該当パッケージがどのようにビルドしなければならないのかを示してくれる。また、パッケージは複数のCrateをもたせることができるが、最終的には一つまでのライブラリとしてビルドするようにするか、それとも複数のバイナリファイルをビルドするかを決めなければならない。</p>
+<p>もしソースフォルダに<code>main.rs</code>があるとしたら、該当Cargoはバイナリとして、それとも<code>lib.rs</code>があるとしたらCargoはライブラリとして認識し、その<code>crate root</code>ファイルを<code>rustc</code>に送ってライブラリまたはバイナリとしてビルドしてくれる。</p>
+<p><code>Cargo.toml</code>では上の<code>main.rs</code>または<code>lib.rs</code>が書いていない。もし両方あればパッケージはバイナリとライブラリ両方ビルドするようになっている。</p>
+<h3 id="2-mod">2. <code>mod</code></h3>
+<p><code>Module</code>は再使用、可読性の向上を催そうとする、Crateの中でスコープまたは接近権限などを指定するものである。PublicにするかPrivateにするかも指定でき、あとでライブラリとして他の所で使わせるとしても中身を見せれなくすることができる。</p>
+<p>モジュールを定義するためには<code>mod</code>キーワードを使う。</p>
+<div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="k">mod</span> <span class="nn">front_of_house</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="k">mod</span> <span class="nn">hosting</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">        </span><span class="k">fn</span> <span class="nf">add_to_waitlist</span><span class="p">()</span><span class="w"> </span><span class="p">{}</span><span class="w">
+</span><span class="w">        </span><span class="k">fn</span> <span class="nf">seat_at_table</span><span class="p">()</span><span class="w"> </span><span class="p">{}</span><span class="w">
+</span><span class="w">    </span><span class="p">}</span><span class="w">
+</span><span class="w">    </span><span class="k">mod</span> <span class="nn">serving</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="c1">// serveing module is sibling of hosting module of front_of_house mod.
+</span><span class="c1"></span><span class="w">        </span><span class="k">fn</span> <span class="nf">take_order</span><span class="p">()</span><span class="w"> </span><span class="p">{}</span><span class="w">
+</span><span class="w">        </span><span class="k">fn</span> <span class="nf">serve_order</span><span class="p">()</span><span class="w"> </span><span class="p">{}</span><span class="w">
+</span><span class="w">        </span><span class="k">fn</span> <span class="nf">take_payment</span><span class="p">()</span><span class="w"> </span><span class="p">{}</span><span class="w">
+</span><span class="w">    </span><span class="p">}</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span></code></pre></div><p>ちなみに、ライブラリまたはバイナリで宣言された全てのモジュールは、<code>crate</code>という黙示的なモジュールを基にする。</p>
+<h3 id="3-要素の探索">3. 要素の探索</h3>
+<p>Rustのコードでモジュール木から使いたい要素を探すためには、Pathを指定する必要がある。Pathは以下のように２つで指定できる。（まるで<code>C++</code>の<code>#include</code>のような感じ）</p>
+<ol>
+<li>Crateの名前または<code>crate::</code>から（Crate Root）始まるAbsolute Path</li>
+<li><code>self</code>、<code>super</code>、または現在コードがあるモジュールから始めるRelative Path（小文字）</li>
+</ol>
+<p>また、モジュール自体はコード構成をやってくれることだけじゃなく、Rust特有の<em>Privacy Boundary</em>も決めてくれる。つまり、外部のコードからこのコードが何をやってくれるコードなのかをわからなくするための隠蔽化をモジュール単位でやってくれる。</p>
+<p>Rustで基本的にすべての要素（<code>fn</code>、<code>struct</code>、<code>enum</code>、<code>trait</code>など）は全部基本的にPrivateだ。なので<code>pub</code>とかを明示的に追加してあげない限り、親モジュール（<code>mod</code>）から子モジュールのPrivate要素に接近するのはできない。逆に、子モジュールから親モジュールのPrivate要素の接近はできる。それは、外のモジュールを外部に見せて、中のモジュールは細部的な挙動またはロジックを書かせるためのデザインとして設計されるようにさせているからだと思う。</p>
+<p>なので、もし子モジュールの各種要素を外のほうで見せたければ、<code>pub</code>を使う。</p>
+<div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="k">mod</span> <span class="nn">front_of_house</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="c1">// front_of_house private module is being seen by sibling.
+</span><span class="c1"></span><span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="k">mod</span> <span class="nn">hosting</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">        </span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">add_to_waitlist</span><span class="p">()</span><span class="w"> </span><span class="p">{}</span><span class="w">
+</span><span class="w">    </span><span class="p">}</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span><span class="w">
+</span><span class="w"></span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">eat_at_restaurant</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="c1">// Absolute path
+</span><span class="c1"></span><span class="w">    </span><span class="k">crate</span>::<span class="n">front_of_house</span>::<span class="n">hosting</span>::<span class="n">add_to_waitlist</span><span class="p">();</span><span class="w">
+</span><span class="w">    </span><span class="c1">// Relative path
+</span><span class="c1"></span><span class="w">    </span><span class="bp">self</span>::<span class="n">front_of_house</span>::<span class="n">hosting</span>::<span class="n">add_to_waitlist</span><span class="p">();</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span></code></pre></div><h3 id="4-use">4. <code>use</code></h3>
+<p>もしPath自体が長すぎて使うたびに冗長になるんだったら、<code>use</code>キーワードを使ってPathをローカルスコープに持ってきてまるでローカル要素のように使わせることが出来る。</p>
+<p><code>use</code>はAbsolute PathとRelative Pathすべて指定できる。</p>
+<div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="k">mod</span> <span class="nn">front_of_house</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="k">mod</span> <span class="nn">hosting</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">        </span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">add_to_waitlist</span><span class="p">()</span><span class="w"> </span><span class="p">{}</span><span class="w">
+</span><span class="w">    </span><span class="p">}</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span><span class="w">
+</span><span class="w"></span><span class="k">use</span><span class="w"> </span><span class="k">crate</span>::<span class="n">front_of_house</span>::<span class="n">hosting</span><span class="p">;</span><span class="w"> </span><span class="c1">// または use self::front_of_house::hosting;
+</span><span class="c1"></span><span class="w">
+</span><span class="w"></span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">eat_at_restaurant</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="n">hosting</span>::<span class="n">add_to_waitlist</span><span class="p">();</span><span class="w">
+</span><span class="w">    </span><span class="n">hosting</span>::<span class="n">add_to_waitlist</span><span class="p">();</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span></code></pre></div><p>モジュールをスコープに入れるだけじゃなく、モジュールの中の各種要素も<code>use</code>を使ってローカルアイテムのように使うことも可能だが、Rust Bookではできれば今使おうとしてる要素が同じモジュールの要素ではなく、外部からの要素であることを強調するため、<code>fn</code>に限って親モジュールだけまでスコープに入れることをお勧めしている。</p>
+<p>他の<code>struct</code>、<code>trait</code>、<code>enum</code>などはそのまま要素まで<code>use</code>でスコープに入れて使うことを勧めている。</p>
+<div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="k">use</span><span class="w"> </span><span class="n">std</span>::<span class="n">collections</span>::<span class="n">HashMap</span><span class="p">;</span><span class="w">
+</span><span class="w">
+</span><span class="w"></span><span class="k">fn</span> <span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">map</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">HashMap</span>::<span class="n">new</span><span class="p">();</span><span class="w">
+</span><span class="w">    </span><span class="n">map</span><span class="p">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span></code></pre></div><p>注意すべき点は、<code>use</code>をしてモジュールまたはモジュールの中の各種要素を中に取り入れたとしても、使おうとしているPathは現在のスコープだけ見えるようになるで（Private）それをまた外部のものが接近できるわけではない。そうするならば、<code>pub use</code>を使う。</p>
+<p>Module自体とModuleの中の特定のなにかを使いたい場合には、<code>{self, BlahBlah}</code>のように書く。</p>
+<h3 id="5-separating-modules-into-different-files">5. Separating Modules into Different Files</h3>
+<p>ファイルまたはディレクトリ自体もモジュールの木の各要素になれる。なので、次のようなフォルダ構造を持った場合、</p>
+<pre><code>src 
+L lib.rs
+L front_of_house.rs
+L (D)front_of_house
+  L hosting.rs
+</code></pre><p>そして<code>hosting.rs</code>は</p>
+<div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">add_to_waitlist</span><span class="p">()</span><span class="w"> </span><span class="p">{}</span><span class="w">
+</span></code></pre></div><p>だけを持って、<code>front_of_house.rs</code>は</p>
+<div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="k">pub</span><span class="w"> </span><span class="k">mod</span> <span class="nn">hosting</span><span class="p">;</span><span class="w">
+</span></code></pre></div><p>そして<code>lib.rs</code>は</p>
+<div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="k">mod</span> <span class="nn">front_of_house</span><span class="w">
+</span><span class="w"></span><span class="k">use</span><span class="w"> </span><span class="bp">self</span>::<span class="n">front_of_house</span>::<span class="n">hosting</span><span class="p">;</span><span class="w">
+</span><span class="w"></span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">eat_at_restaurant</span><span class="p">()</span><span class="w"> 
+</span><span class="w"></span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="n">hosting</span>::<span class="n">add_to_waitlist</span><span class="p">();</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span></code></pre></div><p>にしたら、<code>mod</code>を使った場合、今のファイル構造でモジュールと同一なファイルがあるかを探索し、それをモジュールとして認識してRustのビルド範囲に入れるようにしている。</p>
+<h2 id="generic">Generic</h2>
+<h3 id="1-関数で宣言">1. 関数で宣言</h3>
+<p>Slice typeで一番値が大きいものの参照を返す関数を作るとしたら、Genericなしでは以下のように作るしかない。</p>
+<div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="k">fn</span> <span class="nf">largest_i32</span><span class="p">(</span><span class="n">list</span>: <span class="kp">&amp;</span><span class="p">[</span><span class="kt">i32</span><span class="p">])</span><span class="w"> </span>-&gt; <span class="kp">&amp;</span><span class="kt">i32</span><span class="p">;</span><span class="w">
+</span><span class="w"></span><span class="k">fn</span> <span class="nf">largest_char</span><span class="p">(</span><span class="n">list</span>: <span class="kp">&amp;</span><span class="p">[</span><span class="n">char</span><span class="p">])</span><span class="w"> </span>-&gt; <span class="kp">&amp;</span><span class="nc">char</span><span class="p">;</span><span class="w">
+</span></code></pre></div><p>ちなみにRustはC++のように関数のオーバーロードをサポートしてない。なので、Genericがなくて、別の型に対して同じ挙動をさせようとしたら上のように関数名を違って書くしかなくなる。</p>
+<p>しかし、Genericを使うと以下のように書くことができる。</p>
+<div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="k">fn</span> <span class="nf">largest</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">(</span><span class="n">list</span>: <span class="kp">&amp;</span><span class="p">[</span><span class="n">T</span><span class="p">])</span><span class="w"> </span>-&gt; <span class="kp">&amp;</span><span class="nc">T</span><span class="w"> </span><span class="c1">// &lt;== 関数の名前の後ろに書く。
+</span><span class="c1"></span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">largest</span>: <span class="kp">&amp;</span><span class="nc">T</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">&amp;</span><span class="n">list</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span><span class="w">
+</span><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="n">item</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">list</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">item</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">largest</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">            </span><span class="n">largest</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">item</span><span class="p">;</span><span class="w">
+</span><span class="w">        </span><span class="p">}</span><span class="w">
+</span><span class="w">    </span><span class="p">}</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span></code></pre></div><p>ただ、上のコードはコンパイルされない。何故かと言うと、<code>item &gt; largest </code>の構文で、<code>T</code>自体が<code>trait std::cmp::PartialOrd</code>をするようにしなければならないからだ。ということで、正解としては以下のコードのように書かなければならない。</p>
+<div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="k">fn</span> <span class="nf">largest</span><span class="o">&lt;</span><span class="n">T</span>: <span class="nc">std</span>::<span class="n">cmp</span>::<span class="nb">PartialOrd</span><span class="o">&gt;</span><span class="p">(</span><span class="n">list</span>: <span class="kp">&amp;</span><span class="p">[</span><span class="n">T</span><span class="p">])</span><span class="w"> </span>-&gt; <span class="kp">&amp;</span><span class="nc">T</span><span class="w"> </span><span class="p">{};</span><span class="w">
+</span></code></pre></div><p>または、</p>
+<div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="k">fn</span> <span class="nf">largest</span><span class="p">(</span><span class="n">list</span>: <span class="kp">&amp;</span><span class="p">[(</span><span class="k">impl</span><span class="w"> </span><span class="n">std</span>::<span class="n">cmp</span>::<span class="nb">PartialOrd</span><span class="p">)])</span><span class="w"> </span>-&gt; <span class="kp">&amp;</span><span class="p">(</span><span class="k">impl</span><span class="w"> </span><span class="n">std</span>::<span class="n">cmp</span>::<span class="nb">PartialOrd</span><span class="p">)</span><span class="w"> </span><span class="p">{};</span><span class="w">
+</span></code></pre></div><p>または</p>
+<div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="k">fn</span> <span class="nf">largest</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">(</span><span class="n">list</span>: <span class="kp">&amp;</span><span class="p">[</span><span class="n">T</span><span class="p">])</span><span class="w"> </span>-&gt; <span class="kp">&amp;</span><span class="nc">T</span><span class="w">
+</span><span class="w">    </span><span class="k">where</span><span class="w"> </span><span class="n">T</span>: <span class="nc">std</span>::<span class="n">cmp</span>::<span class="nb">PartialOrd</span><span class="w"> </span><span class="p">{};</span><span class="w">
+</span></code></pre></div><h3 id="2-structで宣言">2. <code>struct</code>で宣言</h3>
+<div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="k">struct</span> <span class="nc">Point</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="w"> </span><span class="c1">// &lt;== 名前の後ろに書く。
+</span><span class="c1"></span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="n">x</span>: <span class="nc">T</span><span class="p">,</span><span class="w">
+</span><span class="w">    </span><span class="n">y</span>: <span class="nc">T</span><span class="p">,</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span></code></pre></div><p>上の<code>fn</code>で<code>trait</code>が取り入れたのとは違って、<code>struct</code>自体はなにかの<code>trait</code>に対して特殊化する形でタイプを書くことができない。もし、ある特殊な<code>trait</code>を実装している型について何かの挙動を変えたければ、</p>
+<div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="k">impl</span><span class="o">&lt;</span><span class="n">T</span>: <span class="nc">Display</span><span class="o">&gt;</span><span class="w"> </span><span class="n">Point</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">T</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="c1">// ...
+</span><span class="c1"></span><span class="p">}</span><span class="w">
+</span><span class="w">
+</span><span class="w"></span><span class="k">impl</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="w"> </span><span class="n">Point</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="k">fn</span> <span class="nf">x</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="kp">&amp;</span><span class="nc">T</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">        </span><span class="o">&amp;</span><span class="bp">self</span><span class="p">.</span><span class="n">x</span><span class="w">
+</span><span class="w">    </span><span class="p">}</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span><span class="w">
+</span><span class="w"></span><span class="k">impl</span><span class="w"> </span><span class="n">Point</span><span class="o">&lt;</span><span class="kt">f32</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="k">fn</span> <span class="nf">distance_from_origin</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="kt">f32</span> <span class="p">{</span><span class="w"> </span><span class="cm">/* ... */</span><span class="w"> </span><span class="p">}</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span></code></pre></div><p>でやるしかない。</p>
+<h3 id="3-enum-で宣言">3. <code>enum</code> で宣言</h3>
+<div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="k">enum</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="nb">Some</span><span class="p">(</span><span class="n">T</span><span class="p">),</span><span class="w">
+</span><span class="w">    </span><span class="nb">None</span><span class="p">,</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span></code></pre></div><p>のように宣言する。Rustの<code>enum</code>は<code>struct</code>のように<code>impl</code>を実装することも出来るので、上のようにある条件の<code>trait</code>に対してメソッドを実装させることも出来る。</p>
+<h3 id="4-traitとimplで宣言">4. <code>trait</code>と<code>impl</code>で宣言</h3>
+<div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="k">use</span><span class="w"> </span><span class="n">std</span>::<span class="n">fmt</span>::<span class="n">Display</span><span class="p">;</span><span class="w">
+</span><span class="w">
+</span><span class="w"></span><span class="k">struct</span> <span class="nc">Pair</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="n">x</span>: <span class="nc">T</span><span class="p">,</span><span class="w">
+</span><span class="w">    </span><span class="n">y</span>: <span class="nc">T</span><span class="p">,</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span><span class="w">
+</span><span class="w"></span><span class="k">impl</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="w"> </span><span class="n">Pair</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="k">fn</span> <span class="nf">new</span><span class="p">(</span><span class="n">x</span>: <span class="nc">T</span><span class="p">,</span><span class="w"> </span><span class="n">y</span>: <span class="nc">T</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">Self</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">        </span><span class="n">Self</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="p">}</span><span class="w">
+</span><span class="w">    </span><span class="p">}</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span></code></pre></div><p>上の<code>impl&lt;T&gt;</code>の場合には、全てのPairは<code>new</code>メソッド（メンバではない）を実装するようにしている。しかし、条件にあっている<code>trait</code>を実装している場合に、追加でなにかのメソッドをやらせることも出来る。</p>
+<div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="k">impl</span><span class="o">&lt;</span><span class="n">T</span>: <span class="nc">Display</span><span class="o">&gt;</span><span class="w"> </span><span class="n">Pair</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="k">fn</span> <span class="nf">cmp_display</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="cm">/* */</span><span class="w"> </span><span class="p">}</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span></code></pre></div><p>上のコードでは、<code>T</code>が<code>std::Display</code>を実装した型である場合だけ、<code>cmp_display</code>関数が呼べるようにしている。また、条件に合致する<code>trait</code>を実装した時だけ特定<code>trait</code>を実装させることも出来る。</p>
+<div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="k">impl</span><span class="o">&lt;</span><span class="n">T</span>: <span class="nc">std</span>::<span class="n">cmp</span>::<span class="n">ParitalOrd</span><span class="o">&gt;</span><span class="w"> </span><span class="n">std</span>::<span class="n">cmp</span>::<span class="nb">PartialEq</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">Pair</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="cm">/* ... */</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span></code></pre></div><p><code>trait</code>と型を組み合わせて<code>impl</code>させる時に注意すべき点としては、外部モジュールからの<code>trait</code>を外部からの型に対して<code>impl</code>させることはできないことである。例えば、<code>std</code>Crateじゃないとこで<code>impl&lt;T&gt; std::Display for Vec&lt;T&gt;</code>することはできない。こういう制限をかける事で、他のとこから引っ張って使っているコード自体をこちらからの追加コードによって壊すことが出来なくなる。（逆も同じ）</p>
+<h3 id="5-明示的lifetimeのための宣言">5. 明示的Lifetimeのための宣言</h3>
+<p>Lifetimeを記すときにもGenericを使う。Lifetimeを明示的に書くことによって、プログラマが意図した分までに参照などが生きていることを示す事ができる。</p>
+<p>以下のような関数があった時、下のコードはコンパイルされない。何故かと言うと、リターン地のSlice type参照は<code>x</code>または<code>y</code>の中でどの有効な（生きている）入力から返されてしまうのかがわからないからだ。つまり、参照の<code>x</code>と<code>y</code>はそれぞれLifetimeが違う可能性があるから、コンパイラとしてはそれを自動で判断することが出来ないということである。</p>
+<div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="k">fn</span> <span class="nf">longest</span><span class="p">(</span><span class="n">x</span>: <span class="kp">&amp;</span><span class="kt">str</span><span class="p">,</span><span class="w"> </span><span class="n">y</span>: <span class="kp">&amp;</span><span class="kt">str</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="kp">&amp;</span><span class="kt">str</span> <span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="n">x</span><span class="p">.</span><span class="n">len</span><span class="p">()</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">y</span><span class="p">.</span><span class="n">len</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">        </span><span class="n">x</span><span class="w">
+</span><span class="w">   	</span><span class="p">}</span><span class="w">
+</span><span class="w">    </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">        </span><span class="n">y</span><span class="w">
+</span><span class="w">    </span><span class="p">}</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span></code></pre></div><p><strong>Lifetime Annotation</strong>自体は参照の寿命などを書き換えるのではなく、単純に与えられた参照たちの寿命についてのヒントを明示的に見せるようにするものに過ぎない。このAnnotationを書くときには、<code>'a</code>または<code>'static</code> のように書く。</p>
+<p><code>mut</code>などの参照型と一緒に書くときには下のようにコードを書く。</p>
+<div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="o">&amp;</span><span class="kt">i32</span><span class="w">
+</span><span class="w"></span><span class="o">&amp;</span><span class="na">&#39;a</span><span class="w"> </span><span class="kt">i32</span><span class="w">
+</span><span class="w"></span><span class="o">&amp;</span><span class="na">&#39;a</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="kt">i32</span><span class="w">
+</span></code></pre></div><p>なので上の<code>longest</code>関数の以下のように作成出来る。</p>
+<div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="k">fn</span> <span class="nf">longest</span><span class="o">&lt;</span><span class="na">&#39;a</span><span class="o">&gt;</span><span class="p">(</span><span class="n">x</span>: <span class="kp">&amp;</span><span class="na">&#39;a</span><span class="w"> </span><span class="kt">str</span><span class="p">,</span><span class="w"> </span><span class="n">y</span>: <span class="kp">&amp;</span><span class="na">&#39;a</span><span class="w"> </span><span class="kt">str</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="kp">&amp;</span><span class="na">&#39;a</span><span class="w"> </span><span class="kt">str</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="cm">/* same logic */</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span></code></pre></div><p>一つのAnnotation以外に複数を用意して使わせることも出来るが、それは実装とやりたいこと次第で違っていく。</p>
+<p><code>struct</code>のフィルドの中で参照がある場合、次のようにAnnotationを付け足すことも出来る。</p>
+<div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="k">struct</span> <span class="nc">ImportantExcerpt</span><span class="o">&lt;</span><span class="na">&#39;a</span><span class="p">,</span><span class="w"> </span><span class="n">T</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="n">part</span>: <span class="kp">&amp;</span><span class="na">&#39;a</span><span class="w"> </span><span class="n">T</span><span class="p">,</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span></code></pre></div><p>もちろんAnnotation自体もGenericなので、<code>impl</code>などでAnnotationがついている<code>struct</code>を実装する場合にはAnnotationも一緒に書かないといけない。</p>
+<h3 id="6-lifetimeの黙示的な省略">6. Lifetimeの黙示的な省略</h3>
+<p>Rustで全ての参照は寿命を持つ。しかし以下のコードのように、寿命を明示的に書かなかったにも関わらずコンパイラが通る場合もある。</p>
+<div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="k">fn</span> <span class="nf">first_word</span><span class="p">(</span><span class="n">s</span>: <span class="kp">&amp;</span><span class="kt">str</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="kp">&amp;</span><span class="kt">str</span> <span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">bytes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">s</span><span class="p">.</span><span class="n">as_bytes</span><span class="p">();</span><span class="w">
+</span><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">item</span><span class="p">)</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">bytes</span><span class="p">.</span><span class="n">iter</span><span class="p">().</span><span class="n">enumerate</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">item</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="sc">b&#39; &#39;</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="o">&amp;</span><span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">..</span><span class="n">i</span><span class="p">];</span><span class="w">
+</span><span class="w">        </span><span class="p">}</span><span class="w">
+</span><span class="w">    </span><span class="p">}</span><span class="w">
+</span><span class="w">    
+</span><span class="w">    </span><span class="o">&amp;</span><span class="n">s</span><span class="p">[..]</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span></code></pre></div><p>実はこのコードは、初期のRustでは明示的に寿命が書いてなかったためコンパイルが通らなかった。なので参照に対して一つ一つ明示的に書く必要があったが、コードの規模が大きくなり複雑になるにつれて寿命を明示的に書くことにたいして煩雑になりがちだったのである。</p>
+<p>また、上のようなコードは寿命（<code>'a</code>）を明示的に書かなくても誰でも判断できるコードだったはずなので、最近のRustコンパイラは上のようなコードに寿命のルールをつけて、それが通れば普通にコンパイルするようになっている。</p>
+<ul>
+<li>
+<p>関数またはメソッドのパラメータに対する寿命をInput Lifetimeと呼び、戻り値の寿命をOutput Lifetimeを呼ぶ。</p>
+</li>
+<li>
+<p>コンパイラは<code>fn</code>と<code>impl</code>ブロックに対し、３つのルールを適用して黙示的な寿命がなり立てるかを判断する。</p>
+</li>
+</ul>
+<p>最初のルール（１番目）は、寿命が書いてない全てのパラメータはそれぞれ異なる寿命（Lifetime）パラメータを持つ。つまり、もし<code>fn</code>の中に３つの参照が入るとしたら、それらはそれぞれ違う黙示的な寿命を持たされる。<code>fn foo&lt;'a, 'b, 'c&gt;(x: &amp;'a i32, y: &amp;'b char, z: &amp;'c f32)</code></p>
+<p>２つ目のルールは、もしインプットが一つしかない場合、リターン値は一つしかないパラメータの寿命を受け継ぐ。上のコードでも２つ目のルールが適用できるから、普通のコンパイルが通るようになることがわかる。</p>
+<p>３つ目は、複数の寿命パラメータがある場合に一つが<code>&amp;self</code>か、<code>&amp;mut self</code>の場合には（メソッド）リターン値の寿命（参照）は<code>self</code>の寿命を受け継がれる。</p>
+<p><code>struct</code>の<code>impl</code>にLifetime Annotationがある場合のElision Ruleの適用がちょっと理解しづらいが…</p>
+<div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="k">impl</span><span class="o">&lt;</span><span class="na">&#39;a</span><span class="o">&gt;</span><span class="w"> </span><span class="n">ImportantExceprt</span><span class="o">&lt;</span><span class="na">&#39;a</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="k">fn</span> <span class="nf">level</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="kt">i32</span> <span class="p">{</span><span class="w"> </span><span class="c1">// ...1
+</span><span class="c1"></span><span class="w">        </span><span class="mi">3</span><span class="w">
+</span><span class="w">    </span><span class="p">}</span><span class="w">
+</span><span class="w">    
+</span><span class="w">    </span><span class="k">fn</span> <span class="nf">announce_and_return_part</span><span class="p">(</span><span class="o">&amp;</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">announcement</span>: <span class="kp">&amp;</span><span class="kt">str</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="kp">&amp;</span><span class="kt">str</span> <span class="p">{</span><span class="w"> </span><span class="c1">// ...2
+</span><span class="c1"></span><span class="w">        </span><span class="n">println</span><span class="o">!</span><span class="p">(</span><span class="s">&#34;Attention please: {}&#34;</span><span class="p">,</span><span class="w"> </span><span class="n">announcement</span><span class="p">);</span><span class="w">
+</span><span class="w">        </span><span class="bp">self</span><span class="p">.</span><span class="n">part</span><span class="w">
+</span><span class="w">    </span><span class="p">}</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span></code></pre></div><ol>
+<li><code>level</code>メソッドは１つ目のElisionルールにより、<code>&amp;self</code>は黙示の寿命表記をもつことになる。よってコンパイルが通る。</li>
+<li><code>&amp;self</code>を含めて入力の参照が２つ以上になってしまったが、３つ目のルールによって出力の<code>&amp;str</code>は<code>&amp;self</code>の寿命を持つことになるため、コンパイルが通る。</li>
+</ol>
+<div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="kd">let</span><span class="w"> </span><span class="n">s</span>: <span class="kp">&amp;</span><span class="nb">&#39;static</span><span class="w"> </span><span class="kt">str</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&#34;I have a static lifetime.&#34;</span><span class="p">;</span><span class="w">
+</span></code></pre></div><p>全ての文字列リテラルは<code>'static</code>寿命を持たせることができる。これはプログラムが動作する間に寿命が維持されることを示す。しかし、全てのリテラルい<code>'static</code>をもたせるかは、設計次第に変わるのでちゃんと考えながらつけるべき。</p>
+<h2 id="closure"><code>Closure</code></h2>
+<h3 id="1-概要-1">1. 概要</h3>
+<p>C++で使われるLambdaまたはClosureは以下のように縦のパイプ（Pipe）を使って宣言する。</p>
+<div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="kd">let</span><span class="w"> </span><span class="n">expensive_closure</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">|</span><span class="n">num</span><span class="o">|</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="c1">// Expensive logics...
+</span><span class="c1"></span><span class="w">    </span><span class="n">num</span><span class="w">
+</span><span class="w"></span><span class="p">};</span><span class="w">
+</span></code></pre></div><p>パイプを使うことによって、クロージャーの中で使うパラメータの名前が指定できる。その後に出てくる<code>{}</code>構文はクロージャーの中で複数の構文を書く時に使われる。C++とは違って、演算する構文（Statement）が一行だけだったら、<code>{}</code>を書かずにExpressionだけ書いても良い。</p>
+<div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="kd">let</span><span class="w"> </span><span class="n">expression_closure</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">|</span><span class="n">num</span><span class="o">|</span><span class="w"> </span><span class="n">num</span><span class="p">;</span><span class="w">
+</span></code></pre></div><p><code>fn</code>とクロージャーとの違いで一つ目は、パラメータまたはリターン型のタイプを書かなくても良いという点である。なぜなら、<code>fn</code>自体は潜在的にユーザーに公開されて明示的に使われるためのものなので、タイプなどが明示的じゃないと使わせられないからだ。厳密にはクロージャーも<code>fn</code>みたいにタイプを書くことが出来るが、外部に見せる必要がないため、書かなくてもコンパイルは通る。</p>
+<div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="k">fn</span>  <span class="nf">add_one_v1</span><span class="w"> </span><span class="p">(</span><span class="n">x</span>: <span class="kt">u32</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="kt">u32</span> <span class="p">{</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="p">}</span><span class="w">
+</span><span class="w"></span><span class="kd">let</span><span class="w"> </span><span class="n">add_one_v2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">|</span><span class="n">x</span>: <span class="kt">u32</span><span class="o">|</span><span class="w"> </span>-&gt; <span class="kt">u32</span> <span class="p">{</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="p">};</span><span class="w">
+</span><span class="w"></span><span class="kd">let</span><span class="w"> </span><span class="n">add_one_v3</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">|</span><span class="n">x</span><span class="o">|</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="p">};</span><span class="w">
+</span><span class="w"></span><span class="kd">let</span><span class="w"> </span><span class="n">add_one_v4</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">|</span><span class="n">x</span><span class="o">|</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w">
+</span></code></pre></div><p>しかし、クロージャーは<code>fn</code>とは違って一般的な宣言じゃGenericに対応せず、決まった型じゃないとコンパイルが出来なくなる。</p>
+<h3 id="2-generic--fn-traitを使って保存する方法">2. Generic + <code>Fn</code> traitを使って保存する方法</h3>
+<div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="k">struct</span> <span class="nc">Cacher</span><span class="o">&lt;</span><span class="n">T</span>: <span class="nb">Fn</span><span class="p">(</span><span class="kt">u32</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="kt">u32</span><span class="o">&gt;</span><span class="w">
+</span><span class="w"></span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="n">calculation</span>: <span class="nc">T</span><span class="p">,</span><span class="w">
+</span><span class="w">    </span><span class="n">cached_value</span>: <span class="nb">Option</span><span class="o">&lt;</span><span class="kt">u32</span><span class="o">&gt;</span><span class="p">,</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span></code></pre></div><p>stdの<code>Fn</code>、<code>FnOnce</code>、<code>FnMut</code> traitは<code>fn</code>の関数ポインタ、またはクロージャーの特性から自動で実装されるtraitだ。全てのクロージャーは特性によって上の３つのTraitから必ず一つのtraitを実装することになる。</p>
+<p>Rustでクロージャーは特定の型が決定できないので、関数ポインタを含めてクロージャーまで含めるつもりなら、上のようにGenericにtraitを限定させて使わせるしかない。</p>
+<h3 id="3-周りの変数などをキャプチャーして使う方法">3. 周りの変数などをキャプチャーして使う方法</h3>
+<p>クロージャーは変数をキャプチャーする時に３つのパターンで分かれる。所有権を獲得して保存するか、<code>&amp;ref</code>としてBorrowするか、それとも<code>&amp;mut ref</code>としてBorrowするかになる。</p>
+<p>そして<code>Fn</code>、<code>FnMut</code>、<code>FnOnce</code>の実装可否によってもキャプチャーの使い方が違っていく。</p>
+<ul>
+<li><code>Fn</code>：キャプチャーした<code>&amp;</code>変数のサイドエフェクトは出来ない。</li>
+<li><code>FnMut</code>：キャプチャーした<code>&amp;mut</code>変数のサイドエフェクトが出来る。</li>
+<li><code>FnOnce</code>：キャプチャーした変数の所有権を獲得し、クロージャーの変数保存空間に移動させる。</li>
+</ul>
+<p>例えば、全てのクロージャーは関数が呼び出せる形になっているので、<code>FnOnce</code>を基本的に実装している。もし、クロージャーがキャプチャーした変数の所有権を獲得しなかったら<code>FnMut</code>を基本的に実装する。さらに、キャプチャーした変数にサイドエフェクトが起こらなかったら<code>Fn</code>も実装することになる。</p>
+<p>例えば、</p>
+<div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="kd">let</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">4</span><span class="p">;</span><span class="w">
+</span><span class="w"></span><span class="kd">let</span><span class="w"> </span><span class="n">equal_to_x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">|</span><span class="n">z</span><span class="o">|</span><span class="w"> </span><span class="n">z</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">x</span><span class="p">;</span><span class="w">
+</span></code></pre></div><p>の<code>equal_to_x</code>クロージャーは<code>x</code>の所有権を獲得しないし、そしてサイドエフェクトも起こさないため、最終的には<code>FnOnce</code>と<code>Fn</code>を実装することになる。</p>
+<p><code>move</code>キーワードを使って、キャプチャーした変数をクロージャーが所有権をもたせることも出来る。</p>
+<div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="kd">let</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">vec</span><span class="o">!</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">];</span><span class="w">
+</span><span class="w"></span><span class="kd">let</span><span class="w"> </span><span class="n">equal_to_x</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">move</span><span class="w"> </span><span class="o">|</span><span class="n">z</span>: <span class="kp">&amp;</span><span class="nb">Vec</span><span class="o">&lt;</span><span class="kt">i32</span><span class="o">&gt;|</span><span class="w"> </span><span class="o">*</span><span class="n">z</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">x</span><span class="p">;</span><span class="w">
+</span><span class="w"></span><span class="kd">let</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">vec</span><span class="o">!</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">];</span><span class="w">
+</span><span class="w"></span><span class="n">assert</span><span class="o">!</span><span class="p">(</span><span class="n">equal_to_x</span><span class="p">(</span><span class="o">&amp;</span><span class="n">y</span><span class="p">));</span><span class="w">
+</span></code></pre></div><p><code>move</code>を使ったら、キャプチャーして中で使われている変数はクロージャーの変数保存空間に移動され保存することになる。</p>
+<h2 id="iterator"><code>Iterator</code></h2>
+<h3 id="1-概要-2">1. 概要</h3>
+<blockquote>
+<p><a href="https://doc.rust-lang.org/std/iter/trait.Iterator.html">https://doc.rust-lang.org/std/iter/trait.Iterator.html</a></p>
+</blockquote>
+<p>Rustでは<code>Iterator</code>もtraitになっており、これを実装することでC++のようにRanged-for loopまたは<code>map(|| {})</code>メソッドチェーニングなどを使ったLazy evalulationが可能になる。Rustのイテレーターは遅延評価をやるので、イテレータを実際に使わない限り何も起こらない。</p>
+<div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="kd">let</span><span class="w"> </span><span class="n">v1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">vec</span><span class="o">!</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">];</span><span class="w">
+</span><span class="w">
+</span><span class="w"></span><span class="kd">let</span><span class="w"> </span><span class="n">v1_iter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">v1</span><span class="p">.</span><span class="n">iter</span><span class="p">();</span><span class="w"> </span><span class="c1">// iter()自体は別のtraitを実装しなきゃいけない。
+</span><span class="c1"></span><span class="k">for</span><span class="w"> </span><span class="n">val</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">v1_iter</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="c1">// v1からそのままloopさせるには違うtrait、IntoIteratorの実装が必要となる。
+</span><span class="c1"></span><span class="w">    </span><span class="n">println</span><span class="o">!</span><span class="p">(</span><span class="s">&#34;Got: {}&#34;</span><span class="p">,</span><span class="w"> </span><span class="n">val</span><span class="p">);</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span><span class="w"></span><span class="c1">// or
+</span><span class="c1"></span><span class="kd">let</span><span class="w"> </span><span class="n">v1_iter_mut</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">v1</span><span class="p">.</span><span class="n">iter_mut</span><span class="p">();</span><span class="w"> </span><span class="c1">// iter_mut()自体は別のtraitを実装しなきゃいけない。
+</span><span class="c1"></span><span class="k">for</span><span class="w"> </span><span class="n">val</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">v1_iter_mut</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="c1">// v1からそのままloopさせるには違うtrait、IntoIteratorの実装が必要となる。
+</span><span class="c1"></span><span class="w">    </span><span class="o">*</span><span class="n">val</span><span class="w"> </span><span class="o">*=</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span></code></pre></div><p>基本的には上のように使う。</p>
+<h3 id="2-trait">2. trait</h3>
+<blockquote>
+<p><a href="https://doc.rust-lang.org/std/iter/index.html">https://doc.rust-lang.org/std/iter/index.html</a></p>
+</blockquote>
+<p><code>Iterator</code>のtraitは基本的に次のような実装条件を持つ。</p>
+<div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="k">pub</span><span class="w"> </span><span class="k">trait</span><span class="w"> </span><span class="nb">Iterator</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="k">type</span> <span class="nc">Item</span><span class="p">;</span><span class="w">
+</span><span class="w">    </span><span class="k">fn</span> <span class="nf">next</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="bp">self</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nb">Option</span><span class="o">&lt;</span><span class="n">Self</span>::<span class="n">Item</span><span class="o">&gt;</span><span class="p">;</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span></code></pre></div><p>ここで<code>type Item</code>は、<code>Self::Item</code>と連関されている。<code>type Item</code>をtraitのAssociated Typeと呼ぶ。C++でいわば<code>using ~~</code>または<code>typedef</code>のようなもので、<code>trait</code>のメソッドがタイプを指定できるようにする。なのでAssociated Typeが含まれているtraitを実装しようとしたら、タイプまでも指定してあげないとビルドが通らない。</p>
+<p>Genericの入ったtraitを使わずにAssociated Typeを使わせる理由としては、Genericがあるtraitはタイプを一つ一つ明示的に書かなければならないし、また任意の<code>struct</code>に対して意図しないタイプを関連付けてtraitを実装してしまう可能性があるので、それを防ぐためだと思われる。</p>
+<p>適用例としては下のようにコードを書く。</p>
+<div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="k">struct</span> <span class="nc">Counter</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="n">count</span>: <span class="kt">usize</span><span class="p">,</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span><span class="w">
+</span><span class="w"></span><span class="k">impl</span><span class="w"> </span><span class="n">Counter</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="k">fn</span> <span class="nf">new</span><span class="p">()</span><span class="w"> </span>-&gt; <span class="nc">Counter</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">Counter</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">count</span>: <span class="mi">0</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">}</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span><span class="w">
+</span><span class="w"></span><span class="k">impl</span><span class="w"> </span><span class="n">std</span>::<span class="nb">Iterator</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">Counter</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="k">type</span> <span class="nc">Item</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kt">usize</span><span class="p">;</span><span class="w">
+</span><span class="w">    
+</span><span class="w">    </span><span class="k">fn</span> <span class="nf">next</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="bp">self</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nb">Option</span><span class="o">&lt;</span><span class="n">Self</span>::<span class="n">Item</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">        </span><span class="c1">// ...
+</span><span class="c1"></span><span class="w">    </span><span class="p">}</span><span class="w">
+</span><span class="w"></span><span class="p">}</span><span class="w">
+</span></code></pre></div><h3 id="3-iteratorを使うメソッド">3. Iteratorを使うメソッド</h3>
+<p><code>Iterator</code>traitの中では、<code>next()</code>メソッドを使って他のIterator Adapterなどを生成するか、アルゴリズムを行うメソッドが存在する。代表的としては<code>map</code>、<code>sum</code>、<code>collect</code>、<code>filter</code>などが存在する。</p>
+<p><code>next()</code>を自動に呼び出すメソッドを<em>Consuming Adapters</em>と呼ぶ。なぜなら生成されたイテレータを使い切るからだ。<code>sum()</code>の場合には、イテレータインスタンスの所有権を獲得し、<code>None</code>が取得されるまで<code>next()</code>を呼び続けてイテレータを消耗しながら足し算のアルゴリズムを行う。</p>
+<p><code>Iterator</code> traitに実装されたメソッドは<em>Iterator Adapter</em>を吐き出すことによって既存のイテレータを他の種類のイテレータを切り替えるようにする。また、このメソッドを連続的に使うことで可読性を保ちながら複雑なアルゴリズムを行うことも出来る。</p>
+<p>しかし、<code>Iterator</code>自体はLazyなので最終のイテレータをまとめて使うようにするメソッドを呼ばないとコンパイルが通らない。例えば、思想をやってくれる<code>map(P)</code>メソッドは単特では使えず、その後に<code>sum()</code>か、<code>collect()</code>などのIterator Consuming Methodを使わないとならない。</p>
+<div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="kd">let</span><span class="w"> </span><span class="n">v1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">vec</span><span class="o">!</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">];</span><span class="w">
+</span><span class="w"></span><span class="kd">let</span><span class="w"> </span><span class="n">v2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">v1</span><span class="p">.</span><span class="n">iter</span><span class="p">().</span><span class="n">map</span><span class="p">(</span><span class="o">|</span><span class="n">x</span><span class="o">|</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">).</span><span class="n">collect</span><span class="p">();</span><span class="w">
+</span><span class="w"></span><span class="n">assert_eq</span><span class="o">!</span><span class="p">(</span><span class="n">v2</span><span class="p">,</span><span class="w"> </span><span class="n">vec</span><span class="o">!</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">]);</span><span class="w">
+</span></code></pre></div></div>
+  <footer class="post-footer">
+  </footer>
+</article>
+    </main><footer class="footer">
+    <span>&copy; 2020 <a href="https://liliilli.github.io">neuromantic</a></span>
+    <span>&middot;</span>
+    <span>Powered by <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo️️</a>️</span>
+    <span>&middot;</span>
+    <span>Theme️ <a href="https://git.io/hugopapermod" rel="noopener" target="_blank">PaperMod</a></span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top">
+    <button class="top-link" id="top-link" type="button">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6">
+            <path d="M12 6H0l6-6z" /></svg>
+    </button>
+</a>
+<script src="https://liliilli.github.io/assets/js/highlight.min.e7afc2928c0925d65c4732dfebe147014d91299a98e819e4b42f25c4fa68e91c.js" integrity="sha256-56/CkowJJdZcRzLf6&#43;FHAU2RKZqY6BnktC8lxPpo6Rw="></script>
+<script>hljs.initHighlightingOnLoad();</script>
+<script>
+    window.onload = function () {
+        if (localStorage.getItem("menu-scroll-position")) {
+            document.getElementById('menu').scrollLeft = localStorage.getItem("menu-scroll-position");
+        }
+    }
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+
+            document.querySelector(this.getAttribute("href")).scrollIntoView({
+                behavior: "smooth"
+            });
+        });
+    });
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+    function menu_on_scroll() {
+        localStorage.setItem("menu-scroll-position", document.getElementById('menu').scrollLeft);
+    }
+</script>
+</body>
+
+</html>
