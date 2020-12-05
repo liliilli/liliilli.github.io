@@ -7,7 +7,16 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright>Copyright © 2008–2019, Steve Francia and the Hugo Authors; all rights reserved.</copyright>
-    <lastBuildDate>Sat, 05 Dec 2020 15:17:29 +0900</lastBuildDate><atom:link href="https://liliilli.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sat, 05 Dec 2020 18:34:27 +0900</lastBuildDate><atom:link href="https://liliilli.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>gitignoreが無視される時の対処法</title>
+      <link>https://liliilli.github.io/posts/fix_gitignore_reset/</link>
+      <pubDate>Sat, 05 Dec 2020 18:34:27 +0900</pubDate>
+      
+      <guid>https://liliilli.github.io/posts/fix_gitignore_reset/</guid>
+      <description>https://stackoverflow.com/a/52621453/7339320 一旦リポジトリの変更事項を全部コミットして、プッシュする。 git rm -r --cached を実行してGitの情報を全て削除する。 git add . を実行して全てを追加する。 .</description>
+    </item>
+    
     <item>
       <title>RustでChip-8インタプリタを作ってみた</title>
       <link>https://liliilli.github.io/posts/self_review_chipmunk/</link>
