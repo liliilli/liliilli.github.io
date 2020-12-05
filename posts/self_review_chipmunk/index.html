@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+<title>RustでChip-8インタプリタを作ってみた - neuromantic</title>
+
+<meta name="description" content="https://github.com/liliilli/chipmunk 最近色んな所で注目されているプログラミング言語、Rustの勉強も兼ねてCHIP-8エミュレータを作ってみました。 CHIP-8とは？ https://en.wikipedia.org/wiki/CHIP-8 CHI">
+<meta name="keywords" content= />
+<meta name="author" content="Jongmin Yun, Neu.">
+<link rel="canonical" href="https://liliilli.github.io/posts/self_review_chipmunk/" />
+<link href="https://liliilli.github.io/assets/css/stylesheet.min.a3b13905fd4b98ea165a18374ae5215d9de97a04f187f789736c56858296ba12.css" integrity="sha256-o7E5Bf1LmOoWWhg3SuUhXZ3pegTxh/eJc2xWhYKWuhI=" rel="preload stylesheet"
+    as="style">
+<link rel="apple-touch-icon" href="https://liliilli.github.io/apple-touch-icon.png">
+<link rel="icon" href="https://liliilli.github.io/favicon.ico">
+<meta name="generator" content="Hugo 0.75.1" />
+
+
+</head>
+
+<body class="single" id="top">
+<header class="header">
+    <nav class="nav">
+        <p class="logo"><a href="https://liliilli.github.io">neuromantic</a></p>
+        <ul class="menu" id="menu" onscroll="menu_on_scroll()">
+            <li>
+                <a href="https://liliilli.github.io/posts/">
+                    <span>
+                        Posts
+                    </span>
+                </a>
+            </li>
+            <li>
+                <a href="https://liliilli.github.io/archives/">
+                    <span>
+                        Archives
+                    </span>
+                </a>
+            </li>
+            <li>
+                <a href="https://liliilli.github.io/tags/">
+                    <span>
+                        Tags
+                    </span>
+                </a>
+            </li>
+            <li>
+                <a href="https://liliilli.github.io/series/">
+                    <span>
+                        Series
+                    </span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+
+    <main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <h1 class="post-title">
+      RustでChip-8インタプリタを作ってみた
+    </h1>
+    <div class="post-meta">
+      <time>December 5, 2020</time>&nbsp;·&nbsp;Jongmin Yun, Neu.
+    </div>
+  </header>
+  <div class="post-content"><p><a href="https://github.com/liliilli/chipmunk">https://github.com/liliilli/chipmunk</a></p>
+<p>最近色んな所で注目されているプログラミング言語、<a href="https://www.rust-lang.org/">Rust</a>の勉強も兼ねてCHIP-8エミュレータを作ってみました。</p>
+<h2 id="chip-8とは">CHIP-8とは？</h2>
+<blockquote>
+<p><a href="https://en.wikipedia.org/wiki/CHIP-8">https://en.wikipedia.org/wiki/CHIP-8</a></p>
+</blockquote>
+<p>CHIP-8は1970年代にJpseph Weisbeckerによって開発されたインタプリタ基盤のプログラミング言語です。何かの特定のハードウェアで駆動するものではなく、単純に既存のハードウェアにて仮想マシンの上で起動するようになっていて、最初はCOSMAC VIPとTelmac 1800というパソコンで駆動するようになりました。</p>
+<p>CHIP-8言語自体はほぼアセンブリに近く、16Bitsの命令を一つ一つ処理しなければならないんですが、そもそも単純な仕様を持っているので実装すること自体はそんなに苦ではないと思います。</p>
+<h2 id="開発環境">開発環境</h2>
+<ul>
+<li>rustc 1.47.0 (stable)</li>
+<li>cargo 1.47.0</li>
+<li>rustup 1.22.1</li>
+<li>stable-x86_64-pc-windows-msvc</li>
+</ul>
+<h2 id="できたもの">できたもの</h2>
+<p>![sample1](/image/dec20/Honeycam 2020-12-04 21-45-42.gif)</p>
+<p>![sample2](/image/dec20/Honeycam 2020-12-04 21-47-25.gif)</p>
+<p>![sample3](/image/dec20/Honeycam 2020-12-04 21-48-09.gif)</p>
+<h2 id="振り返り">振り返り</h2>
+<ul>
+<li>ターミナルを使って描画をするとしたら<code>crossterms</code>ライブラリが一番良いのではないだろうかと思います。<code>pancurses</code>ライブラリを最初には使ったのですが、キー入力が物凄く遅いです。</li>
+<li>読み込んだプログラムのメモリをDumpする機能（ターミナルなどで見せる）とCHIP-8のレジスターをDumpして見せるようにすればデバッグがちょっと楽になることが分かりました。</li>
+<li>全ての命令を一気に実装するのではなく、一番簡単なプログラムを起動しながら足りない命令を優先で実装する感じで完成するのが良いと思います。</li>
+<li>入力系、描画系、処理系は出来るだけそれぞれのモジュールにしておくのがビルドエラーも起こさず楽に実装できます。</li>
+<li>CHIP-8の仕様書を書いたページでは各命令の挙動を間違って書いたものもあったりして、できれば<a href="https://chip-8.github.io/links/">このページ</a>を参考にするのが良いです。</li>
+</ul>
+<h2 id="足りない点">足りない点</h2>
+<ul>
+<li>起動するプログラムの構造によって実行速度が速すぎたり遅かったりする部分があります。</li>
+<li>CHIP-8のサウンドタイマーによるビープ音が実装されませんでした。</li>
+<li>蛇足かもしれませんが、ターミナルで描画するのではなく実際のグラフィックAPIを使ってスクリーンを描画するようにしたいです。</li>
+</ul>
+</div>
+  <footer class="post-footer">
+  </footer>
+</article>
+    </main><footer class="footer">
+    <span>&copy; 2020 <a href="https://liliilli.github.io">neuromantic</a></span>
+    <span>&middot;</span>
+    <span>Powered by <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo️️</a>️</span>
+    <span>&middot;</span>
+    <span>Theme️ <a href="https://git.io/hugopapermod" rel="noopener" target="_blank">PaperMod</a></span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top">
+    <button class="top-link" id="top-link" type="button">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6">
+            <path d="M12 6H0l6-6z" /></svg>
+    </button>
+</a>
+<script src="https://liliilli.github.io/assets/js/highlight.min.e7afc2928c0925d65c4732dfebe147014d91299a98e819e4b42f25c4fa68e91c.js" integrity="sha256-56/CkowJJdZcRzLf6&#43;FHAU2RKZqY6BnktC8lxPpo6Rw="></script>
+<script>hljs.initHighlightingOnLoad();</script>
+<script>
+    window.onload = function () {
+        if (localStorage.getItem("menu-scroll-position")) {
+            document.getElementById('menu').scrollLeft = localStorage.getItem("menu-scroll-position");
+        }
+    }
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+
+            document.querySelector(this.getAttribute("href")).scrollIntoView({
+                behavior: "smooth"
+            });
+        });
+    });
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+    function menu_on_scroll() {
+        localStorage.setItem("menu-scroll-position", document.getElementById('menu').scrollLeft);
+    }
+</script>
+</body>
+
+</html>
