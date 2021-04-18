@@ -1,399 +1,115 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head><meta charset="utf-8">
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
-<title>DirectInput8 導入メモ - neuromantic</title>
-
-<meta name="description" content="https://en.wikipedia.org/wiki/DirectInput https://bell0bytes.eu/directinput/ https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee416842(v=vs.85)?redirectedfrom=MSDN https://docs.microsoft.com/ko-kr/windows/win32/xinput/xinput-and-directinput?redirectedfrom=MSDN DirectInputとは DirectInputは、キーボード、マウス、そして各種のコントローラーを含んでほぼ同一な挙動制御をサポー">
-<meta name="keywords" content= />
-<meta name="author" content="Jongmin Yun, Neu.">
-<link rel="canonical" href="https://liliilli.github.io/posts/dinput8/" />
-<link href="https://liliilli.github.io/assets/css/stylesheet.min.a3b13905fd4b98ea165a18374ae5215d9de97a04f187f789736c56858296ba12.css" integrity="sha256-o7E5Bf1LmOoWWhg3SuUhXZ3pegTxh/eJc2xWhYKWuhI=" rel="preload stylesheet"
-    as="style">
-<link rel="apple-touch-icon" href="https://liliilli.github.io/apple-touch-icon.png">
-<link rel="icon" href="https://liliilli.github.io/favicon.ico">
-<meta name="generator" content="Hugo 0.75.1" />
-
-
-</head>
-
-<body class="single" id="top">
-<header class="header">
-    <nav class="nav">
-        <p class="logo"><a href="https://liliilli.github.io">neuromantic</a></p>
-        <ul class="menu" id="menu" onscroll="menu_on_scroll()">
-            <li>
-                <a href="https://liliilli.github.io/posts/">
-                    <span>
-                        Posts
-                    </span>
-                </a>
-            </li>
-            <li>
-                <a href="https://liliilli.github.io/archives/">
-                    <span>
-                        Archives
-                    </span>
-                </a>
-            </li>
-            <li>
-                <a href="https://liliilli.github.io/tags/">
-                    <span>
-                        Tags
-                    </span>
-                </a>
-            </li>
-            <li>
-                <a href="https://liliilli.github.io/series/">
-                    <span>
-                        Series
-                    </span>
-                </a>
-            </li>
-        </ul>
-    </nav>
-</header>
-
-    <main class="main">
-
-<article class="post-single">
-  <header class="post-header">
-    <h1 class="post-title">
-      DirectInput8 導入メモ
-    </h1>
-    <div class="post-meta">
-      <time>April 25, 2020</time>&nbsp;·&nbsp;Jongmin Yun, Neu.
-    </div>
-  </header>
-  <div class="post-content"><blockquote>
-<p><a href="https://en.wikipedia.org/wiki/DirectInput">https://en.wikipedia.org/wiki/DirectInput</a></p>
-<p><a href="https://bell0bytes.eu/directinput/">https://bell0bytes.eu/directinput/</a></p>
-<p><a href="https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee416842(v=vs.85)?redirectedfrom=MSDN">https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee416842(v=vs.85)?redirectedfrom=MSDN</a></p>
-<p><a href="https://docs.microsoft.com/ko-kr/windows/win32/xinput/xinput-and-directinput?redirectedfrom=MSDN">https://docs.microsoft.com/ko-kr/windows/win32/xinput/xinput-and-directinput?redirectedfrom=MSDN</a></p>
-</blockquote>
-<h1 id="directinputとは">DirectInputとは</h1>
-<p><strong>DirectInput</strong>は、キーボード、マウス、そして各種のコントローラーを含んでほぼ同一な挙動制御をサポートしてくれるAPIを指す。今は<strong>xinput</strong>という新しい（今になっては結構古いAPIだが）APIと一緒に両立しているらしい。</p>
-<p><em>DirectInput</em>はもともと<strong>DirectX</strong>のコンポーネントの一つとして提供され、これを使えば以前までコントローラーごとの挙動制御を一つずつ制御しなかったことが相当省かれる。</p>
-<p><em>DirectInput</em>は認知したデバイスを3つの種類（キーボード、マウス、そしてコントローラー）として分類する。また、<em>DirectInput</em>はデバイスが必ず認識てきる、自分ひとりしか持ってない番号をもたせて認識させるようにする。それを<strong>GUID</strong>という。</p>
-<p>よって、認知したデバイスをインスタンス（例えば<code>IDirectInput8Device</code>とか）として返すためには必ず<em>GUID</em>を持つ必要があるらしい。ただし、基本接続しているキーボードとマウスデバイスは以下のGUIDを通して探せる。</p>
-<ul>
-<li><code>GUID_SysKeyboard</code>：基本接続しているキーボードのGUID（マクロっぽい）</li>
-<li><code>GUID_SysMouse</code>：基本接続しているマウスのGUID</li>
-</ul>
-<p>しかし、それ以外のデバイスはAPIで入れられる<strong>コールバック関数</strong>を通して検証する必要がある。また、それを行うためにはDInput8の<strong>メインオブジェクト</strong>をまず取得する必要がある。</p>
-<blockquote>
-<p>Getting Started with DirectInput</p>
-<p>DirectInputを理解する為には、次のような用語を知っておく必要があるらしい。</p>
-<ul>
-<li>DirectInput Object：メインDirectInputのインタフェース</li>
-<li>Device：キーボード、マウス、またコントローラーとなれるすべての入力デバイス</li>
-<li>DirectInputDevice Object：Deviceの情報を持つ変数またはそれに準ずるコード</li>
-<li>Device Object：DIDOから取得できるキー、ボタン、トリガーなどの構成要素</li>
-</ul>
-</blockquote>
-<p>元記事では以下のようにDirectInput初期化手順を記述している。</p>
-<ol>
-<li>DirectInput Objectを生成する</li>
-<li>GUIDを持つ全てのデバイスを検知し（コールバック関数を用いたクエリー）</li>
-<li>適合なデバイスからDirectInput Device Objectを持ってくる。</li>
-<li>DIDOのco-operation level、フォーマット、プロパティを設定する</li>
-<li>Device Objectを取得する。</li>
-<li>デバイスに入力をPollするかReadを行う。</li>
-<li>取得したDevice Objectを先に開放し、そしてDirectInput Objectを開放して終わり。</li>
-</ol>
-<h1 id="大体のやり方">大体のやり方</h1>
-<h2 id="1-directinput-objectを生成">1. DirectInput Objectを生成</h2>
-<blockquote>
-<p><a href="https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee416756(v%3dvs.85)">https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee416756%28v%3dvs.85%29</a></p>
-</blockquote>
-<div class="highlight"><pre class="chroma"><code class="language-c" data-lang="c"><span class="n">HRESULT</span> <span class="n">DirectInput8Create</span><span class="p">(</span>
-         <span class="n">HINSTANCE</span> <span class="n">hinst</span><span class="p">,</span>
-         <span class="n">DWORD</span> <span class="n">dwVersion</span><span class="p">,</span>
-         <span class="n">REFIID</span> <span class="n">riidltf</span><span class="p">,</span>
-         <span class="n">LPVOID</span> <span class="o">*</span> <span class="n">ppvOut</span><span class="p">,</span>
-         <span class="n">LPUNKNOWN</span> <span class="n">punkOuter</span>
-<span class="p">)</span>
-</code></pre></div><p>上の関数の<code>ppvOut</code>に変数のポインターを入れて、<code>IDirectInput8</code>DirectInput Objectを取得する。取得したオブジェクトは一つしか生成しないようにしなければならないし、特別な状況じゃないとアプリケーションが終わるまで開放しないべきである。</p>
-<p>また、<code>hinst</code>にはプロセス（アプリケーション）またはDLLのハンドルを入れるべき。普通は<code>GetModuleHandleW(nullptr)</code>でいいかも…</p>
-<h2 id="2-guidを持つ全てのデバイスを検知">2. GUIDを持つ全てのデバイスを検知</h2>
-<p>DirectInputはシステムが認知しているすべての入力デバイスを巡回し、連結されているかないか、そしてデバイスの情報を取得することが出来るようになっている。このデバイス全体を巡回して情報を要請することを<strong>Enumeration</strong>という。</p>
-<blockquote>
-<p><a href="https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee417804(v%3dvs.85)">https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee417804%28v%3dvs.85%29</a></p>
-</blockquote>
-<p>Enumerationを行うためには、先程取得したDirectInput Objectの<code>EnumDevices</code>関数を使う。</p>
-<div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="n">HRESULT</span> <span class="n">EnumDevices</span><span class="p">(</span>
-         <span class="n">DWORD</span> <span class="n">dwDevType</span><span class="p">,</span>
-         <span class="n">LPDIENUMDEVICESCALLBACK</span> <span class="n">lpCallback</span><span class="p">,</span>
-         <span class="n">LPVOID</span> <span class="n">pvRef</span><span class="p">,</span>
-         <span class="n">DWORD</span> <span class="n">dwFlags</span>
-<span class="p">)</span>
-</code></pre></div><p><code>dwDevType</code>は<code>DI8DEVCLASS_</code>列挙型の値を入れて、巡回させるデバイスの種類を縛る。コントローラーだけで縛って検証させるなら<code>DI8DEVCLASS_GAMECTRL</code>だけでいいかも。</p>
-<p><code>lpCallback</code>は巡回するデバイスの情報などを取得ためのコールバック関数のポインターを指定する。関数の型は以下のようにしなければならない。</p>
-<div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="n">BOOL</span> <span class="p">(</span><span class="o">*</span><span class="n">LPDIENUMDEVICESCALLBACK</span><span class="p">)(</span><span class="n">LPCDIDEVICEINSTANCE</span> <span class="n">lpddi</span><span class="p">,</span> <span class="n">LPVOID</span> <span class="n">pvRef</span><span class="p">);</span>
-</code></pre></div><p><code>pvRef</code>引数はコールバック関数に持っていくことが出来るポインター変数である。<code>lpddi</code>は<code>EnumDevices</code>関数で取得できたデバイスリストのデバイスインスタンスのポインターである。</p>
-<p>普通はコールバック関数で、縛ったデバイスインスタンスの情報を検証して<code>pvRef</code>の構造体に情報を入れて使えるように準備をするようにしていればOKかもしれない…</p>
-<blockquote>
-<p><a href="https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee416610(v=vs.85)?redirectedfrom=MSDN">https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee416610(v=vs.85)?redirectedfrom=MSDN</a></p>
-</blockquote>
-<p>コールバック関数で持ってこれる<code>DIDEVICEINSTANCE</code>構造体は以下のようになっている。</p>
-<div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="k">typedef</span> <span class="k">struct</span> <span class="nc">DIDEVICEINSTANCE</span> <span class="p">{</span>
-    <span class="n">DWORD</span> <span class="n">dwSize</span><span class="p">;</span>
-    <span class="n">GUID</span> <span class="n">guidInstance</span><span class="p">;</span>
-    <span class="n">GUID</span> <span class="n">guidProduct</span><span class="p">;</span>
-    <span class="n">DWORD</span> <span class="n">dwDevType</span><span class="p">;</span>
-    <span class="n">TCHAR</span> <span class="n">tszInstanceName</span><span class="p">[</span><span class="n">MAX_PATH</span><span class="p">];</span>
-    <span class="n">TCHAR</span> <span class="n">tszProductName</span><span class="p">[</span><span class="n">MAX_PATH</span><span class="p">];</span>
-    <span class="n">GUID</span> <span class="n">guidFFDriver</span><span class="p">;</span>
-    <span class="n">WORD</span> <span class="n">wUsagePage</span><span class="p">;</span>
-    <span class="n">WORD</span> <span class="n">wUsage</span><span class="p">;</span>
-<span class="p">}</span> <span class="n">DIDEVICEINSTANCE</span><span class="p">,</span> <span class="o">*</span><span class="n">LPDIDEVICEINSTANCE</span><span class="p">;</span>
-</code></pre></div><p>注意する点は、新しいAPIの<strong>xinput</strong>がデバイスによって同時にサポートされていることがありうるので、<code>guidProduct</code>を使ってxinputを支援しているかを確認しなければならない。</p>
-<p>とにかく取得したいデバイスを探したら、<code>CreateDevice</code>関数を使ってDIDOを取得する。</p>
-<h2 id="3-適合なデバイスからdirectinput-device-object取得">3. 適合なデバイスからDirectInput Device Object取得</h2>
-<blockquote>
-<p><a href="https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee417803(v%3Dvs.85)">https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee417803(v%3Dvs.85)</a></p>
-</blockquote>
-<div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="n">HRESULT</span> <span class="n">CreateDevice</span><span class="p">(</span>
-         <span class="n">REFGUID</span> <span class="n">rguid</span><span class="p">,</span>
-         <span class="n">LPDIRECTINPUTDEVICE</span> <span class="o">*</span> <span class="n">lplpDirectInputDevice</span><span class="p">,</span>
-         <span class="n">LPUNKNOWN</span> <span class="n">pUnkOuter</span>
-<span class="p">)</span>
-</code></pre></div><p><code>rguid</code>にGUIDを入れるが、必ずインスタンスのGUIDである必要がある。<code>pUnkOuter</code>はCOM Aggregationのための引数であるため、今は使わない。</p>
-<div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="c1">// 3. Get DirectInput Device Object pointer.
-</span><span class="c1"></span><span class="n">IDirectInputDevice8</span><span class="o">*</span> <span class="n">p_device</span> <span class="o">=</span> <span class="k">nullptr</span><span class="p">;</span>
-<span class="k">if</span> <span class="p">(</span><span class="n">p_dio</span><span class="o">-&gt;</span><span class="n">CreateDevice</span><span class="p">(</span><span class="n">lpddi</span><span class="o">-&gt;</span><span class="n">guidInstance</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">p_device</span><span class="p">,</span> <span class="k">nullptr</span><span class="p">)</span> <span class="o">!=</span> <span class="n">DI_OK</span><span class="p">)</span>
-<span class="p">{</span> 
-    <span class="k">return</span> <span class="n">DIENUM_CONTINUE</span><span class="p">;</span> 
-<span class="p">}</span>
-</code></pre></div><h2 id="4-didoのco-operation-levelformatproperties設定">4. DIDOのco-operation level、format、properties設定</h2>
-<h3 id="co-operation-level">co-operation level</h3>
-<blockquote>
-<p><a href="https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee417921(v%3Dvs.85)">https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee417921(v%3Dvs.85)</a></p>
-</blockquote>
-<div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="n">HRESULT</span> <span class="n">SetCooperativeLevel</span><span class="p">(</span>
-         <span class="n">HWND</span> <span class="n">hwnd</span><span class="p">,</span>
-         <span class="n">DWORD</span> <span class="n">dwFlags</span>
-<span class="p">)</span>
-</code></pre></div><p>生成した窓の状態に対し（バックかフォアか、それとも特別な状態を持っているか）、取得したDIDOからのシグナル検知の権限を設定する。</p>
-<p>僕の個人プロジェクトでは、表に見える窓だけではなくてバックグラウンドで動く窓もあるため、<code>dwFlags</code>は<code>DISCL_BACKGROUND | DISCL_EXCLUSIVE</code>にする。</p>
-<h3 id="data-formats">Data formats</h3>
-<blockquote>
-<p><a href="https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee417925(v=vs.85)?redirectedfrom=MSDN">https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee417925(v=vs.85)?redirectedfrom=MSDN</a></p>
-</blockquote>
-<div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="n">HRESULT</span> <span class="n">SetDataFormat</span><span class="p">(</span>
-         <span class="n">LPCDIDATAFORMAT</span> <span class="n">lpdf</span>
-<span class="p">)</span>
-</code></pre></div><p>取得したDIDOから、どのようにデータを解釈して取得させるようにするかを設定する。実は<code>DIDATAFORMAT</code>構造体に値を入れてポインターとして入れなければならないか、DINPUTヘッダーファイル自体ですでに決まったものを入れれば良いらしい。</p>
-<ul>
-<li>c_dfDIKeyboard</li>
-<li>c_dfDIMouse</li>
-<li>c_dfDIJoystick</li>
-<li>c_dfDIJoystick2</li>
-</ul>
-<blockquote>
-<p>&hellip;
+<!doctype html><html lang=en dir=auto><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="IE=edge"><meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no"><meta name=robots content="index, follow"><title>DirectInput8 導入メモ | neuromantic</title><meta name=keywords content><meta name=description content="https://en.wikipedia.org/wiki/DirectInput https://bell0bytes.eu/directinput/ https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee416842(v=vs.85)?redirectedfrom=MSDN https://docs.microsoft.com/ko-kr/windows/win32/xinput/xinput-and-directinput?redirectedfrom=MSDN DirectInputとは DirectInputは、キーボード、マウス、そして各種のコントローラーを含んでほぼ同一な挙動制御をサポー"><meta name=author content="Jongmin Yun, Neu."><link rel=canonical href=https://liliilli.github.io/posts/dinput8/><link crossorigin=anonymous href=/assets/css/stylesheet.min.bc435bed1061be2618667408894ae8a5d27c970831ce57f287e42f911918fcbc.css integrity="sha256-vENb7RBhviYYZnQIiUropdJ8lwgxzlfyh+QvkRkY/Lw=" rel="preload stylesheet" as=style><script defer crossorigin=anonymous src=/assets/js/highlight.min.7680afc38aa6b15ddf158a4f3780b7b1f7dde7e91d26f073e6229bb7a0793c92.js integrity="sha256-doCvw4qmsV3fFYpPN4C3sffd5+kdJvBz5iKbt6B5PJI=" onload=hljs.initHighlightingOnLoad()></script><link rel=icon href=https://liliilli.github.io/favicon.ico><link rel=icon type=image/png sizes=16x16 href=https://liliilli.github.io/favicon-16x16.png><link rel=icon type=image/png sizes=32x32 href=https://liliilli.github.io/favicon-32x32.png><link rel=apple-touch-icon href=https://liliilli.github.io/apple-touch-icon.png><link rel=mask-icon href=https://liliilli.github.io/safari-pinned-tab.svg><meta name=theme-color content="#2e2e33"><meta name=msapplication-TileColor content="#2e2e33"><meta name=generator content="Hugo 0.82.0"><meta property="og:title" content="DirectInput8 導入メモ"><meta property="og:description" content="https://en.wikipedia.org/wiki/DirectInput https://bell0bytes.eu/directinput/ https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee416842(v=vs.85)?redirectedfrom=MSDN https://docs.microsoft.com/ko-kr/windows/win32/xinput/xinput-and-directinput?redirectedfrom=MSDN DirectInputとは DirectInputは、キーボード、マウス、そして各種のコントローラーを含んでほぼ同一な挙動制御をサポー"><meta property="og:type" content="article"><meta property="og:url" content="https://liliilli.github.io/posts/dinput8/"><meta property="article:section" content="posts"><meta property="article:published_time" content="2020-04-25T13:28:07+09:00"><meta property="article:modified_time" content="2020-04-26T13:36:47+09:00"><meta property="og:site_name" content="neuromantic"><meta name=twitter:card content="summary"><meta name=twitter:title content="DirectInput8 導入メモ"><meta name=twitter:description content="https://en.wikipedia.org/wiki/DirectInput https://bell0bytes.eu/directinput/ https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee416842(v=vs.85)?redirectedfrom=MSDN https://docs.microsoft.com/ko-kr/windows/win32/xinput/xinput-and-directinput?redirectedfrom=MSDN DirectInputとは DirectInputは、キーボード、マウス、そして各種のコントローラーを含んでほぼ同一な挙動制御をサポー"><script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":2,"name":"Posts","item":"https://liliilli.github.io/posts/"},{"@type":"ListItem","position":3,"name":"DirectInput8 導入メモ","item":"https://liliilli.github.io/posts/dinput8/"}]}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"DirectInput8 導入メモ","name":"DirectInput8 導入メモ","description":"https://en.wikipedia.org/wiki/DirectInput https://bell0bytes.eu/directinput/ https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee416842(v=vs.85)?redirectedfrom=MSDN https://docs.microsoft.com/ko-kr/windows/win32/xinput/xinput-and-directinput?redirectedfrom=MSDN DirectInputとは DirectInputは、キーボード、マウス、そして各種のコントローラーを含んでほぼ同一な挙動制御をサポー","keywords":[],"articleBody":" https://en.wikipedia.org/wiki/DirectInput\nhttps://bell0bytes.eu/directinput/\nhttps://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee416842(v=vs.85)?redirectedfrom=MSDN\nhttps://docs.microsoft.com/ko-kr/windows/win32/xinput/xinput-and-directinput?redirectedfrom=MSDN\n DirectInputとは DirectInputは、キーボード、マウス、そして各種のコントローラーを含んでほぼ同一な挙動制御をサポートしてくれるAPIを指す。今はxinputという新しい（今になっては結構古いAPIだが）APIと一緒に両立しているらしい。\nDirectInputはもともとDirectXのコンポーネントの一つとして提供され、これを使えば以前までコントローラーごとの挙動制御を一つずつ制御しなかったことが相当省かれる。\nDirectInputは認知したデバイスを3つの種類（キーボード、マウス、そしてコントローラー）として分類する。また、DirectInputはデバイスが必ず認識てきる、自分ひとりしか持ってない番号をもたせて認識させるようにする。それをGUIDという。\nよって、認知したデバイスをインスタンス（例えばIDirectInput8Deviceとか）として返すためには必ずGUIDを持つ必要があるらしい。ただし、基本接続しているキーボードとマウスデバイスは以下のGUIDを通して探せる。\n GUID_SysKeyboard：基本接続しているキーボードのGUID（マクロっぽい） GUID_SysMouse：基本接続しているマウスのGUID  しかし、それ以外のデバイスはAPIで入れられるコールバック関数を通して検証する必要がある。また、それを行うためにはDInput8のメインオブジェクトをまず取得する必要がある。\n Getting Started with DirectInput\nDirectInputを理解する為には、次のような用語を知っておく必要があるらしい。\n DirectInput Object：メインDirectInputのインタフェース Device：キーボード、マウス、またコントローラーとなれるすべての入力デバイス DirectInputDevice Object：Deviceの情報を持つ変数またはそれに準ずるコード Device Object：DIDOから取得できるキー、ボタン、トリガーなどの構成要素   元記事では以下のようにDirectInput初期化手順を記述している。\n DirectInput Objectを生成する GUIDを持つ全てのデバイスを検知し（コールバック関数を用いたクエリー） 適合なデバイスからDirectInput Device Objectを持ってくる。 DIDOのco-operation level、フォーマット、プロパティを設定する Device Objectを取得する。 デバイスに入力をPollするかReadを行う。 取得したDevice Objectを先に開放し、そしてDirectInput Objectを開放して終わり。  大体のやり方 1. DirectInput Objectを生成  https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee416756%28v%3dvs.85%29\n HRESULT DirectInput8Create( HINSTANCE hinst, DWORD dwVersion, REFIID riidltf, LPVOID * ppvOut, LPUNKNOWN punkOuter ) 上の関数のppvOutに変数のポインターを入れて、IDirectInput8DirectInput Objectを取得する。取得したオブジェクトは一つしか生成しないようにしなければならないし、特別な状況じゃないとアプリケーションが終わるまで開放しないべきである。\nまた、hinstにはプロセス（アプリケーション）またはDLLのハンドルを入れるべき。普通はGetModuleHandleW(nullptr)でいいかも…\n2. GUIDを持つ全てのデバイスを検知 DirectInputはシステムが認知しているすべての入力デバイスを巡回し、連結されているかないか、そしてデバイスの情報を取得することが出来るようになっている。このデバイス全体を巡回して情報を要請することをEnumerationという。\n https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee417804%28v%3dvs.85%29\n Enumerationを行うためには、先程取得したDirectInput ObjectのEnumDevices関数を使う。\nHRESULT EnumDevices( DWORD dwDevType, LPDIENUMDEVICESCALLBACK lpCallback, LPVOID pvRef, DWORD dwFlags ) dwDevTypeはDI8DEVCLASS_列挙型の値を入れて、巡回させるデバイスの種類を縛る。コントローラーだけで縛って検証させるならDI8DEVCLASS_GAMECTRLだけでいいかも。\nlpCallbackは巡回するデバイスの情報などを取得ためのコールバック関数のポインターを指定する。関数の型は以下のようにしなければならない。\nBOOL (*LPDIENUMDEVICESCALLBACK)(LPCDIDEVICEINSTANCE lpddi, LPVOID pvRef); pvRef引数はコールバック関数に持っていくことが出来るポインター変数である。lpddiはEnumDevices関数で取得できたデバイスリストのデバイスインスタンスのポインターである。\n普通はコールバック関数で、縛ったデバイスインスタンスの情報を検証してpvRefの構造体に情報を入れて使えるように準備をするようにしていればOKかもしれない…\n https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee416610(v=vs.85)?redirectedfrom=MSDN\n コールバック関数で持ってこれるDIDEVICEINSTANCE構造体は以下のようになっている。\ntypedef struct DIDEVICEINSTANCE { DWORD dwSize; GUID guidInstance; GUID guidProduct; DWORD dwDevType; TCHAR tszInstanceName[MAX_PATH]; TCHAR tszProductName[MAX_PATH]; GUID guidFFDriver; WORD wUsagePage; WORD wUsage; } DIDEVICEINSTANCE, *LPDIDEVICEINSTANCE; 注意する点は、新しいAPIのxinputがデバイスによって同時にサポートされていることがありうるので、guidProductを使ってxinputを支援しているかを確認しなければならない。\nとにかく取得したいデバイスを探したら、CreateDevice関数を使ってDIDOを取得する。\n3. 適合なデバイスからDirectInput Device Object取得  https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee417803(v%3Dvs.85)\n HRESULT CreateDevice( REFGUID rguid, LPDIRECTINPUTDEVICE * lplpDirectInputDevice, LPUNKNOWN pUnkOuter ) rguidにGUIDを入れるが、必ずインスタンスのGUIDである必要がある。pUnkOuterはCOM Aggregationのための引数であるため、今は使わない。\n// 3. Get DirectInput Device Object pointer. IDirectInputDevice8* p_device = nullptr; if (p_dio-CreateDevice(lpddi-guidInstance, \u0026p_device, nullptr) != DI_OK) { return DIENUM_CONTINUE; } 4. DIDOのco-operation level、format、properties設定 co-operation level  https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee417921(v%3Dvs.85)\n HRESULT SetCooperativeLevel( HWND hwnd, DWORD dwFlags ) 生成した窓の状態に対し（バックかフォアか、それとも特別な状態を持っているか）、取得したDIDOからのシグナル検知の権限を設定する。\n僕の個人プロジェクトでは、表に見える窓だけではなくてバックグラウンドで動く窓もあるため、dwFlagsはDISCL_BACKGROUND | DISCL_EXCLUSIVEにする。\nData formats  https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee417925(v=vs.85)?redirectedfrom=MSDN\n HRESULT SetDataFormat( LPCDIDATAFORMAT lpdf ) 取得したDIDOから、どのようにデータを解釈して取得させるようにするかを設定する。実はDIDATAFORMAT構造体に値を入れてポインターとして入れなければならないか、DINPUTヘッダーファイル自体ですでに決まったものを入れれば良いらしい。\n c_dfDIKeyboard c_dfDIMouse c_dfDIJoystick c_dfDIJoystick2   … ちなみに実はジョイスティックには2種類の入力フォーマットがあり、そのもう1つがc_dfDIJoystick2と定義されています。 実際にはボタンやアナログの数が増えただけなので、PS2などの標準コントローラを使う分には特に意味はありませんが、 入力の多いデバイスを使用する場合はこちらの方を使う必要があります。 ※c_dfDIJoystickとc_dfDIJoystick2のどちらを使用しても取得出来る分は取得できます …\nfrom : http://www.charatsoft.com/develop/otogema/page/07input/joystick.html\n データフォーマットを入れたら、後でデバイスのキー状態などを取得する際には入れた値にあっている構造体を入れなければならない。例えば、c_dfDIJoystickを入れた時にはDIJOYSTATAEを使う。\n https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee416627(v%3Dvs.85)\n typedef struct DIJOYSTATE { LONG lX; LONG lY; LONG lZ; LONG lRx; LONG lRy; LONG lRz; LONG rglSlider[2]; DWORD rgdwPOV[4]; BYTE rgbButtons[32]; } DIJOYSTATE, *LPDIJOYSTATE; Properties 普通のゲームコントローラーって、デジタルのボタンなどを除くと、Lスティック、Rスティックそしてタッチパネルまたは特殊トリガーのようなアナログ数値を持つ要素が残る。コントローラーごとにこのスティックなどの読み取り値が違うかもしれないので、それを一つの範囲などに合わせなければならない。その設定をGetCapabilitiesとSetPropertyで設定することが出来るらしい。\nまず、GetCapabilitiesとDIDIVCAPS構造体でDIDOのDevice Object情報を取得する必要がある。\n https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee417892(v=vs.85)?redirectedfrom=MSDN\nhttps://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee416607%28v%3dvs.85%29\n HRESULT GetCapabilities(LPDIDEVCAPS lpDIDevCaps) typedef struct DIDEVCAPS { DWORD dwSize; DWORD dwFlags; DWORD dwDevType; DWORD dwAxes; DWORD dwButtons; DWORD dwPOVs; DWORD dwFFSamplePeriod; DWORD dwFFMinTimeResolution; DWORD dwFirmwareRevision; DWORD dwHardwareRevision; DWORD dwFFDriverVersion; } DIDEVCAPS, *LPDIDEVCAPS; そしてプロパティーを設定するなら、SetPropertyを使う。ただし、設定したいプロパティーによって記述する構造体がそれぞれ違う。例えばスティック軸の数値の範囲を決めたい場合には下のコードのようにしなければならない。\n https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee416638%28v%3dvs.85%29\n DIPROPHEADER header; header.dwSize = sizeof(DIPROPRANGE); header.dwHeaderSize = sizeof(DIPROPHEADER); header.dwObj = ???; header.dwHow = ???; DIPROPRANGE range; range.diph = header; range.lMin = -100; range.lMax = +100; gameController-SetProperty(DIPROP_RANGE, \u0026range.header); 注目すべき所は、DIPROPHEADER構造体のdwObjとdwHowである。公式の説明ページを見ればわかるかもしれないが、dwHowにはデバイスではなく、DIDOの中にある軸、ボタンなどのインスタンスを指すためのDIPH_BYIDを入れなければならない。\nただし、DIPH_BYIDを入れたら、dwObjにはEnumObjects関数で呼び出しするコールバック関数の中で取得できるインスタンスのIDをdwObjに入れなければならなくなる。\n https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee417889(v=vs.85)?redirectedfrom=MSDN\n HRESULT EnumObjects( LPDIENUMDEVICEOBJECTSCALLBACK lpCallback, LPVOID pvRef, DWORD dwFlags ) // Callback function pointer type BOOL (*LPDIENUMDEVICEOBJECTSCALLBACK)(LPCDIDEVICEOBJECTINSTANCE lpddoi, LPVOID pvRef) 書き方は上のEnumDevicesと同じだが、dwFlagsのフラグ値とコールバック関数の中でのSetPropertyコールに使われる構造体がよく合っていなければならない。（かもしれない）\nということで手順をまとめると、\n IDirectInputDevice8のDIDOを取得し、 EnumObjects関数で調べたいインスタンスの縛ってイテレーションさせ、 その中で適切なインスタンスがあったらDIPROPHEADERの入っている適切な構造体を記述して SetPropertyでインスタンスに設定をする。  アナログスティックの場合には、**デッドゾーン（Deadzone)**っていうのがあって、スティックを動かさないと必ず中立（0）の数値になるのではなく0に違い数値を表す時があって、それに対する誤動作を防ぐための判定範囲を設けなければならない。\nアナログスティックなどのデッドゾーンを決めるにはDIPROPWORDとDIPROP_DEADZONEを使う。ここで中止することは、デッドゾーンの数値は固定された0~10000までの範囲から決めなかればならない。例えばスティック入力の1%以内をデッドゾーンとして決めたいなら、100を入れる。\n https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee416636%28v%3dvs.85%29\n typedef struct DIPROPDWORD { DIPROPHEADER diph; DWORD dwData; } DIPROPDWORD, *LPDIPROPDWORD; ちなみに元記事ではRANGEとWORDを同時に設定している。\n5. Device Objectを取得(Acquire)  https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee417818(v=vs.85)?redirectedfrom=MSDN\n HRESULT Acquire() 設定した入力デバイスに接近する権限を得る。アプリケーションを終了したり、それとも使っているコントローラーのアクセス権限を返却する場合には\n https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee417931(v=vs.85)\n HRESULT Unacquire() // and HRESULT Release() を使う。（Releaseを連続で呼び出すのは、CreateDeviceで参照カウントが１増加されたから）\n6. デバイスの入力をPollするかReadを行う  https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee417913(v=vs.85)?redirectedfrom=MSDN\n HRESULT Poll() 取得したデバイスによって違われるかもしれないが、大体はPoll()関数でデバイスか入力情報を取得しなおさなければならない。あるデバイスは自分からインターラプト（Interrupt）をかけて入力データを取得するようにするものもあるが、そのデバイスに限ってはPoll()を呼び出す必要はない（読んだとしてもエラーにはならない）\nもしかしてPoll関数を呼ぶ必要があるかを確かめる為には、GetCapabilities()関数でDIDEVCAPSのDIDC_POLLEDDATAFORMATを確認すれば良いらしい。\n https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee417897(v=vs.85)?redirectedfrom=MSDN\n HRESULT GetDeviceState( DWORD cbData, LPVOID lpvData ) デバイスで更新された情報を持ってくるためには上の関数を使う。ただし、この関数を使うにはlpvDataは前にDIDOのデータフォーマット（DataFormat）を設定した時の値に対応している構造体を入れなければならない。\n   Data Format State Structure     c_dfDIMouse DIMOUSESTATE   c_dfDIMouse2 DIMOUSESTATE2   c_dfDIKeyboard array of 256 bytes   c_dfDIJoystick DIJOYSTATE   c_dfDIJoystick2 DIJOYSTATE2    7. DirectInput Objectを開放して終わり 「5. Device Objectを取得(Acquire)」を見ること。\n","wordCount":"4696","inLanguage":"en","datePublished":"2020-04-25T13:28:07+09:00","dateModified":"2020-04-26T13:36:47+09:00","author":{"@type":"Person","name":"Jongmin Yun, Neu."},"mainEntityOfPage":{"@type":"WebPage","@id":"https://liliilli.github.io/posts/dinput8/"},"publisher":{"@type":"Organization","name":"neuromantic","logo":{"@type":"ImageObject","url":"https://liliilli.github.io/favicon.ico"}}}</script></head><body id=top><script>localStorage.getItem("pref-theme")==="dark"&&document.body.classList.add('dark')</script><noscript><style type=text/css>#theme-toggle,.top-link{display:none}</style></noscript><header class=header><nav class=nav><div class=logo><a href=https://liliilli.github.io accesskey=h title="neuromantic (Alt + H)">neuromantic</a>
+<span class=logo-switches><button id=theme-toggle accesskey=t title="(Alt + T)"><svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg><svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button></span></div><ul id=menu onscroll=menu_on_scroll()><li><a href=https://liliilli.github.io/posts/ title=Posts><span>Posts</span></a></li><li><a href=https://liliilli.github.io/archives/ title=Archives><span>Archives</span></a></li><li><a href=https://liliilli.github.io/tags/ title=Tags><span>Tags</span></a></li><li><a href=https://liliilli.github.io/series/ title=Series><span>Series</span></a></li></ul></nav></header><main class=main><article class=post-single><header class=post-header><div class=breadcrumbs><a href=https://liliilli.github.io>Home</a>&nbsp;»&nbsp;<a href=https://liliilli.github.io/posts/>Posts</a></div><h1 class=post-title>DirectInput8 導入メモ</h1><div class=post-meta>2020, April 25&nbsp;·&nbsp;Jongmin Yun, Neu.</div></header><div class=toc><details><summary accesskey=c title="(Alt + C)"><div class=details>Table of Contents</div></summary><div class=inner><ul><li><a href=#directinput%e3%81%a8%e3%81%af aria-label=DirectInputとは>DirectInputとは</a></li><li><a href=#%e5%a4%a7%e4%bd%93%e3%81%ae%e3%82%84%e3%82%8a%e6%96%b9 aria-label=大体のやり方>大体のやり方</a><ul><li><a href=#1-directinput-object%e3%82%92%e7%94%9f%e6%88%90 aria-label="1. DirectInput Objectを生成">1. DirectInput Objectを生成</a></li><li><a href=#2-guid%e3%82%92%e6%8c%81%e3%81%a4%e5%85%a8%e3%81%a6%e3%81%ae%e3%83%87%e3%83%90%e3%82%a4%e3%82%b9%e3%82%92%e6%a4%9c%e7%9f%a5 aria-label="2. GUIDを持つ全てのデバイスを検知">2. GUIDを持つ全てのデバイスを検知</a></li><li><a href=#3-%e9%81%a9%e5%90%88%e3%81%aa%e3%83%87%e3%83%90%e3%82%a4%e3%82%b9%e3%81%8b%e3%82%89directinput-device-object%e5%8f%96%e5%be%97 aria-label="3. 適合なデバイスからDirectInput Device Object取得">3. 適合なデバイスからDirectInput Device Object取得</a></li><li><a href=#4-dido%e3%81%aeco-operation-levelformatproperties%e8%a8%ad%e5%ae%9a aria-label="4. DIDOのco-operation level、format、properties設定">4. DIDOのco-operation level、format、properties設定</a><ul><li><a href=#co-operation-level aria-label="co-operation level">co-operation level</a></li><li><a href=#data-formats aria-label="Data formats">Data formats</a></li><li><a href=#properties aria-label=Properties>Properties</a></li></ul></li><li><a href=#5-device-object%e3%82%92%e5%8f%96%e5%be%97acquire aria-label="5. Device Objectを取得(Acquire)">5. Device Objectを取得(Acquire)</a></li><li><a href=#6-%e3%83%87%e3%83%90%e3%82%a4%e3%82%b9%e3%81%ae%e5%85%a5%e5%8a%9b%e3%82%92poll%e3%81%99%e3%82%8b%e3%81%8bread%e3%82%92%e8%a1%8c%e3%81%86 aria-label="6. デバイスの入力をPollするかReadを行う">6. デバイスの入力をPollするかReadを行う</a></li><li><a href=#7-directinput-object%e3%82%92%e9%96%8b%e6%94%be%e3%81%97%e3%81%a6%e7%b5%82%e3%82%8f%e3%82%8a aria-label="7. DirectInput Objectを開放して終わり">7. DirectInput Objectを開放して終わり</a></li></ul></li></ul></div></details></div><div class=post-content><blockquote><p><a href=https://en.wikipedia.org/wiki/DirectInput>https://en.wikipedia.org/wiki/DirectInput</a></p><p><a href=https://bell0bytes.eu/directinput/>https://bell0bytes.eu/directinput/</a></p><p><a href="https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee416842(v=vs.85)?redirectedfrom=MSDN">https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee416842(v=vs.85)?redirectedfrom=MSDN</a></p><p><a href="https://docs.microsoft.com/ko-kr/windows/win32/xinput/xinput-and-directinput?redirectedfrom=MSDN">https://docs.microsoft.com/ko-kr/windows/win32/xinput/xinput-and-directinput?redirectedfrom=MSDN</a></p></blockquote><h1 id=directinputとは>DirectInputとは<a hidden class=anchor aria-hidden=true href=#directinputとは>#</a></h1><p><strong>DirectInput</strong>は、キーボード、マウス、そして各種のコントローラーを含んでほぼ同一な挙動制御をサポートしてくれるAPIを指す。今は<strong>xinput</strong>という新しい（今になっては結構古いAPIだが）APIと一緒に両立しているらしい。</p><p><em>DirectInput</em>はもともと<strong>DirectX</strong>のコンポーネントの一つとして提供され、これを使えば以前までコントローラーごとの挙動制御を一つずつ制御しなかったことが相当省かれる。</p><p><em>DirectInput</em>は認知したデバイスを3つの種類（キーボード、マウス、そしてコントローラー）として分類する。また、<em>DirectInput</em>はデバイスが必ず認識てきる、自分ひとりしか持ってない番号をもたせて認識させるようにする。それを<strong>GUID</strong>という。</p><p>よって、認知したデバイスをインスタンス（例えば<code>IDirectInput8Device</code>とか）として返すためには必ず<em>GUID</em>を持つ必要があるらしい。ただし、基本接続しているキーボードとマウスデバイスは以下のGUIDを通して探せる。</p><ul><li><code>GUID_SysKeyboard</code>：基本接続しているキーボードのGUID（マクロっぽい）</li><li><code>GUID_SysMouse</code>：基本接続しているマウスのGUID</li></ul><p>しかし、それ以外のデバイスはAPIで入れられる<strong>コールバック関数</strong>を通して検証する必要がある。また、それを行うためにはDInput8の<strong>メインオブジェクト</strong>をまず取得する必要がある。</p><blockquote><p>Getting Started with DirectInput</p><p>DirectInputを理解する為には、次のような用語を知っておく必要があるらしい。</p><ul><li>DirectInput Object：メインDirectInputのインタフェース</li><li>Device：キーボード、マウス、またコントローラーとなれるすべての入力デバイス</li><li>DirectInputDevice Object：Deviceの情報を持つ変数またはそれに準ずるコード</li><li>Device Object：DIDOから取得できるキー、ボタン、トリガーなどの構成要素</li></ul></blockquote><p>元記事では以下のようにDirectInput初期化手順を記述している。</p><ol><li>DirectInput Objectを生成する</li><li>GUIDを持つ全てのデバイスを検知し（コールバック関数を用いたクエリー）</li><li>適合なデバイスからDirectInput Device Objectを持ってくる。</li><li>DIDOのco-operation level、フォーマット、プロパティを設定する</li><li>Device Objectを取得する。</li><li>デバイスに入力をPollするかReadを行う。</li><li>取得したDevice Objectを先に開放し、そしてDirectInput Objectを開放して終わり。</li></ol><h1 id=大体のやり方>大体のやり方<a hidden class=anchor aria-hidden=true href=#大体のやり方>#</a></h1><h2 id=1-directinput-objectを生成>1. DirectInput Objectを生成<a hidden class=anchor aria-hidden=true href=#1-directinput-objectを生成>#</a></h2><blockquote><p><a href=https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee416756(v%3dvs.85)>https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee416756%28v%3dvs.85%29</a></p></blockquote><div class=highlight><pre class=chroma><code class=language-c data-lang=c><span class=n>HRESULT</span> <span class=n>DirectInput8Create</span><span class=p>(</span>
+         <span class=n>HINSTANCE</span> <span class=n>hinst</span><span class=p>,</span>
+         <span class=n>DWORD</span> <span class=n>dwVersion</span><span class=p>,</span>
+         <span class=n>REFIID</span> <span class=n>riidltf</span><span class=p>,</span>
+         <span class=n>LPVOID</span> <span class=o>*</span> <span class=n>ppvOut</span><span class=p>,</span>
+         <span class=n>LPUNKNOWN</span> <span class=n>punkOuter</span>
+<span class=p>)</span>
+</code></pre></div><p>上の関数の<code>ppvOut</code>に変数のポインターを入れて、<code>IDirectInput8</code>DirectInput Objectを取得する。取得したオブジェクトは一つしか生成しないようにしなければならないし、特別な状況じゃないとアプリケーションが終わるまで開放しないべきである。</p><p>また、<code>hinst</code>にはプロセス（アプリケーション）またはDLLのハンドルを入れるべき。普通は<code>GetModuleHandleW(nullptr)</code>でいいかも…</p><h2 id=2-guidを持つ全てのデバイスを検知>2. GUIDを持つ全てのデバイスを検知<a hidden class=anchor aria-hidden=true href=#2-guidを持つ全てのデバイスを検知>#</a></h2><p>DirectInputはシステムが認知しているすべての入力デバイスを巡回し、連結されているかないか、そしてデバイスの情報を取得することが出来るようになっている。このデバイス全体を巡回して情報を要請することを<strong>Enumeration</strong>という。</p><blockquote><p><a href=https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee417804(v%3dvs.85)>https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee417804%28v%3dvs.85%29</a></p></blockquote><p>Enumerationを行うためには、先程取得したDirectInput Objectの<code>EnumDevices</code>関数を使う。</p><div class=highlight><pre class=chroma><code class=language-c++ data-lang=c++><span class=n>HRESULT</span> <span class=n>EnumDevices</span><span class=p>(</span>
+         <span class=n>DWORD</span> <span class=n>dwDevType</span><span class=p>,</span>
+         <span class=n>LPDIENUMDEVICESCALLBACK</span> <span class=n>lpCallback</span><span class=p>,</span>
+         <span class=n>LPVOID</span> <span class=n>pvRef</span><span class=p>,</span>
+         <span class=n>DWORD</span> <span class=n>dwFlags</span>
+<span class=p>)</span>
+</code></pre></div><p><code>dwDevType</code>は<code>DI8DEVCLASS_</code>列挙型の値を入れて、巡回させるデバイスの種類を縛る。コントローラーだけで縛って検証させるなら<code>DI8DEVCLASS_GAMECTRL</code>だけでいいかも。</p><p><code>lpCallback</code>は巡回するデバイスの情報などを取得ためのコールバック関数のポインターを指定する。関数の型は以下のようにしなければならない。</p><div class=highlight><pre class=chroma><code class=language-c++ data-lang=c++><span class=n>BOOL</span> <span class=p>(</span><span class=o>*</span><span class=n>LPDIENUMDEVICESCALLBACK</span><span class=p>)(</span><span class=n>LPCDIDEVICEINSTANCE</span> <span class=n>lpddi</span><span class=p>,</span> <span class=n>LPVOID</span> <span class=n>pvRef</span><span class=p>);</span>
+</code></pre></div><p><code>pvRef</code>引数はコールバック関数に持っていくことが出来るポインター変数である。<code>lpddi</code>は<code>EnumDevices</code>関数で取得できたデバイスリストのデバイスインスタンスのポインターである。</p><p>普通はコールバック関数で、縛ったデバイスインスタンスの情報を検証して<code>pvRef</code>の構造体に情報を入れて使えるように準備をするようにしていればOKかもしれない…</p><blockquote><p><a href="https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee416610(v=vs.85)?redirectedfrom=MSDN">https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee416610(v=vs.85)?redirectedfrom=MSDN</a></p></blockquote><p>コールバック関数で持ってこれる<code>DIDEVICEINSTANCE</code>構造体は以下のようになっている。</p><div class=highlight><pre class=chroma><code class=language-c++ data-lang=c++><span class=k>typedef</span> <span class=k>struct</span> <span class=nc>DIDEVICEINSTANCE</span> <span class=p>{</span>
+    <span class=n>DWORD</span> <span class=n>dwSize</span><span class=p>;</span>
+    <span class=n>GUID</span> <span class=n>guidInstance</span><span class=p>;</span>
+    <span class=n>GUID</span> <span class=n>guidProduct</span><span class=p>;</span>
+    <span class=n>DWORD</span> <span class=n>dwDevType</span><span class=p>;</span>
+    <span class=n>TCHAR</span> <span class=n>tszInstanceName</span><span class=p>[</span><span class=n>MAX_PATH</span><span class=p>];</span>
+    <span class=n>TCHAR</span> <span class=n>tszProductName</span><span class=p>[</span><span class=n>MAX_PATH</span><span class=p>];</span>
+    <span class=n>GUID</span> <span class=n>guidFFDriver</span><span class=p>;</span>
+    <span class=n>WORD</span> <span class=n>wUsagePage</span><span class=p>;</span>
+    <span class=n>WORD</span> <span class=n>wUsage</span><span class=p>;</span>
+<span class=p>}</span> <span class=n>DIDEVICEINSTANCE</span><span class=p>,</span> <span class=o>*</span><span class=n>LPDIDEVICEINSTANCE</span><span class=p>;</span>
+</code></pre></div><p>注意する点は、新しいAPIの<strong>xinput</strong>がデバイスによって同時にサポートされていることがありうるので、<code>guidProduct</code>を使ってxinputを支援しているかを確認しなければならない。</p><p>とにかく取得したいデバイスを探したら、<code>CreateDevice</code>関数を使ってDIDOを取得する。</p><h2 id=3-適合なデバイスからdirectinput-device-object取得>3. 適合なデバイスからDirectInput Device Object取得<a hidden class=anchor aria-hidden=true href=#3-適合なデバイスからdirectinput-device-object取得>#</a></h2><blockquote><p><a href=https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee417803(v%3Dvs.85)>https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee417803(v%3Dvs.85)</a></p></blockquote><div class=highlight><pre class=chroma><code class=language-c++ data-lang=c++><span class=n>HRESULT</span> <span class=n>CreateDevice</span><span class=p>(</span>
+         <span class=n>REFGUID</span> <span class=n>rguid</span><span class=p>,</span>
+         <span class=n>LPDIRECTINPUTDEVICE</span> <span class=o>*</span> <span class=n>lplpDirectInputDevice</span><span class=p>,</span>
+         <span class=n>LPUNKNOWN</span> <span class=n>pUnkOuter</span>
+<span class=p>)</span>
+</code></pre></div><p><code>rguid</code>にGUIDを入れるが、必ずインスタンスのGUIDである必要がある。<code>pUnkOuter</code>はCOM Aggregationのための引数であるため、今は使わない。</p><div class=highlight><pre class=chroma><code class=language-c++ data-lang=c++><span class=c1>// 3. Get DirectInput Device Object pointer.
+</span><span class=c1></span><span class=n>IDirectInputDevice8</span><span class=o>*</span> <span class=n>p_device</span> <span class=o>=</span> <span class=k>nullptr</span><span class=p>;</span>
+<span class=k>if</span> <span class=p>(</span><span class=n>p_dio</span><span class=o>-&gt;</span><span class=n>CreateDevice</span><span class=p>(</span><span class=n>lpddi</span><span class=o>-&gt;</span><span class=n>guidInstance</span><span class=p>,</span> <span class=o>&amp;</span><span class=n>p_device</span><span class=p>,</span> <span class=k>nullptr</span><span class=p>)</span> <span class=o>!=</span> <span class=n>DI_OK</span><span class=p>)</span>
+<span class=p>{</span> 
+    <span class=k>return</span> <span class=n>DIENUM_CONTINUE</span><span class=p>;</span> 
+<span class=p>}</span>
+</code></pre></div><h2 id=4-didoのco-operation-levelformatproperties設定>4. DIDOのco-operation level、format、properties設定<a hidden class=anchor aria-hidden=true href=#4-didoのco-operation-levelformatproperties設定>#</a></h2><h3 id=co-operation-level>co-operation level<a hidden class=anchor aria-hidden=true href=#co-operation-level>#</a></h3><blockquote><p><a href=https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee417921(v%3Dvs.85)>https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee417921(v%3Dvs.85)</a></p></blockquote><div class=highlight><pre class=chroma><code class=language-c++ data-lang=c++><span class=n>HRESULT</span> <span class=n>SetCooperativeLevel</span><span class=p>(</span>
+         <span class=n>HWND</span> <span class=n>hwnd</span><span class=p>,</span>
+         <span class=n>DWORD</span> <span class=n>dwFlags</span>
+<span class=p>)</span>
+</code></pre></div><p>生成した窓の状態に対し（バックかフォアか、それとも特別な状態を持っているか）、取得したDIDOからのシグナル検知の権限を設定する。</p><p>僕の個人プロジェクトでは、表に見える窓だけではなくてバックグラウンドで動く窓もあるため、<code>dwFlags</code>は<code>DISCL_BACKGROUND | DISCL_EXCLUSIVE</code>にする。</p><h3 id=data-formats>Data formats<a hidden class=anchor aria-hidden=true href=#data-formats>#</a></h3><blockquote><p><a href="https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee417925(v=vs.85)?redirectedfrom=MSDN">https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee417925(v=vs.85)?redirectedfrom=MSDN</a></p></blockquote><div class=highlight><pre class=chroma><code class=language-c++ data-lang=c++><span class=n>HRESULT</span> <span class=n>SetDataFormat</span><span class=p>(</span>
+         <span class=n>LPCDIDATAFORMAT</span> <span class=n>lpdf</span>
+<span class=p>)</span>
+</code></pre></div><p>取得したDIDOから、どのようにデータを解釈して取得させるようにするかを設定する。実は<code>DIDATAFORMAT</code>構造体に値を入れてポインターとして入れなければならないか、DINPUTヘッダーファイル自体ですでに決まったものを入れれば良いらしい。</p><ul><li>c_dfDIKeyboard</li><li>c_dfDIMouse</li><li>c_dfDIJoystick</li><li>c_dfDIJoystick2</li></ul><blockquote><p>&mldr;
 ちなみに実はジョイスティックには2種類の入力フォーマットがあり、そのもう1つが<strong>c_dfDIJoystick2</strong>と定義されています。
 実際にはボタンやアナログの数が増えただけなので、PS2などの標準コントローラを使う分には特に意味はありませんが、
 入力の多いデバイスを使用する場合はこちらの方を使う必要があります。
 ※<strong>c_dfDIJoystick</strong>と<strong>c_dfDIJoystick2</strong>のどちらを使用しても取得出来る分は取得できます
-&hellip;</p>
-<p>from : <a href="http://www.charatsoft.com/develop/otogema/page/07input/joystick.html">http://www.charatsoft.com/develop/otogema/page/07input/joystick.html</a></p>
-</blockquote>
-<p>データフォーマットを入れたら、後でデバイスのキー状態などを取得する際には入れた値にあっている構造体を入れなければならない。例えば、<code>c_dfDIJoystick</code>を入れた時には<code>DIJOYSTATAE</code>を使う。</p>
-<blockquote>
-<p><a href="https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee416627(v%3Dvs.85)">https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee416627(v%3Dvs.85)</a></p>
-</blockquote>
-<div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="k">typedef</span> <span class="k">struct</span> <span class="nc">DIJOYSTATE</span> <span class="p">{</span>
-    <span class="n">LONG</span> <span class="n">lX</span><span class="p">;</span>
-    <span class="n">LONG</span> <span class="n">lY</span><span class="p">;</span>
-    <span class="n">LONG</span> <span class="n">lZ</span><span class="p">;</span>
-    <span class="n">LONG</span> <span class="n">lRx</span><span class="p">;</span>
-    <span class="n">LONG</span> <span class="n">lRy</span><span class="p">;</span>
-    <span class="n">LONG</span> <span class="n">lRz</span><span class="p">;</span>
-    <span class="n">LONG</span> <span class="n">rglSlider</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span>
-    <span class="n">DWORD</span> <span class="n">rgdwPOV</span><span class="p">[</span><span class="mi">4</span><span class="p">];</span>
-    <span class="n">BYTE</span> <span class="n">rgbButtons</span><span class="p">[</span><span class="mi">32</span><span class="p">];</span>
-<span class="p">}</span> <span class="n">DIJOYSTATE</span><span class="p">,</span> <span class="o">*</span><span class="n">LPDIJOYSTATE</span><span class="p">;</span>
-</code></pre></div><h3 id="properties">Properties</h3>
-<p>普通のゲームコントローラーって、デジタルのボタンなどを除くと、Lスティック、Rスティックそしてタッチパネルまたは特殊トリガーのような<strong>アナログ</strong>数値を持つ要素が残る。コントローラーごとにこのスティックなどの読み取り値が違うかもしれないので、それを一つの範囲などに合わせなければならない。その設定を<code>GetCapabilities</code>と<code>SetProperty</code>で設定することが出来るらしい。</p>
-<p>まず、<code>GetCapabilities</code>と<code>DIDIVCAPS</code>構造体でDIDOのDevice Object情報を取得する必要がある。</p>
-<blockquote>
-<p><a href="https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee417892(v=vs.85)?redirectedfrom=MSDN">https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee417892(v=vs.85)?redirectedfrom=MSDN</a></p>
-<p><a href="https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee416607(v%3dvs.85)">https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee416607%28v%3dvs.85%29</a></p>
-</blockquote>
-<div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="n">HRESULT</span> <span class="nf">GetCapabilities</span><span class="p">(</span><span class="n">LPDIDEVCAPS</span> <span class="n">lpDIDevCaps</span><span class="p">)</span>
+&mldr;</p><p>from : <a href=http://www.charatsoft.com/develop/otogema/page/07input/joystick.html>http://www.charatsoft.com/develop/otogema/page/07input/joystick.html</a></p></blockquote><p>データフォーマットを入れたら、後でデバイスのキー状態などを取得する際には入れた値にあっている構造体を入れなければならない。例えば、<code>c_dfDIJoystick</code>を入れた時には<code>DIJOYSTATAE</code>を使う。</p><blockquote><p><a href=https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee416627(v%3Dvs.85)>https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee416627(v%3Dvs.85)</a></p></blockquote><div class=highlight><pre class=chroma><code class=language-c++ data-lang=c++><span class=k>typedef</span> <span class=k>struct</span> <span class=nc>DIJOYSTATE</span> <span class=p>{</span>
+    <span class=n>LONG</span> <span class=n>lX</span><span class=p>;</span>
+    <span class=n>LONG</span> <span class=n>lY</span><span class=p>;</span>
+    <span class=n>LONG</span> <span class=n>lZ</span><span class=p>;</span>
+    <span class=n>LONG</span> <span class=n>lRx</span><span class=p>;</span>
+    <span class=n>LONG</span> <span class=n>lRy</span><span class=p>;</span>
+    <span class=n>LONG</span> <span class=n>lRz</span><span class=p>;</span>
+    <span class=n>LONG</span> <span class=n>rglSlider</span><span class=p>[</span><span class=mi>2</span><span class=p>];</span>
+    <span class=n>DWORD</span> <span class=n>rgdwPOV</span><span class=p>[</span><span class=mi>4</span><span class=p>];</span>
+    <span class=n>BYTE</span> <span class=n>rgbButtons</span><span class=p>[</span><span class=mi>32</span><span class=p>];</span>
+<span class=p>}</span> <span class=n>DIJOYSTATE</span><span class=p>,</span> <span class=o>*</span><span class=n>LPDIJOYSTATE</span><span class=p>;</span>
+</code></pre></div><h3 id=properties>Properties<a hidden class=anchor aria-hidden=true href=#properties>#</a></h3><p>普通のゲームコントローラーって、デジタルのボタンなどを除くと、Lスティック、Rスティックそしてタッチパネルまたは特殊トリガーのような<strong>アナログ</strong>数値を持つ要素が残る。コントローラーごとにこのスティックなどの読み取り値が違うかもしれないので、それを一つの範囲などに合わせなければならない。その設定を<code>GetCapabilities</code>と<code>SetProperty</code>で設定することが出来るらしい。</p><p>まず、<code>GetCapabilities</code>と<code>DIDIVCAPS</code>構造体でDIDOのDevice Object情報を取得する必要がある。</p><blockquote><p><a href="https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee417892(v=vs.85)?redirectedfrom=MSDN">https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee417892(v=vs.85)?redirectedfrom=MSDN</a></p><p><a href=https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee416607(v%3dvs.85)>https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee416607%28v%3dvs.85%29</a></p></blockquote><div class=highlight><pre class=chroma><code class=language-c++ data-lang=c++><span class=n>HRESULT</span> <span class=nf>GetCapabilities</span><span class=p>(</span><span class=n>LPDIDEVCAPS</span> <span class=n>lpDIDevCaps</span><span class=p>)</span>
 
-<span class="k">typedef</span> <span class="k">struct</span> <span class="nc">DIDEVCAPS</span> <span class="p">{</span>
-    <span class="n">DWORD</span> <span class="n">dwSize</span><span class="p">;</span>
-    <span class="n">DWORD</span> <span class="n">dwFlags</span><span class="p">;</span>
-    <span class="n">DWORD</span> <span class="n">dwDevType</span><span class="p">;</span>
-    <span class="n">DWORD</span> <span class="n">dwAxes</span><span class="p">;</span>
-    <span class="n">DWORD</span> <span class="n">dwButtons</span><span class="p">;</span>
-    <span class="n">DWORD</span> <span class="n">dwPOVs</span><span class="p">;</span>
-    <span class="n">DWORD</span> <span class="n">dwFFSamplePeriod</span><span class="p">;</span>
-    <span class="n">DWORD</span> <span class="n">dwFFMinTimeResolution</span><span class="p">;</span>
-    <span class="n">DWORD</span> <span class="n">dwFirmwareRevision</span><span class="p">;</span>
-    <span class="n">DWORD</span> <span class="n">dwHardwareRevision</span><span class="p">;</span>
-    <span class="n">DWORD</span> <span class="n">dwFFDriverVersion</span><span class="p">;</span>
-<span class="p">}</span> <span class="n">DIDEVCAPS</span><span class="p">,</span> <span class="o">*</span><span class="n">LPDIDEVCAPS</span><span class="p">;</span>
-</code></pre></div><p>そしてプロパティーを設定するなら、<code>SetProperty</code>を使う。ただし、設定したいプロパティーによって記述する構造体がそれぞれ違う。例えばスティック軸の数値の範囲を決めたい場合には下のコードのようにしなければならない。</p>
-<blockquote>
-<p><a href="https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee416638(v%3dvs.85)">https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee416638%28v%3dvs.85%29</a></p>
-</blockquote>
-<div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="n">DIPROPHEADER</span> <span class="n">header</span><span class="p">;</span>
-<span class="n">header</span><span class="p">.</span><span class="n">dwSize</span> <span class="o">=</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">DIPROPRANGE</span><span class="p">);</span>
-<span class="n">header</span><span class="p">.</span><span class="n">dwHeaderSize</span> <span class="o">=</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">DIPROPHEADER</span><span class="p">);</span>
-<span class="n">header</span><span class="p">.</span><span class="n">dwObj</span> <span class="o">=</span> <span class="o">???</span><span class="p">;</span>
-<span class="n">header</span><span class="p">.</span><span class="n">dwHow</span> <span class="o">=</span> <span class="o">???</span><span class="p">;</span>
+<span class=k>typedef</span> <span class=k>struct</span> <span class=nc>DIDEVCAPS</span> <span class=p>{</span>
+    <span class=n>DWORD</span> <span class=n>dwSize</span><span class=p>;</span>
+    <span class=n>DWORD</span> <span class=n>dwFlags</span><span class=p>;</span>
+    <span class=n>DWORD</span> <span class=n>dwDevType</span><span class=p>;</span>
+    <span class=n>DWORD</span> <span class=n>dwAxes</span><span class=p>;</span>
+    <span class=n>DWORD</span> <span class=n>dwButtons</span><span class=p>;</span>
+    <span class=n>DWORD</span> <span class=n>dwPOVs</span><span class=p>;</span>
+    <span class=n>DWORD</span> <span class=n>dwFFSamplePeriod</span><span class=p>;</span>
+    <span class=n>DWORD</span> <span class=n>dwFFMinTimeResolution</span><span class=p>;</span>
+    <span class=n>DWORD</span> <span class=n>dwFirmwareRevision</span><span class=p>;</span>
+    <span class=n>DWORD</span> <span class=n>dwHardwareRevision</span><span class=p>;</span>
+    <span class=n>DWORD</span> <span class=n>dwFFDriverVersion</span><span class=p>;</span>
+<span class=p>}</span> <span class=n>DIDEVCAPS</span><span class=p>,</span> <span class=o>*</span><span class=n>LPDIDEVCAPS</span><span class=p>;</span>
+</code></pre></div><p>そしてプロパティーを設定するなら、<code>SetProperty</code>を使う。ただし、設定したいプロパティーによって記述する構造体がそれぞれ違う。例えばスティック軸の数値の範囲を決めたい場合には下のコードのようにしなければならない。</p><blockquote><p><a href=https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee416638(v%3dvs.85)>https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee416638%28v%3dvs.85%29</a></p></blockquote><div class=highlight><pre class=chroma><code class=language-c++ data-lang=c++><span class=n>DIPROPHEADER</span> <span class=n>header</span><span class=p>;</span>
+<span class=n>header</span><span class=p>.</span><span class=n>dwSize</span> <span class=o>=</span> <span class=k>sizeof</span><span class=p>(</span><span class=n>DIPROPRANGE</span><span class=p>);</span>
+<span class=n>header</span><span class=p>.</span><span class=n>dwHeaderSize</span> <span class=o>=</span> <span class=k>sizeof</span><span class=p>(</span><span class=n>DIPROPHEADER</span><span class=p>);</span>
+<span class=n>header</span><span class=p>.</span><span class=n>dwObj</span> <span class=o>=</span> <span class=o>???</span><span class=p>;</span>
+<span class=n>header</span><span class=p>.</span><span class=n>dwHow</span> <span class=o>=</span> <span class=o>???</span><span class=p>;</span>
 
-<span class="n">DIPROPRANGE</span> <span class="n">range</span><span class="p">;</span>
-<span class="n">range</span><span class="p">.</span><span class="n">diph</span> <span class="o">=</span> <span class="n">header</span><span class="p">;</span>
-<span class="n">range</span><span class="p">.</span><span class="n">lMin</span> <span class="o">=</span> <span class="o">-</span><span class="mi">100</span><span class="p">;</span>
-<span class="n">range</span><span class="p">.</span><span class="n">lMax</span> <span class="o">=</span> <span class="o">+</span><span class="mi">100</span><span class="p">;</span>
+<span class=n>DIPROPRANGE</span> <span class=n>range</span><span class=p>;</span>
+<span class=n>range</span><span class=p>.</span><span class=n>diph</span> <span class=o>=</span> <span class=n>header</span><span class=p>;</span>
+<span class=n>range</span><span class=p>.</span><span class=n>lMin</span> <span class=o>=</span> <span class=o>-</span><span class=mi>100</span><span class=p>;</span>
+<span class=n>range</span><span class=p>.</span><span class=n>lMax</span> <span class=o>=</span> <span class=o>+</span><span class=mi>100</span><span class=p>;</span>
 
-<span class="n">gameController</span><span class="o">-&gt;</span><span class="n">SetProperty</span><span class="p">(</span><span class="n">DIPROP_RANGE</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">range</span><span class="p">.</span><span class="n">header</span><span class="p">);</span>
-</code></pre></div><p>注目すべき所は、<code>DIPROPHEADER</code>構造体の<code>dwObj</code>と<code>dwHow</code>である。公式の説明ページを見ればわかるかもしれないが、<code>dwHow</code>にはデバイスではなく、DIDOの中にある軸、ボタンなどのインスタンスを指すための<code>DIPH_BYID</code>を入れなければならない。</p>
-<p>ただし、<code>DIPH_BYID</code>を入れたら、<code>dwObj</code>には<code>EnumObjects</code>関数で呼び出しするコールバック関数の中で取得できるインスタンスのIDを<code>dwObj</code>に入れなければならなくなる。</p>
-<blockquote>
-<p><a href="https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee417889(v=vs.85)?redirectedfrom=MSDN">https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee417889(v=vs.85)?redirectedfrom=MSDN</a></p>
-</blockquote>
-<div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="n">HRESULT</span> <span class="n">EnumObjects</span><span class="p">(</span>
-         <span class="n">LPDIENUMDEVICEOBJECTSCALLBACK</span> <span class="n">lpCallback</span><span class="p">,</span>
-         <span class="n">LPVOID</span> <span class="n">pvRef</span><span class="p">,</span>
-         <span class="n">DWORD</span> <span class="n">dwFlags</span>
-<span class="p">)</span>
+<span class=n>gameController</span><span class=o>-&gt;</span><span class=n>SetProperty</span><span class=p>(</span><span class=n>DIPROP_RANGE</span><span class=p>,</span> <span class=o>&amp;</span><span class=n>range</span><span class=p>.</span><span class=n>header</span><span class=p>);</span>
+</code></pre></div><p>注目すべき所は、<code>DIPROPHEADER</code>構造体の<code>dwObj</code>と<code>dwHow</code>である。公式の説明ページを見ればわかるかもしれないが、<code>dwHow</code>にはデバイスではなく、DIDOの中にある軸、ボタンなどのインスタンスを指すための<code>DIPH_BYID</code>を入れなければならない。</p><p>ただし、<code>DIPH_BYID</code>を入れたら、<code>dwObj</code>には<code>EnumObjects</code>関数で呼び出しするコールバック関数の中で取得できるインスタンスのIDを<code>dwObj</code>に入れなければならなくなる。</p><blockquote><p><a href="https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee417889(v=vs.85)?redirectedfrom=MSDN">https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee417889(v=vs.85)?redirectedfrom=MSDN</a></p></blockquote><div class=highlight><pre class=chroma><code class=language-c++ data-lang=c++><span class=n>HRESULT</span> <span class=n>EnumObjects</span><span class=p>(</span>
+         <span class=n>LPDIENUMDEVICEOBJECTSCALLBACK</span> <span class=n>lpCallback</span><span class=p>,</span>
+         <span class=n>LPVOID</span> <span class=n>pvRef</span><span class=p>,</span>
+         <span class=n>DWORD</span> <span class=n>dwFlags</span>
+<span class=p>)</span>
   
-<span class="c1">// Callback function pointer type
-</span><span class="c1"></span><span class="n">BOOL</span> <span class="p">(</span><span class="o">*</span><span class="n">LPDIENUMDEVICEOBJECTSCALLBACK</span><span class="p">)(</span><span class="n">LPCDIDEVICEOBJECTINSTANCE</span> <span class="n">lpddoi</span><span class="p">,</span> <span class="n">LPVOID</span> <span class="n">pvRef</span><span class="p">)</span>
-</code></pre></div><p>書き方は上の<code>EnumDevices</code>と同じだが、<code>dwFlags</code>のフラグ値とコールバック関数の中での<code>SetProperty</code>コールに使われる構造体がよく合っていなければならない。（かもしれない）</p>
-<p>ということで手順をまとめると、</p>
-<ol>
-<li><code>IDirectInputDevice8</code>のDIDOを取得し、</li>
-<li><code>EnumObjects</code>関数で調べたいインスタンスの縛ってイテレーションさせ、</li>
-<li>その中で適切なインスタンスがあったら<code>DIPROPHEADER</code>の入っている適切な構造体を記述して</li>
-<li><code>SetProperty</code>でインスタンスに設定をする。</li>
-</ol>
-<p>アナログスティックの場合には、**デッドゾーン（Deadzone)**っていうのがあって、スティックを動かさないと必ず中立（0）の数値になるのではなく0に違い数値を表す時があって、それに対する誤動作を防ぐための判定範囲を設けなければならない。</p>
-<p>アナログスティックなどのデッドゾーンを決めるには<code>DIPROPWORD</code>と<code>DIPROP_DEADZONE</code>を使う。ここで中止することは、デッドゾーンの数値は固定された0~10000までの範囲から決めなかればならない。例えばスティック入力の1%以内をデッドゾーンとして決めたいなら、100を入れる。</p>
-<blockquote>
-<p><a href="https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee416636(v%3dvs.85)">https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee416636%28v%3dvs.85%29</a></p>
-</blockquote>
-<div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="k">typedef</span> <span class="k">struct</span> <span class="nc">DIPROPDWORD</span> <span class="p">{</span>
-    <span class="n">DIPROPHEADER</span> <span class="n">diph</span><span class="p">;</span>
-    <span class="n">DWORD</span> <span class="n">dwData</span><span class="p">;</span>
-<span class="p">}</span> <span class="n">DIPROPDWORD</span><span class="p">,</span> <span class="o">*</span><span class="n">LPDIPROPDWORD</span><span class="p">;</span>
-</code></pre></div><p>ちなみに元記事ではRANGEとWORDを同時に設定している。</p>
-<h2 id="5-device-objectを取得acquire">5. Device Objectを取得(Acquire)</h2>
-<blockquote>
-<p><a href="https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee417818(v=vs.85)?redirectedfrom=MSDN">https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee417818(v=vs.85)?redirectedfrom=MSDN</a></p>
-</blockquote>
-<div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="n">HRESULT</span> <span class="n">Acquire</span><span class="p">()</span>
-</code></pre></div><p>設定した入力デバイスに接近する権限を得る。アプリケーションを終了したり、それとも使っているコントローラーのアクセス権限を返却する場合には</p>
-<blockquote>
-<p><a href="https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee417931(v=vs.85)">https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee417931(v=vs.85)</a></p>
-</blockquote>
-<div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="n">HRESULT</span> <span class="n">Unacquire</span><span class="p">()</span>
-<span class="c1">// and
-</span><span class="c1"></span><span class="n">HRESULT</span> <span class="n">Release</span><span class="p">()</span>
-</code></pre></div><p>を使う。（Releaseを連続で呼び出すのは、CreateDeviceで参照カウントが１増加されたから）</p>
-<h2 id="6-デバイスの入力をpollするかreadを行う">6. デバイスの入力をPollするかReadを行う</h2>
-<blockquote>
-<p><a href="https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee417913(v=vs.85)?redirectedfrom=MSDN">https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee417913(v=vs.85)?redirectedfrom=MSDN</a></p>
-</blockquote>
-<div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="n">HRESULT</span> <span class="n">Poll</span><span class="p">()</span>
-</code></pre></div><p>取得したデバイスによって違われるかもしれないが、大体は<code>Poll()</code>関数でデバイスか入力情報を取得しなおさなければならない。あるデバイスは自分からインターラプト（Interrupt）をかけて入力データを取得するようにするものもあるが、そのデバイスに限っては<code>Poll()</code>を呼び出す必要はない（読んだとしてもエラーにはならない）</p>
-<p>もしかして<code>Poll</code>関数を呼ぶ必要があるかを確かめる為には、<code>GetCapabilities()</code>関数で<code>DIDEVCAPS</code>の<code>DIDC_POLLEDDATAFORMAT</code>を確認すれば良いらしい。</p>
-<blockquote>
-<p><a href="https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee417897(v=vs.85)?redirectedfrom=MSDN">https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee417897(v=vs.85)?redirectedfrom=MSDN</a></p>
-</blockquote>
-<div class="highlight"><pre class="chroma"><code class="language-c++" data-lang="c++"><span class="n">HRESULT</span> <span class="n">GetDeviceState</span><span class="p">(</span>
-         <span class="n">DWORD</span> <span class="n">cbData</span><span class="p">,</span>
-         <span class="n">LPVOID</span> <span class="n">lpvData</span>
-<span class="p">)</span>
-</code></pre></div><p>デバイスで更新された情報を持ってくるためには上の関数を使う。ただし、この関数を使うには<code>lpvData</code>は前にDIDOのデータフォーマット（DataFormat）を設定した時の値に対応している構造体を入れなければならない。</p>
-<table>
-<thead>
-<tr>
-<th>Data Format</th>
-<th>State Structure</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>c_dfDIMouse</td>
-<td><a href="https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee416630(v%3dvs.85)">DIMOUSESTATE</a></td>
-</tr>
-<tr>
-<td>c_dfDIMouse2</td>
-<td><a href="https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee416631(v%3dvs.85)">DIMOUSESTATE2</a></td>
-</tr>
-<tr>
-<td>c_dfDIKeyboard</td>
-<td>array of 256 bytes</td>
-</tr>
-<tr>
-<td>c_dfDIJoystick</td>
-<td><a href="https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee416627(v%3dvs.85)"> DIJOYSTATE</a></td>
-</tr>
-<tr>
-<td>c_dfDIJoystick2</td>
-<td><a href="https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee416628(v%3dvs.85)">DIJOYSTATE2</a></td>
-</tr>
-</tbody>
-</table>
-<h2 id="7-directinput-objectを開放して終わり">7. DirectInput Objectを開放して終わり</h2>
-<p>「5. Device Objectを取得(Acquire)」を見ること。</p>
-</div>
-  <footer class="post-footer">
-  </footer>
-</article>
-    </main><footer class="footer">
-    <span>&copy; 2020 <a href="https://liliilli.github.io">neuromantic</a></span>
-    <span>&middot;</span>
-    <span>Powered by <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo️️</a>️</span>
-    <span>&middot;</span>
-    <span>Theme️ <a href="https://git.io/hugopapermod" rel="noopener" target="_blank">PaperMod</a></span>
-</footer>
-<a href="#top" aria-label="go to top" title="Go to Top">
-    <button class="top-link" id="top-link" type="button">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6">
-            <path d="M12 6H0l6-6z" /></svg>
-    </button>
-</a>
-<script src="https://liliilli.github.io/assets/js/highlight.min.e7afc2928c0925d65c4732dfebe147014d91299a98e819e4b42f25c4fa68e91c.js" integrity="sha256-56/CkowJJdZcRzLf6&#43;FHAU2RKZqY6BnktC8lxPpo6Rw="></script>
-<script>hljs.initHighlightingOnLoad();</script>
-<script>
-    window.onload = function () {
-        if (localStorage.getItem("menu-scroll-position")) {
-            document.getElementById('menu').scrollLeft = localStorage.getItem("menu-scroll-position");
-        }
-    }
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener("click", function (e) {
-            e.preventDefault();
-
-            document.querySelector(this.getAttribute("href")).scrollIntoView({
-                behavior: "smooth"
-            });
-        });
-    });
-    var mybutton = document.getElementById("top-link");
-    window.onscroll = function () {
-        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
-            mybutton.style.visibility = "visible";
-            mybutton.style.opacity = "1";
-        } else {
-            mybutton.style.visibility = "hidden";
-            mybutton.style.opacity = "0";
-        }
-    };
-    function menu_on_scroll() {
-        localStorage.setItem("menu-scroll-position", document.getElementById('menu').scrollLeft);
-    }
-</script>
-</body>
-
-</html>
+<span class=c1>// Callback function pointer type
+</span><span class=c1></span><span class=n>BOOL</span> <span class=p>(</span><span class=o>*</span><span class=n>LPDIENUMDEVICEOBJECTSCALLBACK</span><span class=p>)(</span><span class=n>LPCDIDEVICEOBJECTINSTANCE</span> <span class=n>lpddoi</span><span class=p>,</span> <span class=n>LPVOID</span> <span class=n>pvRef</span><span class=p>)</span>
+</code></pre></div><p>書き方は上の<code>EnumDevices</code>と同じだが、<code>dwFlags</code>のフラグ値とコールバック関数の中での<code>SetProperty</code>コールに使われる構造体がよく合っていなければならない。（かもしれない）</p><p>ということで手順をまとめると、</p><ol><li><code>IDirectInputDevice8</code>のDIDOを取得し、</li><li><code>EnumObjects</code>関数で調べたいインスタンスの縛ってイテレーションさせ、</li><li>その中で適切なインスタンスがあったら<code>DIPROPHEADER</code>の入っている適切な構造体を記述して</li><li><code>SetProperty</code>でインスタンスに設定をする。</li></ol><p>アナログスティックの場合には、**デッドゾーン（Deadzone)**っていうのがあって、スティックを動かさないと必ず中立（0）の数値になるのではなく0に違い数値を表す時があって、それに対する誤動作を防ぐための判定範囲を設けなければならない。</p><p>アナログスティックなどのデッドゾーンを決めるには<code>DIPROPWORD</code>と<code>DIPROP_DEADZONE</code>を使う。ここで中止することは、デッドゾーンの数値は固定された0~10000までの範囲から決めなかればならない。例えばスティック入力の1%以内をデッドゾーンとして決めたいなら、100を入れる。</p><blockquote><p><a href=https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee416636(v%3dvs.85)>https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee416636%28v%3dvs.85%29</a></p></blockquote><div class=highlight><pre class=chroma><code class=language-c++ data-lang=c++><span class=k>typedef</span> <span class=k>struct</span> <span class=nc>DIPROPDWORD</span> <span class=p>{</span>
+    <span class=n>DIPROPHEADER</span> <span class=n>diph</span><span class=p>;</span>
+    <span class=n>DWORD</span> <span class=n>dwData</span><span class=p>;</span>
+<span class=p>}</span> <span class=n>DIPROPDWORD</span><span class=p>,</span> <span class=o>*</span><span class=n>LPDIPROPDWORD</span><span class=p>;</span>
+</code></pre></div><p>ちなみに元記事ではRANGEとWORDを同時に設定している。</p><h2 id=5-device-objectを取得acquire>5. Device Objectを取得(Acquire)<a hidden class=anchor aria-hidden=true href=#5-device-objectを取得acquire>#</a></h2><blockquote><p><a href="https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee417818(v=vs.85)?redirectedfrom=MSDN">https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee417818(v=vs.85)?redirectedfrom=MSDN</a></p></blockquote><div class=highlight><pre class=chroma><code class=language-c++ data-lang=c++><span class=n>HRESULT</span> <span class=n>Acquire</span><span class=p>()</span>
+</code></pre></div><p>設定した入力デバイスに接近する権限を得る。アプリケーションを終了したり、それとも使っているコントローラーのアクセス権限を返却する場合には</p><blockquote><p><a href="https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee417931(v=vs.85)">https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee417931(v=vs.85)</a></p></blockquote><div class=highlight><pre class=chroma><code class=language-c++ data-lang=c++><span class=n>HRESULT</span> <span class=n>Unacquire</span><span class=p>()</span>
+<span class=c1>// and
+</span><span class=c1></span><span class=n>HRESULT</span> <span class=n>Release</span><span class=p>()</span>
+</code></pre></div><p>を使う。（Releaseを連続で呼び出すのは、CreateDeviceで参照カウントが１増加されたから）</p><h2 id=6-デバイスの入力をpollするかreadを行う>6. デバイスの入力をPollするかReadを行う<a hidden class=anchor aria-hidden=true href=#6-デバイスの入力をpollするかreadを行う>#</a></h2><blockquote><p><a href="https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee417913(v=vs.85)?redirectedfrom=MSDN">https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee417913(v=vs.85)?redirectedfrom=MSDN</a></p></blockquote><div class=highlight><pre class=chroma><code class=language-c++ data-lang=c++><span class=n>HRESULT</span> <span class=n>Poll</span><span class=p>()</span>
+</code></pre></div><p>取得したデバイスによって違われるかもしれないが、大体は<code>Poll()</code>関数でデバイスか入力情報を取得しなおさなければならない。あるデバイスは自分からインターラプト（Interrupt）をかけて入力データを取得するようにするものもあるが、そのデバイスに限っては<code>Poll()</code>を呼び出す必要はない（読んだとしてもエラーにはならない）</p><p>もしかして<code>Poll</code>関数を呼ぶ必要があるかを確かめる為には、<code>GetCapabilities()</code>関数で<code>DIDEVCAPS</code>の<code>DIDC_POLLEDDATAFORMAT</code>を確認すれば良いらしい。</p><blockquote><p><a href="https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee417897(v=vs.85)?redirectedfrom=MSDN">https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee417897(v=vs.85)?redirectedfrom=MSDN</a></p></blockquote><div class=highlight><pre class=chroma><code class=language-c++ data-lang=c++><span class=n>HRESULT</span> <span class=n>GetDeviceState</span><span class=p>(</span>
+         <span class=n>DWORD</span> <span class=n>cbData</span><span class=p>,</span>
+         <span class=n>LPVOID</span> <span class=n>lpvData</span>
+<span class=p>)</span>
+</code></pre></div><p>デバイスで更新された情報を持ってくるためには上の関数を使う。ただし、この関数を使うには<code>lpvData</code>は前にDIDOのデータフォーマット（DataFormat）を設定した時の値に対応している構造体を入れなければならない。</p><table><thead><tr><th>Data Format</th><th>State Structure</th></tr></thead><tbody><tr><td>c_dfDIMouse</td><td><a href=https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee416630(v%3dvs.85)>DIMOUSESTATE</a></td></tr><tr><td>c_dfDIMouse2</td><td><a href=https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee416631(v%3dvs.85)>DIMOUSESTATE2</a></td></tr><tr><td>c_dfDIKeyboard</td><td>array of 256 bytes</td></tr><tr><td>c_dfDIJoystick</td><td><a href=https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee416627(v%3dvs.85)>DIJOYSTATE</a></td></tr><tr><td>c_dfDIJoystick2</td><td><a href=https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee416628(v%3dvs.85)>DIJOYSTATE2</a></td></tr></tbody></table><h2 id=7-directinput-objectを開放して終わり>7. DirectInput Objectを開放して終わり<a hidden class=anchor aria-hidden=true href=#7-directinput-objectを開放して終わり>#</a></h2><p>「5. Device Objectを取得(Acquire)」を見ること。</p></div><footer class=post-footer><nav class=paginav><a class=prev href=https://liliilli.github.io/posts/shader_opti_memo/><span class=title>« Prev Page</span><br><span>Low Level Thinking in High Shader Languages</span></a>
+<a class=next href=https://liliilli.github.io/posts/tlsf_basic/><span class=title>Next Page »</span><br><span>TLSF Allocatorを作ってみた</span></a></nav><div class=share-buttons><a target=_blank rel="noopener noreferrer" aria-label="share DirectInput8 導入メモ on twitter" href="https://twitter.com/intent/tweet/?text=DirectInput8%20%e5%b0%8e%e5%85%a5%e3%83%a1%e3%83%a2&url=https%3a%2f%2fliliilli.github.io%2fposts%2fdinput8%2f&hashtags="><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zM195.519 424.544c135.939.0 210.268-112.643 210.268-210.268.0-3.218.0-6.437-.153-9.502 14.406-10.421 26.973-23.448 36.935-38.314-13.18 5.824-27.433 9.809-42.452 11.648 15.326-9.196 26.973-23.602 32.49-40.92-14.252 8.429-30.038 14.56-46.896 17.931-13.487-14.406-32.644-23.295-53.946-23.295-40.767.0-73.87 33.104-73.87 73.87.0 5.824.613 11.494 1.992 16.858-61.456-3.065-115.862-32.49-152.337-77.241-6.284 10.881-9.962 23.601-9.962 37.088.0 25.594 13.027 48.276 32.95 61.456-12.107-.307-23.448-3.678-33.41-9.196v.92c0 35.862 25.441 65.594 59.311 72.49-6.13 1.686-12.72 2.606-19.464 2.606-4.751.0-9.348-.46-13.946-1.38 9.349 29.426 36.628 50.728 68.965 51.341-25.287 19.771-57.164 31.571-91.8 31.571-5.977.0-11.801-.306-17.625-1.073 32.337 21.15 71.264 33.41 112.95 33.41z"/></svg></a><a target=_blank rel="noopener noreferrer" aria-label="share DirectInput8 導入メモ on linkedin" href="https://www.linkedin.com/shareArticle?mini=true&url=https%3a%2f%2fliliilli.github.io%2fposts%2fdinput8%2f&title=DirectInput8%20%e5%b0%8e%e5%85%a5%e3%83%a1%e3%83%a2&summary=DirectInput8%20%e5%b0%8e%e5%85%a5%e3%83%a1%e3%83%a2&source=https%3a%2f%2fliliilli.github.io%2fposts%2fdinput8%2f"><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zM160.461 423.278V197.561h-75.04v225.717h75.04zm270.539.0V293.839c0-69.333-37.018-101.586-86.381-101.586-39.804.0-57.634 21.891-67.617 37.266v-31.958h-75.021c.995 21.181.0 225.717.0 225.717h75.02V297.222c0-6.748.486-13.492 2.474-18.315 5.414-13.475 17.767-27.434 38.494-27.434 27.135.0 38.007 20.707 38.007 51.037v120.768H431zM123.448 88.722C97.774 88.722 81 105.601 81 127.724c0 21.658 16.264 39.002 41.455 39.002h.484c26.165.0 42.452-17.344 42.452-39.002-.485-22.092-16.241-38.954-41.943-39.002z"/></svg></a><a target=_blank rel="noopener noreferrer" aria-label="share DirectInput8 導入メモ on reddit" href="https://reddit.com/submit?url=https%3a%2f%2fliliilli.github.io%2fposts%2fdinput8%2f&title=DirectInput8%20%e5%b0%8e%e5%85%a5%e3%83%a1%e3%83%a2"><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zM446 265.638c0-22.964-18.616-41.58-41.58-41.58-11.211.0-21.361 4.457-28.841 11.666-28.424-20.508-67.586-33.757-111.204-35.278l18.941-89.121 61.884 13.157c.756 15.734 13.642 28.29 29.56 28.29 16.407.0 29.706-13.299 29.706-29.701.0-16.403-13.299-29.702-29.706-29.702-11.666.0-21.657 6.792-26.515 16.578l-69.105-14.69c-1.922-.418-3.939-.042-5.585 1.036-1.658 1.073-2.811 2.761-3.224 4.686l-21.152 99.438c-44.258 1.228-84.046 14.494-112.837 35.232-7.468-7.164-17.589-11.591-28.757-11.591-22.965.0-41.585 18.616-41.585 41.58.0 16.896 10.095 31.41 24.568 37.918-.639 4.135-.99 8.328-.99 12.576.0 63.977 74.469 115.836 166.33 115.836s166.334-51.859 166.334-115.836c0-4.218-.347-8.387-.977-12.493 14.564-6.47 24.735-21.034 24.735-38.001zM326.526 373.831c-20.27 20.241-59.115 21.816-70.534 21.816-11.428.0-50.277-1.575-70.522-21.82-3.007-3.008-3.007-7.882.0-10.889 3.003-2.999 7.882-3.003 10.885.0 12.777 12.781 40.11 17.317 59.637 17.317 19.522.0 46.86-4.536 59.657-17.321 3.016-2.999 7.886-2.995 10.885.008 3.008 3.011 3.003 7.882-.008 10.889zm-5.23-48.781c-16.373.0-29.701-13.324-29.701-29.698.0-16.381 13.328-29.714 29.701-29.714 16.378.0 29.706 13.333 29.706 29.714.0 16.374-13.328 29.698-29.706 29.698zM160.91 295.348c0-16.381 13.328-29.71 29.714-29.71 16.369.0 29.689 13.329 29.689 29.71.0 16.373-13.32 29.693-29.689 29.693-16.386.0-29.714-13.32-29.714-29.693z"/></svg></a><a target=_blank rel="noopener noreferrer" aria-label="share DirectInput8 導入メモ on facebook" href="https://facebook.com/sharer/sharer.php?u=https%3a%2f%2fliliilli.github.io%2fposts%2fdinput8%2f"><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H342.978V319.085h66.6l12.672-82.621h-79.272v-53.617c0-22.603 11.073-44.636 46.58-44.636H425.6v-70.34s-32.71-5.582-63.982-5.582c-65.288.0-107.96 39.569-107.96 111.204v62.971h-72.573v82.621h72.573V512h-191.104c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892z"/></svg></a><a target=_blank rel="noopener noreferrer" aria-label="share DirectInput8 導入メモ on whatsapp" href="https://api.whatsapp.com/send?text=DirectInput8%20%e5%b0%8e%e5%85%a5%e3%83%a1%e3%83%a2%20-%20https%3a%2f%2fliliilli.github.io%2fposts%2fdinput8%2f"><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zm-58.673 127.703c-33.842-33.881-78.847-52.548-126.798-52.568-98.799.0-179.21 80.405-179.249 179.234-.013 31.593 8.241 62.428 23.927 89.612l-25.429 92.884 95.021-24.925c26.181 14.28 55.659 21.807 85.658 21.816h.074c98.789.0 179.206-80.413 179.247-179.243.018-47.895-18.61-92.93-52.451-126.81zM263.976 403.485h-.06c-26.734-.01-52.954-7.193-75.828-20.767l-5.441-3.229-56.386 14.792 15.05-54.977-3.542-5.637c-14.913-23.72-22.791-51.136-22.779-79.287.033-82.142 66.867-148.971 149.046-148.971 39.793.014 77.199 15.531 105.329 43.692 28.128 28.16 43.609 65.592 43.594 105.4-.034 82.149-66.866 148.983-148.983 148.984zm81.721-111.581c-4.479-2.242-26.499-13.075-30.604-14.571-4.105-1.495-7.091-2.241-10.077 2.241-2.986 4.483-11.569 14.572-14.182 17.562-2.612 2.988-5.225 3.364-9.703 1.12-4.479-2.241-18.91-6.97-36.017-22.23C231.8 264.15 222.81 249.484 220.198 245s-.279-6.908 1.963-9.14c2.016-2.007 4.48-5.232 6.719-7.847 2.24-2.615 2.986-4.484 4.479-7.472 1.493-2.99.747-5.604-.374-7.846-1.119-2.241-10.077-24.288-13.809-33.256-3.635-8.733-7.327-7.55-10.077-7.688-2.609-.13-5.598-.158-8.583-.158-2.986.0-7.839 1.121-11.944 5.604-4.105 4.484-15.675 15.32-15.675 37.364.0 22.046 16.048 43.342 18.287 46.332 2.24 2.99 31.582 48.227 76.511 67.627 10.685 4.615 19.028 7.371 25.533 9.434 10.728 3.41 20.492 2.929 28.209 1.775 8.605-1.285 26.499-10.833 30.231-21.295 3.732-10.464 3.732-19.431 2.612-21.298-1.119-1.869-4.105-2.99-8.583-5.232z"/></svg></a><a target=_blank rel="noopener noreferrer" aria-label="share DirectInput8 導入メモ on telegram" href="https://telegram.me/share/url?text=DirectInput8%20%e5%b0%8e%e5%85%a5%e3%83%a1%e3%83%a2&url=https%3a%2f%2fliliilli.github.io%2fposts%2fdinput8%2f"><svg viewBox="2 2 28 28"><path d="M26.49 29.86H5.5a3.37 3.37.0 01-2.47-1 3.35 3.35.0 01-1-2.47V5.48A3.36 3.36.0 013 3 3.37 3.37.0 015.5 2h21A3.38 3.38.0 0129 3a3.36 3.36.0 011 2.46V26.37a3.35 3.35.0 01-1 2.47 3.38 3.38.0 01-2.51 1.02zm-5.38-6.71a.79.79.0 00.85-.66L24.73 9.24a.55.55.0 00-.18-.46.62.62.0 00-.41-.17q-.08.0-16.53 6.11a.59.59.0 00-.41.59.57.57.0 00.43.52l4 1.24 1.61 4.83a.62.62.0 00.63.43.56.56.0 00.4-.17L16.54 20l4.09 3A.9.9.0 0021.11 23.15zM13.8 20.71l-1.21-4q8.72-5.55 8.78-5.55c.15.0.23.0.23.16a.18.18.0 010 .06s-2.51 2.3-7.52 6.8z"/></svg></a></div></footer></article></main><footer class=footer><span>Copyright © 2008–2019, Steve Francia and the Hugo Authors; all rights reserved.</span>
+<span>&#183;</span>
+<span>Powered by <a href=https://gohugo.io/ rel="noopener noreferrer" target=_blank>Hugo</a></span>
+<span>&#183;</span>
+<span>Theme <a href=https://git.io/hugopapermod rel=noopener target=_blank>PaperMod</a></span></footer><a href=#top aria-label="go to top" title="Go to Top (Alt + G)"><button class=top-link id=top-link type=button accesskey=g><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentcolor"><path d="M12 6H0l6-6z"/></svg></button></a>
+<script>window.onload=function(){localStorage.getItem("menu-scroll-position")&&(document.getElementById('menu').scrollLeft=localStorage.getItem("menu-scroll-position"))};function menu_on_scroll(){localStorage.setItem("menu-scroll-position",document.getElementById('menu').scrollLeft)}document.querySelectorAll('a[href^="#"]').forEach(a=>{a.addEventListener("click",function(b){b.preventDefault();var a=this.getAttribute("href").substr(1);window.matchMedia('(prefers-reduced-motion: reduce)').matches?document.querySelector(`[id='${decodeURIComponent(a)}']`).scrollIntoView():document.querySelector(`[id='${decodeURIComponent(a)}']`).scrollIntoView({behavior:"smooth"}),a==="top"?history.replaceState(null,null," "):history.pushState(null,null,`#${a}`)})})</script><script>var mybutton=document.getElementById("top-link");window.onscroll=function(){document.body.scrollTop>800||document.documentElement.scrollTop>800?(mybutton.style.visibility="visible",mybutton.style.opacity="1"):(mybutton.style.visibility="hidden",mybutton.style.opacity="0")}</script><script>document.getElementById("theme-toggle").addEventListener("click",()=>{document.body.className.includes("dark")?(document.body.classList.remove('dark'),localStorage.setItem("pref-theme",'light')):(document.body.classList.add('dark'),localStorage.setItem("pref-theme",'dark'))})</script><script>document.querySelectorAll('pre > code').forEach(b=>{const c=b.parentNode.parentNode,a=document.createElement('button');a.classList.add('copy-code'),a.innerText='copy';function d(){a.innerText='copied!',setTimeout(()=>{a.innerText='copy'},2e3)}a.addEventListener('click',e=>{if('clipboard'in navigator){navigator.clipboard.writeText(b.textContent),d();return}const a=document.createRange();a.selectNodeContents(b);const c=window.getSelection();c.removeAllRanges(),c.addRange(a);try{document.execCommand('copy'),d()}catch(a){}c.removeRange(a)}),c.classList.contains("highlight")?c.appendChild(a):c.parentNode.firstChild==c||(b.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName=="TABLE"?b.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(a):b.parentNode.appendChild(a))})</script></body></html>

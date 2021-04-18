@@ -1,176 +1,109 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
-  
   <url>
-    <loc>https://liliilli.github.io/posts/fix_gitignore_reset/</loc>
-    <lastmod>2020-12-05T18:34:27+09:00</lastmod>
-  </url>
-  
-  <url>
+    <loc>https://liliilli.github.io/posts/vim_environment_setting/</loc>
+    <lastmod>2021-04-18T18:01:36+09:00</lastmod>
+  </url><url>
     <loc>https://liliilli.github.io/</loc>
-    <lastmod>2020-12-05T18:34:27+09:00</lastmod>
-  </url>
-  
-  <url>
+    <lastmod>2021-04-18T18:01:36+09:00</lastmod>
+  </url><url>
     <loc>https://liliilli.github.io/posts/</loc>
-    <lastmod>2020-12-05T18:34:27+09:00</lastmod>
-  </url>
-  
-  <url>
+    <lastmod>2021-04-18T18:01:36+09:00</lastmod>
+  </url><url>
+    <loc>https://liliilli.github.io/posts/fix_gitignore_reset/</loc>
+    <lastmod>2020-12-05T18:41:40+09:00</lastmod>
+  </url><url>
     <loc>https://liliilli.github.io/posts/self_review_chipmunk/</loc>
     <lastmod>2020-12-05T16:48:48+09:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>https://liliilli.github.io/posts/rust_3_memo/</loc>
     <lastmod>2020-12-02T15:08:25+09:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>https://liliilli.github.io/posts/rust_2_memo/</loc>
     <lastmod>2020-12-02T15:08:25+09:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>https://liliilli.github.io/posts/rust_1_memo/</loc>
     <lastmod>2020-12-02T15:08:25+09:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>https://liliilli.github.io/tags/c&#43;&#43;/</loc>
     <lastmod>2020-10-04T19:50:15+09:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>https://liliilli.github.io/posts/cppcon2017_atomics_memo/</loc>
     <lastmod>2020-10-04T19:50:15+09:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>https://liliilli.github.io/tags/</loc>
     <lastmod>2020-10-04T19:50:15+09:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>https://liliilli.github.io/posts/doxygen_memo/</loc>
     <lastmod>2020-09-15T00:23:05+09:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>https://liliilli.github.io/tags/doxygen/</loc>
     <lastmod>2020-09-15T00:23:05+09:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>https://liliilli.github.io/posts/donclugston_delegate/</loc>
     <lastmod>2020-09-15T00:23:05+09:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>https://liliilli.github.io/tags/rust-winapi/</loc>
     <lastmod>2020-08-13T17:18:39+09:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>https://liliilli.github.io/posts/rust_winapi_memo/</loc>
     <lastmod>2020-08-13T17:18:39+09:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>https://liliilli.github.io/posts/gcn_architecture_crash/</loc>
     <lastmod>2020-06-23T08:42:00+09:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>https://liliilli.github.io/posts/week25_2020/</loc>
     <lastmod>2020-06-23T18:16:38+09:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>https://liliilli.github.io/posts/shader_opti_memo_2/</loc>
     <lastmod>2020-06-18T19:42:58+09:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>https://liliilli.github.io/posts/sfinae_afaid/</loc>
     <lastmod>2020-06-18T00:44:37+09:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>https://liliilli.github.io/posts/shader_opti_memo/</loc>
     <lastmod>2020-06-17T19:08:03+09:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>https://liliilli.github.io/posts/dinput8/</loc>
     <lastmod>2020-04-26T13:36:47+09:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>https://liliilli.github.io/posts/tlsf_basic/</loc>
     <lastmod>2020-03-17T23:17:23+09:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>https://liliilli.github.io/tags/untagged/</loc>
     <lastmod>2020-03-17T23:17:23+09:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>https://liliilli.github.io/posts/matrix_name/</loc>
     <lastmod>2020-03-16T09:48:04+09:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>https://liliilli.github.io/posts/dy_cmake/</loc>
     <lastmod>2020-03-08T19:18:31+09:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>https://liliilli.github.io/posts/cmake_memo/</loc>
     <lastmod>2020-03-04T22:40:57+09:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>https://liliilli.github.io/posts/hugo_memo/</loc>
     <lastmod>2020-03-03T23:48:07+09:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>https://liliilli.github.io/posts/cpp_concept/</loc>
     <lastmod>2019-11-21T21:46:17+09:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>https://liliilli.github.io/posts/shadertoy_pbr/</loc>
     <lastmod>2019-11-20T00:17:40+09:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>https://liliilli.github.io/posts/chained-group-allocation/</loc>
     <lastmod>2019-11-09T23:12:58+09:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>https://liliilli.github.io/archives/</loc>
     <lastmod>2020-10-04T23:19:02+09:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>https://liliilli.github.io/archives/</loc>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>https://liliilli.github.io/categories/</loc>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>https://liliilli.github.io/posts/</loc>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>https://liliilli.github.io/series/</loc>
   </url>
-  
 </urlset>

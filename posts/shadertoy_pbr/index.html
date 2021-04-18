@@ -1,112 +1,25 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head><meta charset="utf-8">
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
-<title>ShaderToyでPBRを書いてから、自ら解説してみた。 - neuromantic</title>
-
-<meta name="description" content="なんで、このシェーダーを書きながら、どうやってPBRのDiffuseとSpecularを実装したのかを簡単と大雑把に書きたいと思います。図形">
-<meta name="keywords" content= />
-<meta name="author" content="Jongmin Yun, Neu.">
-<link rel="canonical" href="https://liliilli.github.io/posts/shadertoy_pbr/" />
-<link href="https://liliilli.github.io/assets/css/stylesheet.min.a3b13905fd4b98ea165a18374ae5215d9de97a04f187f789736c56858296ba12.css" integrity="sha256-o7E5Bf1LmOoWWhg3SuUhXZ3pegTxh/eJc2xWhYKWuhI=" rel="preload stylesheet"
-    as="style">
-<link rel="apple-touch-icon" href="https://liliilli.github.io/apple-touch-icon.png">
-<link rel="icon" href="https://liliilli.github.io/favicon.ico">
-<meta name="generator" content="Hugo 0.75.1" />
-
-
-</head>
-
-<body class="single" id="top">
-<header class="header">
-    <nav class="nav">
-        <p class="logo"><a href="https://liliilli.github.io">neuromantic</a></p>
-        <ul class="menu" id="menu" onscroll="menu_on_scroll()">
-            <li>
-                <a href="https://liliilli.github.io/posts/">
-                    <span>
-                        Posts
-                    </span>
-                </a>
-            </li>
-            <li>
-                <a href="https://liliilli.github.io/archives/">
-                    <span>
-                        Archives
-                    </span>
-                </a>
-            </li>
-            <li>
-                <a href="https://liliilli.github.io/tags/">
-                    <span>
-                        Tags
-                    </span>
-                </a>
-            </li>
-            <li>
-                <a href="https://liliilli.github.io/series/">
-                    <span>
-                        Series
-                    </span>
-                </a>
-            </li>
-        </ul>
-    </nav>
-</header>
-
-    <main class="main">
-
-<article class="post-single">
-  <header class="post-header">
-    <h1 class="post-title">
-      ShaderToyでPBRを書いてから、自ら解説してみた。
-    </h1>
-    <div class="post-meta">
-      <time>November 16, 2019</time>&nbsp;·&nbsp;Jongmin Yun, Neu.
-    </div>
-  </header>
-  <div class="post-content"><!-- raw HTML omitted -->
-<!-- raw HTML omitted -->
-<!-- raw HTML omitted -->
-<p>なんで、このシェーダーを書きながら、どうやってPBRのDiffuseとSpecularを実装したのかを簡単と大雑把に書きたいと思います。図形の作り方、またはレイマーチングのやり方に関しては説明いたしません。</p>
-<h1 id="本編">本編</h1>
-<p>PBRレンダリングを勉強するときによく見られるDisneyの<code>Physical-Based Shading at Disney</code>、または色々のPBRが基づく理論文書を読みますと、光と視点のよるある地点の色は以下になります。</p>
-<p>$$
+<!doctype html><html lang=en dir=auto><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="IE=edge"><meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no"><meta name=robots content="index, follow"><title>ShaderToyでPBRを書いてから、自ら解説してみた。 | neuromantic</title><meta name=keywords content="untagged"><meta name=description content="なんで、このシェーダーを書きながら、どうやってPBRのDiffuseとSpecularを実装したのかを簡単と大雑把に書きたいと思います。図形"><meta name=author content="Jongmin Yun, Neu."><link rel=canonical href=https://liliilli.github.io/posts/shadertoy_pbr/><link crossorigin=anonymous href=/assets/css/stylesheet.min.bc435bed1061be2618667408894ae8a5d27c970831ce57f287e42f911918fcbc.css integrity="sha256-vENb7RBhviYYZnQIiUropdJ8lwgxzlfyh+QvkRkY/Lw=" rel="preload stylesheet" as=style><script defer crossorigin=anonymous src=/assets/js/highlight.min.7680afc38aa6b15ddf158a4f3780b7b1f7dde7e91d26f073e6229bb7a0793c92.js integrity="sha256-doCvw4qmsV3fFYpPN4C3sffd5+kdJvBz5iKbt6B5PJI=" onload=hljs.initHighlightingOnLoad()></script><link rel=icon href=https://liliilli.github.io/favicon.ico><link rel=icon type=image/png sizes=16x16 href=https://liliilli.github.io/favicon-16x16.png><link rel=icon type=image/png sizes=32x32 href=https://liliilli.github.io/favicon-32x32.png><link rel=apple-touch-icon href=https://liliilli.github.io/apple-touch-icon.png><link rel=mask-icon href=https://liliilli.github.io/safari-pinned-tab.svg><meta name=theme-color content="#2e2e33"><meta name=msapplication-TileColor content="#2e2e33"><meta name=generator content="Hugo 0.82.0"><meta property="og:title" content="ShaderToyでPBRを書いてから、自ら解説してみた。"><meta property="og:description" content="なんで、このシェーダーを書きながら、どうやってPBRのDiffuseとSpecularを実装したのかを簡単と大雑把に書きたいと思います。図形"><meta property="og:type" content="article"><meta property="og:url" content="https://liliilli.github.io/posts/shadertoy_pbr/"><meta property="article:section" content="posts"><meta property="article:published_time" content="2019-11-16T19:51:58+09:00"><meta property="article:modified_time" content="2019-11-20T00:17:40+09:00"><meta property="og:site_name" content="neuromantic"><meta name=twitter:card content="summary"><meta name=twitter:title content="ShaderToyでPBRを書いてから、自ら解説してみた。"><meta name=twitter:description content="なんで、このシェーダーを書きながら、どうやってPBRのDiffuseとSpecularを実装したのかを簡単と大雑把に書きたいと思います。図形"><script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":2,"name":"Posts","item":"https://liliilli.github.io/posts/"},{"@type":"ListItem","position":3,"name":"ShaderToyでPBRを書いてから、自ら解説してみた。","item":"https://liliilli.github.io/posts/shadertoy_pbr/"}]}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"ShaderToyでPBRを書いてから、自ら解説してみた。","name":"ShaderToyでPBRを書いてから、自ら解説してみた。","description":"なんで、このシェーダーを書きながら、どうやってPBRのDiffuseとSpecularを実装したのかを簡単と大雑把に書きたいと思います。図形","keywords":["untagged"],"articleBody":"なんで、このシェーダーを書きながら、どうやってPBRのDiffuseとSpecularを実装したのかを簡単と大雑把に書きたいと思います。図形の作り方、またはレイマーチングのやり方に関しては説明いたしません。\n本編 PBRレンダリングを勉強するときによく見られるDisneyのPhysical-Based Shading at Disney、または色々のPBRが基づく理論文書を読みますと、光と視点のよるある地点の色は以下になります。\n$$ f(\\pmb{l}, \\pmb{v}) = \\text{diffuse} + \\text{specular} $$ DiffuseとSpecularはそれぞれの特性を独立的に持てると言えます。なので、実施に最終色を入れるときに次のように単純にDiffuseとSpecularを入れます。\n// fragColorは[0,1]のvec4(R,G,B,A)です。 fragColor = vec4(dif + spc, 1);  $$ f(\\pmb{l}, \\pmb{v}) $$ は実際には色そのまのを表してはいません。あくまでBRDF（Bidirectional-Reflectance Distribution Funciton）のモデルを表したものであり、実際にはぶつかった入射光線と表面の法線での半球で、すべての反射光線がどの角度とエナジーを持つのかを調べて、全部合わせないと正確な数値が計算できません。\nただし、今はもっと抽象化した数式を使ってレンダリングをしようとします。リアルタイムで完全な数式を解いて色を得ることはほぼ不可能だし、もっと抽象化したモデルでもだいたい通じます。\n Diffuse 普通よく使うのはLambertianですがOren-Nayarっていう、もっと正確なPBRモデルもあります。僕は最初はLambertianを使いましたが、最終はOren-Nayarにしました。\nLambertian $$ f(\\pmb{l}, \\pmb{v}) = \\frac{\\rho_{ss}}{\\pi} $$\nDiffuseモデルの中で一番簡単なモデルです。色だけでモデルBRDFが決まりますし、だとしてもそれっぽく見えるようになるので普通のゲームでもよく使います。\nここで $$ \\rho_{ss} $$ は、表面のアルベド（物体が光を弾いたときの反射率）を表します。これだけがLambertianのモデルの数値になります。\n下のコードはLambertianモデルを使って、実際のピクセルのカラーを表現するコードです。\nfloat FactorDiffLambertian(in vec3 l, in vec3 n) { return max(0.0f, dot(l, n)) / pi; } vec3 DiffuseLambertian(in vec3 l, in vec3 n, in vec3 diffuse, in vec3 ambient) { return mix(ambient, diffuse, FactorDiffLambertian(l, n) * pi); } 注意するとこは、FactorDiffLamberitanの中のdot(l, n)は実際はLambertianのモデルの数式に含まれていません。mix(ambient, diffuse, ...)のdiffuseが上記の $$ \\rho_{ss} $$ になります。 そして、FactorDiffLambertian関数は、以下の数式 $$ L_o(\\mathbf{v}) = \\int_{\\mathbf{l}\\in\\Omega}{f(\\mathbf{l}, \\mathbf{v})L_i(\\mathbf{l})(\\mathbf{n}\\cdot\\mathbf{l})d\\mathbf{l}} $$ のdot(l, n)項を表しています。（ただし、πは事前に入れときました。反省するとこですね。）\nこのモデルの特徴は表面が平坦だと見なしてレンダリングを行うところです。Roughnessが関与するとこが無く、単純にアルベドと光と表面の法線ベクトルによる明度だけをレンダリングします。ということで、ちょっと単純だけどコストが速いし、それなりにごまかせば他のモデルとあんまり違いは出ないと思います。\nOren-Nayar  https://en.wikipedia.org/wiki/Oren%E2%80%93Nayar_reflectance_model https://mimosa-pudica.net/improved-oren-nayar.html\n このモデルは上のLambertianとは違って、表面の粗さによって明度の違いのレンダリングを調節できます。Oren-Nayarとともに表面の粗さによるDiffuseレンダリングモデルを総じて、Rough-surface diffuse BRDFと呼びます。\nとりあえずOren-Nayarは論文をみますとFull-Model（完全モデル）とQuantitive-Model（ある程度省略したモデル）に分かれています。ウィキペディアに乗っているのはQuantitive-Modelだし、僕もフールモデルじゃなくてQuantitive-Modelを使ってOren-Nayarを実装してます。\nOren-Nayar（Quantitiveバージョン）は以下の数式となります。 $$ \\begin{align} L_{r} \u0026= \\frac{\\rho}{\\pi} \\cdot (\\mathbf{l} \\cdot \\mathbf{n}) \\cdot (A + (B \\cdot \\max[0, \\cos(\\phi_{i} - \\phi_{v})] \\cdot \\sin\\alpha \\cdot \\tan\\beta)) \\cdot E_0 \\\\\\\nA \u0026= 1 - 0.5\\frac{\\sigma^2}{\\sigma^2 + 0.33} \\\\\\\nB \u0026= 0.45 \\frac{\\sigma^2}{\\sigma^2 + 0.09} \\\\\\\n\\alpha \u0026= \\max( \\theta_{\\mathbf{l} \\cdot \\mathbf{n}}, \\theta_{\\mathbf{v} \\cdot \\mathbf{n}}) \\\\\\\n\\beta \u0026= \\min( \\theta_{\\mathbf{l} \\cdot \\mathbf{n}}, \\theta_{\\mathbf{v} \\cdot \\mathbf{n}}) \\end{align} $$ しかし僕は2番目のリンクにあるベクトルを使った数式を使いました。 $$ \\begin{align} L_o \u0026= \\frac{\\rho}{\\pi}\\cdot(\\mathbf{l}\\cdot\\mathbf{n})(A + B\\frac{\\mathbf{s}}{t}) \\\\\\\ns \u0026= \\mathbf{l}\\cdot\\mathbf{v} - (\\mathbf{n}\\cdot\\mathbf{l})(\\mathbf{n}\\cdot\\mathbf{v}) \\\\\\\nt \u0026= \\begin{cases} 1 \u0026 \\text{if $s \\le 0$} \\\\\\\n\\max(\\mathbf{n}\\cdot\\mathbf{v}, \\mathbf{n}\\cdot\\mathbf{l}) \u0026 \\text{if $s \\gt 0$} \\end{cases} \\\\\\\nA \u0026= (1 - 0.5\\frac{\\sigma^2}{\\sigma^2 + 0.33} + 0.17\\rho\\frac{\\sigma^2}{\\sigma^2 + 0.13}) \\\\\\\nB \u0026= 0.45\\frac{\\sigma^2}{\\sigma^2 + 0.09} \\end{align} $$ なぜなら、上の数式を直接反映してみたらところどころでバグによる明るい曲線が見えるからです。多分tan()項でバグったりして不具合が描画されると思いますが、直せずに下のベクトル形態の数式を使ってOren-NayarのQuantitive-Modelを実装しました。\n数式で見れる\\rho（$ \\rho $ ）はアルベドを表します。普通Lamberitanのアルベドのように、アルベドカラーを入れます。そして\\sigma（$ \\sigma $）は表面の粗さ（Roughness）を示します。だいたい０～１の値を持ちます。\n上の数式を表したコードは下にあります。\nfloat OrenNayarAlpha(in vec3 l, in vec3 n, in vec3 v) { return dot(l, v) - dot(n, l) * dot(n, v); } float OrenNayarBeta(in vec3 l, in vec3 n, in vec3 v) { return mix( 1.f, max(dot(n, l), dot(n, v)), step(1e-5, OrenNayarAlpha(l, n, v)) ); } float OrenNayarA(in float r) { return 1.0f - 0.5f * ( (r * r) / // ---------------------- (r * r + 0.33f) ) + 0.17f * ( (r * r) / // ---------------------- (r * r + 0.13f) ); } float OrenNayarB(in float r) { return 0.45f * ( (r * r) / // ---------------------- (r * r + 0.09f) ); } float FactorDiffOrenNayar(in vec3 l, in vec3 n, in vec3 v, in float r) { float A = OrenNayarA(r); float B = OrenNayarB(r); float _a = OrenNayarAlpha(l, n, v); float _b = OrenNayarBeta(l, n, v); return FactorDiffLambertian(l, n) * (A + B * (_a / _b)); } vec3 DiffuseOrenNayar(in vec3 l, in vec3 n, in vec3 diffuse, in vec3 ambient, in vec3 v, in float r) { return mix(ambient, diffuse, FactorDiffOrenNayar(l, n, v, r) * pi); } 一気にコードの量が増えましたが、分析していただきましたら大したものはないことがわかります。\n実は、2番目のリンク先で投稿した方の改良したOren-Nayarモデルも実装はしたんですが、光が表面全体を照らすときの描画が好きじゃなかったので断念してOren-NayarのQuantitive-Modelを最終採用しました。\nSpecular SpecularのBRDFも、上のDiffuseのようにMicrofacet理論に基づいたモデルを使っています。Specular（ハイライト）は、Diffuseとは違ってカメラの目線によってある位置にハイライトの陰影がつけられるかが異なります。（なんで、Lambertianみたいな単純なモデルは無いです）\n普通に使ってるPBRのSpecularモデルは、以下のCook-Torrance Modelです。 $$ f_{spec}(\\mathbf{l}, \\mathbf{v}) = \\frac {F(\\mathbf{h}, \\mathbf{l})G_{2}(\\mathbf{l},\\mathbf{v},\\mathbf{h})D(\\mathbf{h})} {4|\\mathbf{n}\\cdot\\mathbf{l}||\\mathbf{n}\\cdot\\mathbf{v}|} $$\nfloat cn = 4.f * max(.25f, dot(n, ld)) * max(.25f, dot(n, -fwd)); float d = GTR(9e-3, kBx1.mRough, th, 2.f); float f = Schlick(kBx1.mR0, td); float g = SeparableMaskingShadowing(tl, td, kBx1.mRough); spc = vec3(1) * d * f * g / cn; Fresnel Reflection  https://en.wikipedia.org/wiki/Fresnel_equations https://en.wikipedia.org/wiki/Schlick%27s_approximation\n 上記のCook-Torrance Modelにて、分子の $$ F(\\mathbf{h}, \\mathbf{l}) $$ はフレネルの式を示します。要するに、光の入射光線がある物体の表面にぶつかるときの正反射率を表す数式です。全ての物質は自分のIOR（屈折率）と外部のIORによってそれぞれ違う反射率を持ちます。\nウィキペディアを見ていただきますと正確な数式がありますが、CGでシェーダープログラムにフレネルの式の全部をやらせるには負担がかかりすぎます。なので、下の単純なモデルを使いながらある程度フレネルの式を従います。 $$ F(\\mathbf{h}, \\mathbf{l}) \\approx F_0 + (1 - F_0)(1 - (\\mathbf{h}\\cdot\\mathbf{l})^+)^5 $$ この数式はSchlick-Approximationと言います。空気中の物質に対するフレネルの式の数値を得たいときの使います。もちろん、抽象化されたモデルなので正確ではありません。ですがフレネルの式の数値のグラフでの変動をある程度沿っています。\nここで、 $$ F_0 $$ は垂直入射の時のFresnel反射係数の実部です。この数値はRGBまたは普通のグレースケールの数値として入れられます。グレースケールになる場合には、物質が金属ではない場合で使えます。RGBは金属の物質のフレネルの数値を求めたい場合に使えます。（大雑把でしたけど、もっと詳しくお調べしたい方々はReal-Time Rendering 4thのChapter9をお読みくださいませ） $$ \\mathbf{h} = \\text{normalize($\\mathbf{l} + \\mathbf{v}$)} $$ hはハーフウェイベクトル（Halfway Vector）と言います。DiffuseとSpecularを一つに統合したレンダリングモデルである、Blinn-Phong Reflectance Modelでも使うやつです。\nfloat Schlick(in float r0, in vec3 n, in vec3 v) { return r0 + (1. - r0) * pow(1. - max(0.f, dot(n, v)), 5.f); } // または float Schlick(in float r0, in float td) { return r0 + (1. - r0) * pow(1. - max(0.f, cos(td)), 5.f); } 上のコードはSchlick Approximationを2つのバージョンで実装したものです。下のバージョンのtdは、nとvの角度差を表します。\nNormal Distribution Function 法線分布関数だと呼ばれるNormal Distribution Functionは、微小面の法線がどうやって分布されているかを示す関数です。この関数は統計的に測定されて使っているか、それともある抽象化した数学関数を用いて使います。詳しくはmicrofacet理論の触れますので割愛します。\nですけどこのNDFに特徴の一つは、あるNDF関数があって、そしてある表面の法線ベクトル N があった時に、球面を覆う単位ベクトルを入れたNDFの値の積分は、N を持つ微細表面の面積になります。ということで、 $$ \\int_{\\mathbf{m} \\in \\Theta} {D(\\mathbf{m})(\\mathbf{n} \\cdot \\mathbf{m})d\\mathbf{m}} = 1 $$ になります。\nまた、カメラまたは目線のベクトルvがあるとき、ある表面の法線ベクトルがnで、そして微細表面の球体の単位ベクトルがmだとしたら、 $$ \\int_{\\mathbf{m} \\in \\Theta}{D(\\mathbf{m})(\\mathbf{v}\\cdot\\mathbf{m})d\\mathbf{m}} = \\mathbf{v}\\cdot\\mathbf{n} $$ です。目によって実際に見える微小面の面積は微小面の凸凹の法線ベクトルたちを目線のベクトルとの内積し、結果値を全部足したのと同じです。v * mで目に見えない微小面はなくなりまし、見える表面は残ります。\n一応これもリアルタイムでは計算しにくいので、上の特性から派生した様々な抽象化したモデルがあります。僕はDisney BRDFで使った**GTR (Generalized-Trowbridge-Reitz）**モデルを使いました。このモデルはGGX（Trowbridge-Reitz）モデルを一般化したものです。 $$ D_{GTR} = \\frac{c}{(a^2\\cos^2(\\theta_{h})+\\sin^2(\\theta_{h}))^\\gamma} $$\n 実はこの数式も実使用で使うために簡略化された数式です。Realtime-RenderingでGTRの完全数式を見てみますと結構ひどいです。（白目）\n 上の数式で、gammaが2ならGGXと同じになります。以下はGTRをコードに写したものです。\nfloat GTR(in float c, in float r, in float dh, in float gamma) { return c / //-------------------------------------------------------- pow(r * r * cos(dh) * cos(dh) + sin(dh) * sin(dh), gamma); } Joint Masking Shadowing Function Joint Masking Shadowing Functionを説明する前に、簡単に一般Masking Function Gを説明させていただきたいと思います。日本語でいうと幾何減衰項（読み方はわかりません）と言います。Masking Functionは微小面（Microfacet）によって発生するシャドウィング（自己陰影）、マスキング（自己遮蔽）を表したものです。\n幾何減衰項は上で説明したNDFに（法線分布関数）と密接に関連されます。上の表面の法線・微小面の法線・目線の法線との関係がある数式は、以下のように変形できます。 $$ \\int_{\\in\\Theta}{G_1(\\mathbf{m}, \\mathbf{v})D(\\mathbf{m})(\\mathbf{v}\\cdot\\mathbf{m})^+d\\mathbf{m}} = \\mathbf{v}\\cdot\\mathbf{n} $$ ここで G_1(m, v)は**Smith Function**といい、vに対して見えるmの比率を表します。ですけど、G1は実際にはmが目線の反対方向を向いていなければ、G1の数値に全然影響がない特徴を持ちます。なのでSmith Function G1の数式は $$ G_1(\\mathbf{m}, \\mathbf{v}) = \\frac{\\chi^+(\\mathbf{m}\\cdot\\mathbf{v})}{1 + \\Lambda(\\mathbf{v})} $$ となります。コードでは上の分子の項は、mとvの内積が0より大きければ1として置換できます。ですがこれをこのまま使うのではなく、BRDFを建てる時には以下のようにG1の代わりにG2を使います。 $$ f(\\mathbf{l}, \\mathbf{v}) = \\int_{\\mathbf{m}\\in\\Theta} f_{\\mu}(\\mathbf{l}, \\mathbf{v}, \\mathbf{m}) G_2(\\mathbf{l}, \\mathbf{v}, \\mathbf{m}) D(\\mathbf{m}) \\frac{(\\mathbf{m}\\cdot\\mathbf{l})^+}{|\\mathbf{n}\\cdot\\mathbf{l}|} \\frac{(\\mathbf{m}\\cdot\\mathbf{v})^+}{|\\mathbf{n}\\cdot\\mathbf{v}|} d\\mathbf{m} \\\\\\\n\\\\\\\nG_2(\\mathbf{l}, \\mathbf{v}, \\mathbf{m}) = G_1(\\mathbf{v}, \\mathbf{m}) G_1(\\mathbf{l}, \\mathbf{m}) $$ 上のG2の形以外に、様々な変形数式が存在します。G1を2つくっつけて掛け算する数式が一番だったりしますが、不具合が存在しますので下のも使われるそうです。（下は*Smith Height-Correlated Masking-Shadowing Function*）と言います。 $$ G_2(\\mathbf{l}, \\mathbf{v}, \\mathbf{m}) = \\frac{\\chi^+(\\mathbf{v}\\cdot\\mathbf{m})\\chi^+(\\mathbf{l}\\cdot\\mathbf{m})}{1 + \\Lambda(\\mathbf{v}) + \\Lambda(\\mathbf{l})} $$ 僕は一番簡単な分離型G2を使いました。\nfloat Lambda(in float rad, in float r) { return (-1.f + sqrt(1.f + r * r * (1.f / cos(rad) * cos(rad) - 1.f))) * .5f; } float SmithMasking(in float rad, in float r) { return 1.f / //----------------------- (1.f + Lambda(rad, r)); } float SeparableMaskingShadowing(in float tl, in float tv, in float r) { return SmithMasking(tl, r) * SmithMasking(tv, r); } まとめ 以上、大雑把にコードを振り返りながらPBRの書き方、中身についてメモをしてみました。\nもっと詳しく調べたい方に   https://qiita.com/mebiusbox2/items/1cd65993ffb546822213\n  https://qiita.com/mebiusbox2/items/8db00cdcaf263992a5ce\n  https://qiita.com/emadurandal/items/3a8db7bc61438245654d\n  ","wordCount":"4823","inLanguage":"en","datePublished":"2019-11-16T19:51:58+09:00","dateModified":"2019-11-20T00:17:40+09:00","author":{"@type":"Person","name":"Jongmin Yun, Neu."},"mainEntityOfPage":{"@type":"WebPage","@id":"https://liliilli.github.io/posts/shadertoy_pbr/"},"publisher":{"@type":"Organization","name":"neuromantic","logo":{"@type":"ImageObject","url":"https://liliilli.github.io/favicon.ico"}}}</script></head><body id=top><script>localStorage.getItem("pref-theme")==="dark"&&document.body.classList.add('dark')</script><noscript><style type=text/css>#theme-toggle,.top-link{display:none}</style></noscript><header class=header><nav class=nav><div class=logo><a href=https://liliilli.github.io accesskey=h title="neuromantic (Alt + H)">neuromantic</a>
+<span class=logo-switches><button id=theme-toggle accesskey=t title="(Alt + T)"><svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg><svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button></span></div><ul id=menu onscroll=menu_on_scroll()><li><a href=https://liliilli.github.io/posts/ title=Posts><span>Posts</span></a></li><li><a href=https://liliilli.github.io/archives/ title=Archives><span>Archives</span></a></li><li><a href=https://liliilli.github.io/tags/ title=Tags><span>Tags</span></a></li><li><a href=https://liliilli.github.io/series/ title=Series><span>Series</span></a></li></ul></nav></header><main class=main><article class=post-single><header class=post-header><div class=breadcrumbs><a href=https://liliilli.github.io>Home</a>&nbsp;»&nbsp;<a href=https://liliilli.github.io/posts/>Posts</a></div><h1 class=post-title>ShaderToyでPBRを書いてから、自ら解説してみた。</h1><div class=post-meta>2019, November 16&nbsp;·&nbsp;Jongmin Yun, Neu.</div></header><div class=toc><details><summary accesskey=c title="(Alt + C)"><div class=details>Table of Contents</div></summary><div class=inner><ul><li><a href=#%e6%9c%ac%e7%b7%a8 aria-label=本編>本編</a><ul><li><a href=#diffuse aria-label=Diffuse>Diffuse</a><ul><li><a href=#lambertian aria-label=Lambertian>Lambertian</a></li><li><a href=#oren-nayar aria-label=Oren-Nayar>Oren-Nayar</a></li></ul></li><li><a href=#specular aria-label=Specular>Specular</a><ul><li><a href=#fresnel-reflection aria-label="Fresnel Reflection">Fresnel Reflection</a></li><li><a href=#normal-distribution-function aria-label="Normal Distribution Function">Normal Distribution Function</a></li><li><a href=#joint-masking-shadowing-function aria-label="Joint Masking Shadowing Function">Joint Masking Shadowing Function</a></li></ul></li></ul></li><li><a href=#%e3%81%be%e3%81%a8%e3%82%81 aria-label=まとめ>まとめ</a></li><li><a href=#%e3%82%82%e3%81%a3%e3%81%a8%e8%a9%b3%e3%81%97%e3%81%8f%e8%aa%bf%e3%81%b9%e3%81%9f%e3%81%84%e6%96%b9%e3%81%ab aria-label=もっと詳しく調べたい方に>もっと詳しく調べたい方に</a></li></ul></div></details></div><div class=post-content><p>なんで、このシェーダーを書きながら、どうやってPBRのDiffuseとSpecularを実装したのかを簡単と大雑把に書きたいと思います。図形の作り方、またはレイマーチングのやり方に関しては説明いたしません。</p><h1 id=本編>本編<a hidden class=anchor aria-hidden=true href=#本編>#</a></h1><p>PBRレンダリングを勉強するときによく見られるDisneyの<code>Physical-Based Shading at Disney</code>、または色々のPBRが基づく理論文書を読みますと、光と視点のよるある地点の色は以下になります。</p><p>$$
 f(\pmb{l}, \pmb{v}) = \text{diffuse} + \text{specular}
 $$
-<code>Diffuse</code>と<code>Specular</code>はそれぞれの特性を独立的に持てると言えます。なので、実施に最終色を入れるときに次のように単純に<code>Diffuse</code>と<code>Specular</code>を入れます。</p>
-<div class="highlight"><pre class="chroma"><code class="language-glsl" data-lang="glsl"><span class="c1">// fragColorは[0,1]のvec4(R,G,B,A)です。</span>
-<span class="n">fragColor</span> <span class="o">=</span> <span class="k">vec4</span><span class="p">(</span><span class="n">dif</span> <span class="o">+</span> <span class="n">spc</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
-</code></pre></div><blockquote>
-<p>$$ f(\pmb{l}, \pmb{v}) $$ は実際には色そのまのを表してはいません。あくまでBRDF（Bidirectional-Reflectance Distribution Funciton）のモデルを表したものであり、実際にはぶつかった入射光線と表面の法線での半球で、すべての反射光線がどの角度とエナジーを持つのかを調べて、全部合わせないと正確な数値が計算できません。</p>
-<p>ただし、今はもっと抽象化した数式を使ってレンダリングをしようとします。リアルタイムで完全な数式を解いて色を得ることはほぼ不可能だし、もっと抽象化したモデルでもだいたい通じます。</p>
-</blockquote>
-<h2 id="diffuse">Diffuse</h2>
-<p>普通よく使うのは<code>Lambertian</code>ですが<code>Oren-Nayar</code>っていう、もっと正確なPBRモデルもあります。僕は最初は<code>Lambertian</code>を使いましたが、最終は<code>Oren-Nayar</code>にしました。</p>
-<h3 id="lambertian">Lambertian</h3>
-<p>$$
+<code>Diffuse</code>と<code>Specular</code>はそれぞれの特性を独立的に持てると言えます。なので、実施に最終色を入れるときに次のように単純に<code>Diffuse</code>と<code>Specular</code>を入れます。</p><div class=highlight><pre class=chroma><code class=language-glsl data-lang=glsl><span class=c1>// fragColorは[0,1]のvec4(R,G,B,A)です。</span>
+<span class=n>fragColor</span> <span class=o>=</span> <span class=k>vec4</span><span class=p>(</span><span class=n>dif</span> <span class=o>+</span> <span class=n>spc</span><span class=p>,</span> <span class=mi>1</span><span class=p>);</span>
+</code></pre></div><blockquote><p>$$ f(\pmb{l}, \pmb{v}) $$ は実際には色そのまのを表してはいません。あくまでBRDF（Bidirectional-Reflectance Distribution Funciton）のモデルを表したものであり、実際にはぶつかった入射光線と表面の法線での半球で、すべての反射光線がどの角度とエナジーを持つのかを調べて、全部合わせないと正確な数値が計算できません。</p><p>ただし、今はもっと抽象化した数式を使ってレンダリングをしようとします。リアルタイムで完全な数式を解いて色を得ることはほぼ不可能だし、もっと抽象化したモデルでもだいたい通じます。</p></blockquote><h2 id=diffuse>Diffuse<a hidden class=anchor aria-hidden=true href=#diffuse>#</a></h2><p>普通よく使うのは<code>Lambertian</code>ですが<code>Oren-Nayar</code>っていう、もっと正確なPBRモデルもあります。僕は最初は<code>Lambertian</code>を使いましたが、最終は<code>Oren-Nayar</code>にしました。</p><h3 id=lambertian>Lambertian<a hidden class=anchor aria-hidden=true href=#lambertian>#</a></h3><p>$$
 f(\pmb{l}, \pmb{v}) = \frac{\rho_{ss}}{\pi}
-$$</p>
-<p><code>Diffuse</code>モデルの中で一番簡単なモデルです。色だけでモデルBRDFが決まりますし、だとしてもそれっぽく見えるようになるので普通のゲームでもよく使います。</p>
-<p>ここで
+$$</p><p><code>Diffuse</code>モデルの中で一番簡単なモデルです。色だけでモデルBRDFが決まりますし、だとしてもそれっぽく見えるようになるので普通のゲームでもよく使います。</p><p>ここで
 $$
 \rho_{ss}
 $$
-は、表面のアルベド（物体が光を弾いたときの反射率）を表します。これだけがLambertianのモデルの数値になります。</p>
-<p>下のコードはLambertianモデルを使って、実際のピクセルのカラーを表現するコードです。</p>
-<div class="highlight"><pre class="chroma"><code class="language-glsl" data-lang="glsl"><span class="k">float</span> <span class="n">FactorDiffLambertian</span><span class="p">(</span><span class="k">in</span> <span class="k">vec3</span> <span class="n">l</span><span class="p">,</span> <span class="k">in</span> <span class="k">vec3</span> <span class="n">n</span><span class="p">)</span> 
-<span class="p">{</span>
-    <span class="k">return</span> <span class="n">max</span><span class="p">(</span><span class="mf">0.0</span><span class="n">f</span><span class="p">,</span> <span class="n">dot</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">n</span><span class="p">))</span> <span class="o">/</span> <span class="n">pi</span><span class="p">;</span>
-<span class="p">}</span>
+は、表面のアルベド（物体が光を弾いたときの反射率）を表します。これだけがLambertianのモデルの数値になります。</p><p>下のコードはLambertianモデルを使って、実際のピクセルのカラーを表現するコードです。</p><div class=highlight><pre class=chroma><code class=language-glsl data-lang=glsl><span class=k>float</span> <span class=n>FactorDiffLambertian</span><span class=p>(</span><span class=k>in</span> <span class=k>vec3</span> <span class=n>l</span><span class=p>,</span> <span class=k>in</span> <span class=k>vec3</span> <span class=n>n</span><span class=p>)</span> 
+<span class=p>{</span>
+    <span class=k>return</span> <span class=n>max</span><span class=p>(</span><span class=mf>0.0</span><span class=n>f</span><span class=p>,</span> <span class=n>dot</span><span class=p>(</span><span class=n>l</span><span class=p>,</span> <span class=n>n</span><span class=p>))</span> <span class=o>/</span> <span class=n>pi</span><span class=p>;</span>
+<span class=p>}</span>
 
-<span class="k">vec3</span> <span class="n">DiffuseLambertian</span><span class="p">(</span><span class="k">in</span> <span class="k">vec3</span> <span class="n">l</span><span class="p">,</span> <span class="k">in</span> <span class="k">vec3</span> <span class="n">n</span><span class="p">,</span> 
-                       <span class="k">in</span> <span class="k">vec3</span> <span class="n">diffuse</span><span class="p">,</span> <span class="k">in</span> <span class="k">vec3</span> <span class="n">ambient</span><span class="p">)</span> 
-<span class="p">{</span>
-    <span class="k">return</span> <span class="n">mix</span><span class="p">(</span><span class="n">ambient</span><span class="p">,</span> <span class="n">diffuse</span><span class="p">,</span> <span class="n">FactorDiffLambertian</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span> <span class="o">*</span> <span class="n">pi</span><span class="p">);</span>
-<span class="p">}</span>
+<span class=k>vec3</span> <span class=n>DiffuseLambertian</span><span class=p>(</span><span class=k>in</span> <span class=k>vec3</span> <span class=n>l</span><span class=p>,</span> <span class=k>in</span> <span class=k>vec3</span> <span class=n>n</span><span class=p>,</span> 
+                       <span class=k>in</span> <span class=k>vec3</span> <span class=n>diffuse</span><span class=p>,</span> <span class=k>in</span> <span class=k>vec3</span> <span class=n>ambient</span><span class=p>)</span> 
+<span class=p>{</span>
+    <span class=k>return</span> <span class=n>mix</span><span class=p>(</span><span class=n>ambient</span><span class=p>,</span> <span class=n>diffuse</span><span class=p>,</span> <span class=n>FactorDiffLambertian</span><span class=p>(</span><span class=n>l</span><span class=p>,</span> <span class=n>n</span><span class=p>)</span> <span class=o>*</span> <span class=n>pi</span><span class=p>);</span>
+<span class=p>}</span>
 </code></pre></div><p>注意するとこは、<code>FactorDiffLamberitan</code>の中の<code>dot(l, n)</code>は実際はLambertianのモデルの数式に含まれていません。<code>mix(ambient, diffuse, ...)</code>の<code>diffuse</code>が上記の
 $$
 \rho_{ss}
@@ -116,35 +29,23 @@ $$
 $$
 L_o(\mathbf{v}) = \int_{\mathbf{l}\in\Omega}{f(\mathbf{l}, \mathbf{v})L_i(\mathbf{l})(\mathbf{n}\cdot\mathbf{l})d\mathbf{l}}
 $$
-の<code>dot(l, n)</code>項を表しています。（ただし、πは事前に入れときました。反省するとこですね。）</p>
-<p>このモデルの特徴は表面が平坦だと見なしてレンダリングを行うところです。Roughnessが関与するとこが無く、単純にアルベドと光と表面の法線ベクトルによる明度だけをレンダリングします。ということで、ちょっと単純だけどコストが速いし、それなりにごまかせば他のモデルとあんまり違いは出ないと思います。</p>
-<h3 id="oren-nayar">Oren-Nayar</h3>
-<blockquote>
-<p><a href="https://en.wikipedia.org/wiki/Oren%E2%80%93Nayar_reflectance_model">https://en.wikipedia.org/wiki/Oren%E2%80%93Nayar_reflectance_model</a>
-<a href="https://mimosa-pudica.net/improved-oren-nayar.html">https://mimosa-pudica.net/improved-oren-nayar.html</a></p>
-</blockquote>
-<p>このモデルは上のLambertianとは違って、表面の粗さによって明度の違いのレンダリングを調節できます。Oren-Nayarとともに表面の粗さによるDiffuseレンダリングモデルを総じて、<code>Rough-surface diffuse BRDF</code>と呼びます。</p>
-<p>とりあえずOren-Nayarは論文をみますとFull-Model（完全モデル）とQuantitive-Model（ある程度省略したモデル）に分かれています。ウィキペディアに乗っているのはQuantitive-Modelだし、僕もフールモデルじゃなくてQuantitive-Modelを使ってOren-Nayarを実装してます。</p>
-<p>Oren-Nayar（Quantitiveバージョン）は以下の数式となります。
+の<code>dot(l, n)</code>項を表しています。（ただし、πは事前に入れときました。反省するとこですね。）</p><p>このモデルの特徴は表面が平坦だと見なしてレンダリングを行うところです。Roughnessが関与するとこが無く、単純にアルベドと光と表面の法線ベクトルによる明度だけをレンダリングします。ということで、ちょっと単純だけどコストが速いし、それなりにごまかせば他のモデルとあんまり違いは出ないと思います。</p><h3 id=oren-nayar>Oren-Nayar<a hidden class=anchor aria-hidden=true href=#oren-nayar>#</a></h3><blockquote><p><a href=https://en.wikipedia.org/wiki/Oren%E2%80%93Nayar_reflectance_model>https://en.wikipedia.org/wiki/Oren%E2%80%93Nayar_reflectance_model</a>
+<a href=https://mimosa-pudica.net/improved-oren-nayar.html>https://mimosa-pudica.net/improved-oren-nayar.html</a></p></blockquote><p>このモデルは上のLambertianとは違って、表面の粗さによって明度の違いのレンダリングを調節できます。Oren-Nayarとともに表面の粗さによるDiffuseレンダリングモデルを総じて、<code>Rough-surface diffuse BRDF</code>と呼びます。</p><p>とりあえずOren-Nayarは論文をみますとFull-Model（完全モデル）とQuantitive-Model（ある程度省略したモデル）に分かれています。ウィキペディアに乗っているのはQuantitive-Modelだし、僕もフールモデルじゃなくてQuantitive-Modelを使ってOren-Nayarを実装してます。</p><p>Oren-Nayar（Quantitiveバージョン）は以下の数式となります。
 $$
 \begin{align}
-L_{r} &amp;=
+L_{r} &=
 \frac{\rho}{\pi}
 \cdot (\mathbf{l} \cdot \mathbf{n})
 \cdot (A + (B \cdot \max[0, \cos(\phi_{i} - \phi_{v})]
 \cdot \sin\alpha
 \cdot \tan\beta))
 \cdot E_0
-\\\<br>
-A &amp;= 1 - 0.5\frac{\sigma^2}{\sigma^2 + 0.33}
-\\\<br>
-B &amp;= 0.45 \frac{\sigma^2}{\sigma^2 + 0.09}
-\\\<br>
-\alpha &amp;= \max(
+\\\<br>A &= 1 - 0.5\frac{\sigma^2}{\sigma^2 + 0.33}
+\\\<br>B &= 0.45 \frac{\sigma^2}{\sigma^2 + 0.09}
+\\\<br>\alpha &= \max(
 \theta_{\mathbf{l} \cdot \mathbf{n}},
 \theta_{\mathbf{v} \cdot \mathbf{n}})
-\\\<br>
-\beta &amp;= \min(
+\\\<br>\beta &= \min(
 \theta_{\mathbf{l} \cdot \mathbf{n}},
 \theta_{\mathbf{v} \cdot \mathbf{n}})
 \end{align}
@@ -152,109 +53,90 @@ $$
 しかし僕は2番目のリンクにあるベクトルを使った数式を使いました。
 $$
 \begin{align}
-L_o &amp;= \frac{\rho}{\pi}\cdot(\mathbf{l}\cdot\mathbf{n})(A + B\frac{\mathbf{s}}{t})
-\\\<br>
-s &amp;= \mathbf{l}\cdot\mathbf{v} - (\mathbf{n}\cdot\mathbf{l})(\mathbf{n}\cdot\mathbf{v})
-\\\<br>
-t &amp;=
+L_o &= \frac{\rho}{\pi}\cdot(\mathbf{l}\cdot\mathbf{n})(A + B\frac{\mathbf{s}}{t})
+\\\<br>s &= \mathbf{l}\cdot\mathbf{v} - (\mathbf{n}\cdot\mathbf{l})(\mathbf{n}\cdot\mathbf{v})
+\\\<br>t &=
 \begin{cases}
-1 &amp; \text{if $s \le 0$} \\\<br>
-\max(\mathbf{n}\cdot\mathbf{v}, \mathbf{n}\cdot\mathbf{l}) &amp; \text{if $s \gt 0$}
+1 & \text{if $s \le 0$} \\\<br>\max(\mathbf{n}\cdot\mathbf{v}, \mathbf{n}\cdot\mathbf{l}) & \text{if $s \gt 0$}
 \end{cases}
-\\\<br>
-A &amp;= (1 - 0.5\frac{\sigma^2}{\sigma^2 + 0.33} + 0.17\rho\frac{\sigma^2}{\sigma^2 + 0.13})
-\\\<br>
-B &amp;= 0.45\frac{\sigma^2}{\sigma^2 + 0.09}
+\\\<br>A &= (1 - 0.5\frac{\sigma^2}{\sigma^2 + 0.33} + 0.17\rho\frac{\sigma^2}{\sigma^2 + 0.13})
+\\\<br>B &= 0.45\frac{\sigma^2}{\sigma^2 + 0.09}
 \end{align}
 $$
-なぜなら、上の数式を直接反映してみたらところどころでバグによる明るい曲線が見えるからです。多分<code>tan()</code>項でバグったりして不具合が描画されると思いますが、直せずに下のベクトル形態の数式を使ってOren-NayarのQuantitive-Modelを実装しました。</p>
-<p>数式で見れる<code>\rho</code>（$ \rho $ ）はアルベドを表します。普通Lamberitanのアルベドのように、アルベドカラーを入れます。そして<code>\sigma</code>（$ \sigma $）は表面の粗さ（Roughness）を示します。だいたい０～１の値を持ちます。</p>
-<p>上の数式を表したコードは下にあります。</p>
-<div class="highlight"><pre class="chroma"><code class="language-glsl" data-lang="glsl"><span class="k">float</span> <span class="n">OrenNayarAlpha</span><span class="p">(</span><span class="k">in</span> <span class="k">vec3</span> <span class="n">l</span><span class="p">,</span> <span class="k">in</span> <span class="k">vec3</span> <span class="n">n</span><span class="p">,</span> <span class="k">in</span> <span class="k">vec3</span> <span class="n">v</span><span class="p">)</span>
-<span class="p">{</span>
-    <span class="k">return</span> <span class="n">dot</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="o">-</span> <span class="n">dot</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">l</span><span class="p">)</span> <span class="o">*</span> <span class="n">dot</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">v</span><span class="p">);</span>
-<span class="p">}</span>
+なぜなら、上の数式を直接反映してみたらところどころでバグによる明るい曲線が見えるからです。多分<code>tan()</code>項でバグったりして不具合が描画されると思いますが、直せずに下のベクトル形態の数式を使ってOren-NayarのQuantitive-Modelを実装しました。</p><p>数式で見れる<code>\rho</code>（$ \rho $ ）はアルベドを表します。普通Lamberitanのアルベドのように、アルベドカラーを入れます。そして<code>\sigma</code>（$ \sigma $）は表面の粗さ（Roughness）を示します。だいたい０～１の値を持ちます。</p><p>上の数式を表したコードは下にあります。</p><div class=highlight><pre class=chroma><code class=language-glsl data-lang=glsl><span class=k>float</span> <span class=n>OrenNayarAlpha</span><span class=p>(</span><span class=k>in</span> <span class=k>vec3</span> <span class=n>l</span><span class=p>,</span> <span class=k>in</span> <span class=k>vec3</span> <span class=n>n</span><span class=p>,</span> <span class=k>in</span> <span class=k>vec3</span> <span class=n>v</span><span class=p>)</span>
+<span class=p>{</span>
+    <span class=k>return</span> <span class=n>dot</span><span class=p>(</span><span class=n>l</span><span class=p>,</span> <span class=n>v</span><span class=p>)</span> <span class=o>-</span> <span class=n>dot</span><span class=p>(</span><span class=n>n</span><span class=p>,</span> <span class=n>l</span><span class=p>)</span> <span class=o>*</span> <span class=n>dot</span><span class=p>(</span><span class=n>n</span><span class=p>,</span> <span class=n>v</span><span class=p>);</span>
+<span class=p>}</span>
 
-<span class="k">float</span> <span class="n">OrenNayarBeta</span><span class="p">(</span><span class="k">in</span> <span class="k">vec3</span> <span class="n">l</span><span class="p">,</span> <span class="k">in</span> <span class="k">vec3</span> <span class="n">n</span><span class="p">,</span> <span class="k">in</span> <span class="k">vec3</span> <span class="n">v</span><span class="p">)</span>
-<span class="p">{</span>
-    <span class="k">return</span> <span class="n">mix</span><span class="p">(</span>
-        <span class="mf">1.</span><span class="n">f</span><span class="p">,</span>
-        <span class="n">max</span><span class="p">(</span><span class="n">dot</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">l</span><span class="p">),</span> <span class="n">dot</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">v</span><span class="p">)),</span>
-        <span class="n">step</span><span class="p">(</span><span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="n">OrenNayarAlpha</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">v</span><span class="p">))</span>
-    <span class="p">);</span>
-<span class="p">}</span>
+<span class=k>float</span> <span class=n>OrenNayarBeta</span><span class=p>(</span><span class=k>in</span> <span class=k>vec3</span> <span class=n>l</span><span class=p>,</span> <span class=k>in</span> <span class=k>vec3</span> <span class=n>n</span><span class=p>,</span> <span class=k>in</span> <span class=k>vec3</span> <span class=n>v</span><span class=p>)</span>
+<span class=p>{</span>
+    <span class=k>return</span> <span class=n>mix</span><span class=p>(</span>
+        <span class=mf>1.</span><span class=n>f</span><span class=p>,</span>
+        <span class=n>max</span><span class=p>(</span><span class=n>dot</span><span class=p>(</span><span class=n>n</span><span class=p>,</span> <span class=n>l</span><span class=p>),</span> <span class=n>dot</span><span class=p>(</span><span class=n>n</span><span class=p>,</span> <span class=n>v</span><span class=p>)),</span>
+        <span class=n>step</span><span class=p>(</span><span class=mi>1</span><span class=n>e</span><span class=o>-</span><span class=mi>5</span><span class=p>,</span> <span class=n>OrenNayarAlpha</span><span class=p>(</span><span class=n>l</span><span class=p>,</span> <span class=n>n</span><span class=p>,</span> <span class=n>v</span><span class=p>))</span>
+    <span class=p>);</span>
+<span class=p>}</span>
 
-<span class="k">float</span> <span class="n">OrenNayarA</span><span class="p">(</span><span class="k">in</span> <span class="k">float</span> <span class="n">r</span><span class="p">)</span>
-<span class="p">{</span>
-    <span class="k">return</span> <span class="mf">1.0</span><span class="n">f</span> <span class="o">-</span> <span class="mf">0.5</span><span class="n">f</span> <span class="o">*</span> <span class="p">(</span>
-         		<span class="p">(</span><span class="n">r</span> <span class="o">*</span> <span class="n">r</span><span class="p">)</span>
-    <span class="o">/</span> <span class="c1">// ----------------------</span>
-        	<span class="p">(</span><span class="n">r</span> <span class="o">*</span> <span class="n">r</span> <span class="o">+</span> <span class="mf">0.33</span><span class="n">f</span><span class="p">)</span>           
-    <span class="p">)</span>
-    <span class="o">+</span> <span class="mf">0.17</span><span class="n">f</span> <span class="o">*</span> <span class="p">(</span>
-        		<span class="p">(</span><span class="n">r</span> <span class="o">*</span> <span class="n">r</span><span class="p">)</span>
-    <span class="o">/</span> <span class="c1">// ----------------------</span>
-        	<span class="p">(</span><span class="n">r</span> <span class="o">*</span> <span class="n">r</span> <span class="o">+</span> <span class="mf">0.13</span><span class="n">f</span><span class="p">)</span>
-    <span class="p">);</span>
-<span class="p">}</span>
+<span class=k>float</span> <span class=n>OrenNayarA</span><span class=p>(</span><span class=k>in</span> <span class=k>float</span> <span class=n>r</span><span class=p>)</span>
+<span class=p>{</span>
+    <span class=k>return</span> <span class=mf>1.0</span><span class=n>f</span> <span class=o>-</span> <span class=mf>0.5</span><span class=n>f</span> <span class=o>*</span> <span class=p>(</span>
+         		<span class=p>(</span><span class=n>r</span> <span class=o>*</span> <span class=n>r</span><span class=p>)</span>
+    <span class=o>/</span> <span class=c1>// ----------------------</span>
+        	<span class=p>(</span><span class=n>r</span> <span class=o>*</span> <span class=n>r</span> <span class=o>+</span> <span class=mf>0.33</span><span class=n>f</span><span class=p>)</span>           
+    <span class=p>)</span>
+    <span class=o>+</span> <span class=mf>0.17</span><span class=n>f</span> <span class=o>*</span> <span class=p>(</span>
+        		<span class=p>(</span><span class=n>r</span> <span class=o>*</span> <span class=n>r</span><span class=p>)</span>
+    <span class=o>/</span> <span class=c1>// ----------------------</span>
+        	<span class=p>(</span><span class=n>r</span> <span class=o>*</span> <span class=n>r</span> <span class=o>+</span> <span class=mf>0.13</span><span class=n>f</span><span class=p>)</span>
+    <span class=p>);</span>
+<span class=p>}</span>
 
-<span class="k">float</span> <span class="n">OrenNayarB</span><span class="p">(</span><span class="k">in</span> <span class="k">float</span> <span class="n">r</span><span class="p">)</span>
-<span class="p">{</span>
-    <span class="k">return</span> <span class="mf">0.45</span><span class="n">f</span> <span class="o">*</span> <span class="p">(</span>
-         		<span class="p">(</span><span class="n">r</span> <span class="o">*</span> <span class="n">r</span><span class="p">)</span>
-    <span class="o">/</span> <span class="c1">// ----------------------</span>
-        	<span class="p">(</span><span class="n">r</span> <span class="o">*</span> <span class="n">r</span> <span class="o">+</span> <span class="mf">0.09</span><span class="n">f</span><span class="p">)</span>
-    <span class="p">);</span>
-<span class="p">}</span>
+<span class=k>float</span> <span class=n>OrenNayarB</span><span class=p>(</span><span class=k>in</span> <span class=k>float</span> <span class=n>r</span><span class=p>)</span>
+<span class=p>{</span>
+    <span class=k>return</span> <span class=mf>0.45</span><span class=n>f</span> <span class=o>*</span> <span class=p>(</span>
+         		<span class=p>(</span><span class=n>r</span> <span class=o>*</span> <span class=n>r</span><span class=p>)</span>
+    <span class=o>/</span> <span class=c1>// ----------------------</span>
+        	<span class=p>(</span><span class=n>r</span> <span class=o>*</span> <span class=n>r</span> <span class=o>+</span> <span class=mf>0.09</span><span class=n>f</span><span class=p>)</span>
+    <span class=p>);</span>
+<span class=p>}</span>
 
-<span class="k">float</span> <span class="n">FactorDiffOrenNayar</span><span class="p">(</span><span class="k">in</span> <span class="k">vec3</span> <span class="n">l</span><span class="p">,</span> <span class="k">in</span> <span class="k">vec3</span> <span class="n">n</span><span class="p">,</span> <span class="k">in</span> <span class="k">vec3</span> <span class="n">v</span><span class="p">,</span> <span class="k">in</span> <span class="k">float</span> <span class="n">r</span><span class="p">)</span>
-<span class="p">{</span>
-    <span class="k">float</span> <span class="n">A</span>  	<span class="o">=</span> <span class="n">OrenNayarA</span><span class="p">(</span><span class="n">r</span><span class="p">);</span>
-    <span class="k">float</span> <span class="n">B</span> 	<span class="o">=</span> <span class="n">OrenNayarB</span><span class="p">(</span><span class="n">r</span><span class="p">);</span>
-    <span class="k">float</span> <span class="n">_a</span> 	<span class="o">=</span> <span class="n">OrenNayarAlpha</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">v</span><span class="p">);</span>
-    <span class="k">float</span> <span class="n">_b</span> 	<span class="o">=</span> <span class="n">OrenNayarBeta</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">v</span><span class="p">);</span>
-    <span class="k">return</span> <span class="n">FactorDiffLambertian</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">A</span> <span class="o">+</span> <span class="n">B</span> <span class="o">*</span> <span class="p">(</span><span class="n">_a</span> <span class="o">/</span> <span class="n">_b</span><span class="p">));</span>
-<span class="p">}</span>
+<span class=k>float</span> <span class=n>FactorDiffOrenNayar</span><span class=p>(</span><span class=k>in</span> <span class=k>vec3</span> <span class=n>l</span><span class=p>,</span> <span class=k>in</span> <span class=k>vec3</span> <span class=n>n</span><span class=p>,</span> <span class=k>in</span> <span class=k>vec3</span> <span class=n>v</span><span class=p>,</span> <span class=k>in</span> <span class=k>float</span> <span class=n>r</span><span class=p>)</span>
+<span class=p>{</span>
+    <span class=k>float</span> <span class=n>A</span>  	<span class=o>=</span> <span class=n>OrenNayarA</span><span class=p>(</span><span class=n>r</span><span class=p>);</span>
+    <span class=k>float</span> <span class=n>B</span> 	<span class=o>=</span> <span class=n>OrenNayarB</span><span class=p>(</span><span class=n>r</span><span class=p>);</span>
+    <span class=k>float</span> <span class=n>_a</span> 	<span class=o>=</span> <span class=n>OrenNayarAlpha</span><span class=p>(</span><span class=n>l</span><span class=p>,</span> <span class=n>n</span><span class=p>,</span> <span class=n>v</span><span class=p>);</span>
+    <span class=k>float</span> <span class=n>_b</span> 	<span class=o>=</span> <span class=n>OrenNayarBeta</span><span class=p>(</span><span class=n>l</span><span class=p>,</span> <span class=n>n</span><span class=p>,</span> <span class=n>v</span><span class=p>);</span>
+    <span class=k>return</span> <span class=n>FactorDiffLambertian</span><span class=p>(</span><span class=n>l</span><span class=p>,</span> <span class=n>n</span><span class=p>)</span> <span class=o>*</span> <span class=p>(</span><span class=n>A</span> <span class=o>+</span> <span class=n>B</span> <span class=o>*</span> <span class=p>(</span><span class=n>_a</span> <span class=o>/</span> <span class=n>_b</span><span class=p>));</span>
+<span class=p>}</span>
 
-<span class="k">vec3</span> <span class="n">DiffuseOrenNayar</span><span class="p">(</span><span class="k">in</span> <span class="k">vec3</span> <span class="n">l</span><span class="p">,</span> <span class="k">in</span> <span class="k">vec3</span> <span class="n">n</span><span class="p">,</span> 
-                      <span class="k">in</span> <span class="k">vec3</span> <span class="n">diffuse</span><span class="p">,</span> <span class="k">in</span> <span class="k">vec3</span> <span class="n">ambient</span><span class="p">,</span> 
-                      <span class="k">in</span> <span class="k">vec3</span> <span class="n">v</span><span class="p">,</span> <span class="k">in</span> <span class="k">float</span> <span class="n">r</span><span class="p">)</span> 
-<span class="p">{</span>
-    <span class="k">return</span> <span class="n">mix</span><span class="p">(</span><span class="n">ambient</span><span class="p">,</span> <span class="n">diffuse</span><span class="p">,</span> <span class="n">FactorDiffOrenNayar</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">r</span><span class="p">)</span> <span class="o">*</span> <span class="n">pi</span><span class="p">);</span>
-<span class="p">}</span>
-</code></pre></div><p>一気にコードの量が増えましたが、分析していただきましたら大したものはないことがわかります。</p>
-<p>実は、2番目のリンク先で投稿した方の改良したOren-Nayarモデルも実装はしたんですが、光が表面全体を照らすときの描画が好きじゃなかったので断念してOren-NayarのQuantitive-Modelを最終採用しました。</p>
-<h2 id="specular">Specular</h2>
-<p>SpecularのBRDFも、上のDiffuseのようにMicrofacet理論に基づいたモデルを使っています。Specular（ハイライト）は、Diffuseとは違ってカメラの目線によってある位置にハイライトの陰影がつけられるかが異なります。（なんで、Lambertianみたいな単純なモデルは無いです）</p>
-<p>普通に使ってるPBRのSpecularモデルは、以下の<strong>Cook-Torrance Model</strong>です。
+<span class=k>vec3</span> <span class=n>DiffuseOrenNayar</span><span class=p>(</span><span class=k>in</span> <span class=k>vec3</span> <span class=n>l</span><span class=p>,</span> <span class=k>in</span> <span class=k>vec3</span> <span class=n>n</span><span class=p>,</span> 
+                      <span class=k>in</span> <span class=k>vec3</span> <span class=n>diffuse</span><span class=p>,</span> <span class=k>in</span> <span class=k>vec3</span> <span class=n>ambient</span><span class=p>,</span> 
+                      <span class=k>in</span> <span class=k>vec3</span> <span class=n>v</span><span class=p>,</span> <span class=k>in</span> <span class=k>float</span> <span class=n>r</span><span class=p>)</span> 
+<span class=p>{</span>
+    <span class=k>return</span> <span class=n>mix</span><span class=p>(</span><span class=n>ambient</span><span class=p>,</span> <span class=n>diffuse</span><span class=p>,</span> <span class=n>FactorDiffOrenNayar</span><span class=p>(</span><span class=n>l</span><span class=p>,</span> <span class=n>n</span><span class=p>,</span> <span class=n>v</span><span class=p>,</span> <span class=n>r</span><span class=p>)</span> <span class=o>*</span> <span class=n>pi</span><span class=p>);</span>
+<span class=p>}</span>
+</code></pre></div><p>一気にコードの量が増えましたが、分析していただきましたら大したものはないことがわかります。</p><p>実は、2番目のリンク先で投稿した方の改良したOren-Nayarモデルも実装はしたんですが、光が表面全体を照らすときの描画が好きじゃなかったので断念してOren-NayarのQuantitive-Modelを最終採用しました。</p><h2 id=specular>Specular<a hidden class=anchor aria-hidden=true href=#specular>#</a></h2><p>SpecularのBRDFも、上のDiffuseのようにMicrofacet理論に基づいたモデルを使っています。Specular（ハイライト）は、Diffuseとは違ってカメラの目線によってある位置にハイライトの陰影がつけられるかが異なります。（なんで、Lambertianみたいな単純なモデルは無いです）</p><p>普通に使ってるPBRのSpecularモデルは、以下の<strong>Cook-Torrance Model</strong>です。
 $$
 f_{spec}(\mathbf{l}, \mathbf{v}) = \frac
 {F(\mathbf{h}, \mathbf{l})G_{2}(\mathbf{l},\mathbf{v},\mathbf{h})D(\mathbf{h})}
 {4|\mathbf{n}\cdot\mathbf{l}||\mathbf{n}\cdot\mathbf{v}|}
-$$</p>
-<div class="highlight"><pre class="chroma"><code class="language-glsl" data-lang="glsl"><span class="k">float</span> <span class="n">cn</span> <span class="o">=</span> <span class="mf">4.</span><span class="n">f</span> <span class="o">*</span> <span class="n">max</span><span class="p">(</span><span class="mf">.25</span><span class="n">f</span><span class="p">,</span> <span class="n">dot</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">ld</span><span class="p">))</span> <span class="o">*</span> <span class="n">max</span><span class="p">(</span><span class="mf">.25</span><span class="n">f</span><span class="p">,</span> <span class="n">dot</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="o">-</span><span class="n">fwd</span><span class="p">));</span>
+$$</p><div class=highlight><pre class=chroma><code class=language-glsl data-lang=glsl><span class=k>float</span> <span class=n>cn</span> <span class=o>=</span> <span class=mf>4.</span><span class=n>f</span> <span class=o>*</span> <span class=n>max</span><span class=p>(</span><span class=mf>.25</span><span class=n>f</span><span class=p>,</span> <span class=n>dot</span><span class=p>(</span><span class=n>n</span><span class=p>,</span> <span class=n>ld</span><span class=p>))</span> <span class=o>*</span> <span class=n>max</span><span class=p>(</span><span class=mf>.25</span><span class=n>f</span><span class=p>,</span> <span class=n>dot</span><span class=p>(</span><span class=n>n</span><span class=p>,</span> <span class=o>-</span><span class=n>fwd</span><span class=p>));</span>
             
-<span class="k">float</span> <span class="n">d</span> <span class="o">=</span> <span class="n">GTR</span><span class="p">(</span><span class="mi">9</span><span class="n">e</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="n">kBx1</span><span class="p">.</span><span class="n">mRough</span><span class="p">,</span> <span class="n">th</span><span class="p">,</span> <span class="mf">2.</span><span class="n">f</span><span class="p">);</span>
-<span class="k">float</span> <span class="n">f</span> <span class="o">=</span> <span class="n">Schlick</span><span class="p">(</span><span class="n">kBx1</span><span class="p">.</span><span class="n">mR0</span><span class="p">,</span> <span class="n">td</span><span class="p">);</span>
-<span class="k">float</span> <span class="n">g</span> <span class="o">=</span> <span class="n">SeparableMaskingShadowing</span><span class="p">(</span><span class="n">tl</span><span class="p">,</span> <span class="n">td</span><span class="p">,</span> <span class="n">kBx1</span><span class="p">.</span><span class="n">mRough</span><span class="p">);</span>
+<span class=k>float</span> <span class=n>d</span> <span class=o>=</span> <span class=n>GTR</span><span class=p>(</span><span class=mi>9</span><span class=n>e</span><span class=o>-</span><span class=mi>3</span><span class=p>,</span> <span class=n>kBx1</span><span class=p>.</span><span class=n>mRough</span><span class=p>,</span> <span class=n>th</span><span class=p>,</span> <span class=mf>2.</span><span class=n>f</span><span class=p>);</span>
+<span class=k>float</span> <span class=n>f</span> <span class=o>=</span> <span class=n>Schlick</span><span class=p>(</span><span class=n>kBx1</span><span class=p>.</span><span class=n>mR0</span><span class=p>,</span> <span class=n>td</span><span class=p>);</span>
+<span class=k>float</span> <span class=n>g</span> <span class=o>=</span> <span class=n>SeparableMaskingShadowing</span><span class=p>(</span><span class=n>tl</span><span class=p>,</span> <span class=n>td</span><span class=p>,</span> <span class=n>kBx1</span><span class=p>.</span><span class=n>mRough</span><span class=p>);</span>
             
-<span class="n">spc</span> <span class="o">=</span> <span class="k">vec3</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">d</span> <span class="o">*</span> <span class="n">f</span> <span class="o">*</span> <span class="n">g</span> <span class="o">/</span> <span class="n">cn</span><span class="p">;</span>
-</code></pre></div><h3 id="fresnel-reflection">Fresnel Reflection</h3>
-<blockquote>
-<p><a href="https://en.wikipedia.org/wiki/Fresnel_equations">https://en.wikipedia.org/wiki/Fresnel_equations</a>
-<a href="https://en.wikipedia.org/wiki/Schlick%27s_approximation">https://en.wikipedia.org/wiki/Schlick%27s_approximation</a></p>
-</blockquote>
-<p>上記のCook-Torrance Modelにて、分子の
+<span class=n>spc</span> <span class=o>=</span> <span class=k>vec3</span><span class=p>(</span><span class=mi>1</span><span class=p>)</span> <span class=o>*</span> <span class=n>d</span> <span class=o>*</span> <span class=n>f</span> <span class=o>*</span> <span class=n>g</span> <span class=o>/</span> <span class=n>cn</span><span class=p>;</span>
+</code></pre></div><h3 id=fresnel-reflection>Fresnel Reflection<a hidden class=anchor aria-hidden=true href=#fresnel-reflection>#</a></h3><blockquote><p><a href=https://en.wikipedia.org/wiki/Fresnel_equations>https://en.wikipedia.org/wiki/Fresnel_equations</a>
+<a href=https://en.wikipedia.org/wiki/Schlick%27s_approximation>https://en.wikipedia.org/wiki/Schlick%27s_approximation</a></p></blockquote><p>上記のCook-Torrance Modelにて、分子の
 $$
 F(\mathbf{h}, \mathbf{l})
 $$
-はフレネルの式を示します。要するに、光の入射光線がある物体の表面にぶつかるときの正反射率を表す数式です。全ての物質は自分のIOR（屈折率）と外部のIORによってそれぞれ違う反射率を持ちます。</p>
-<p>ウィキペディアを見ていただきますと正確な数式がありますが、CGでシェーダープログラムにフレネルの式の全部をやらせるには負担がかかりすぎます。なので、下の単純なモデルを使いながらある程度フレネルの式を従います。
+はフレネルの式を示します。要するに、光の入射光線がある物体の表面にぶつかるときの正反射率を表す数式です。全ての物質は自分のIOR（屈折率）と外部のIORによってそれぞれ違う反射率を持ちます。</p><p>ウィキペディアを見ていただきますと正確な数式がありますが、CGでシェーダープログラムにフレネルの式の全部をやらせるには負担がかかりすぎます。なので、下の単純なモデルを使いながらある程度フレネルの式を従います。
 $$
 F(\mathbf{h}, \mathbf{l}) \approx F_0 + (1 - F_0)(1 - (\mathbf{h}\cdot\mathbf{l})^+)^5
 $$
-この数式は<strong>Schlick-Approximation</strong>と言います。空気中の物質に対するフレネルの式の数値を得たいときの使います。もちろん、抽象化されたモデルなので正確ではありません。ですがフレネルの式の数値のグラフでの変動をある程度沿っています。</p>
-<p>ここで、
+この数式は<strong>Schlick-Approximation</strong>と言います。空気中の物質に対するフレネルの式の数値を得たいときの使います。もちろん、抽象化されたモデルなので正確ではありません。ですがフレネルの式の数値のグラフでの変動をある程度沿っています。</p><p>ここで、
 $$
 F_0
 $$
@@ -262,49 +144,36 @@ $$
 $$
 \mathbf{h} = \text{normalize($\mathbf{l} + \mathbf{v}$)}
 $$
-<code>h</code>はハーフウェイベクトル（Halfway Vector）と言います。DiffuseとSpecularを一つに統合したレンダリングモデルである、Blinn-Phong Reflectance Modelでも使うやつです。</p>
-<div class="highlight"><pre class="chroma"><code class="language-glsl" data-lang="glsl"><span class="k">float</span> <span class="n">Schlick</span><span class="p">(</span><span class="k">in</span> <span class="k">float</span> <span class="n">r0</span><span class="p">,</span> <span class="k">in</span> <span class="k">vec3</span> <span class="n">n</span><span class="p">,</span> <span class="k">in</span> <span class="k">vec3</span> <span class="n">v</span><span class="p">)</span> 
-<span class="p">{</span>
-    <span class="k">return</span> <span class="n">r0</span> <span class="o">+</span> <span class="p">(</span><span class="mf">1.</span> <span class="o">-</span> <span class="n">r0</span><span class="p">)</span> <span class="o">*</span> <span class="n">pow</span><span class="p">(</span><span class="mf">1.</span> <span class="o">-</span> <span class="n">max</span><span class="p">(</span><span class="mf">0.</span><span class="n">f</span><span class="p">,</span> <span class="n">dot</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">v</span><span class="p">)),</span> <span class="mf">5.</span><span class="n">f</span><span class="p">);</span>
-<span class="p">}</span>
+<code>h</code>はハーフウェイベクトル（Halfway Vector）と言います。DiffuseとSpecularを一つに統合したレンダリングモデルである、Blinn-Phong Reflectance Modelでも使うやつです。</p><div class=highlight><pre class=chroma><code class=language-glsl data-lang=glsl><span class=k>float</span> <span class=n>Schlick</span><span class=p>(</span><span class=k>in</span> <span class=k>float</span> <span class=n>r0</span><span class=p>,</span> <span class=k>in</span> <span class=k>vec3</span> <span class=n>n</span><span class=p>,</span> <span class=k>in</span> <span class=k>vec3</span> <span class=n>v</span><span class=p>)</span> 
+<span class=p>{</span>
+    <span class=k>return</span> <span class=n>r0</span> <span class=o>+</span> <span class=p>(</span><span class=mf>1.</span> <span class=o>-</span> <span class=n>r0</span><span class=p>)</span> <span class=o>*</span> <span class=n>pow</span><span class=p>(</span><span class=mf>1.</span> <span class=o>-</span> <span class=n>max</span><span class=p>(</span><span class=mf>0.</span><span class=n>f</span><span class=p>,</span> <span class=n>dot</span><span class=p>(</span><span class=n>n</span><span class=p>,</span> <span class=n>v</span><span class=p>)),</span> <span class=mf>5.</span><span class=n>f</span><span class=p>);</span>
+<span class=p>}</span>
 
-<span class="c1">// または</span>
+<span class=c1>// または</span>
 
-<span class="k">float</span> <span class="n">Schlick</span><span class="p">(</span><span class="k">in</span> <span class="k">float</span> <span class="n">r0</span><span class="p">,</span> <span class="k">in</span> <span class="k">float</span> <span class="n">td</span><span class="p">)</span> 
-<span class="p">{</span>
-    <span class="k">return</span> <span class="n">r0</span> <span class="o">+</span> <span class="p">(</span><span class="mf">1.</span> <span class="o">-</span> <span class="n">r0</span><span class="p">)</span> <span class="o">*</span> <span class="n">pow</span><span class="p">(</span><span class="mf">1.</span> <span class="o">-</span> <span class="n">max</span><span class="p">(</span><span class="mf">0.</span><span class="n">f</span><span class="p">,</span> <span class="n">cos</span><span class="p">(</span><span class="n">td</span><span class="p">)),</span> <span class="mf">5.</span><span class="n">f</span><span class="p">);</span>
-<span class="p">}</span>
-</code></pre></div><p>上のコードはSchlick Approximationを2つのバージョンで実装したものです。下のバージョンの<code>td</code>は、<code>n</code>と<code>v</code>の角度差を表します。</p>
-<h3 id="normal-distribution-function">Normal Distribution Function</h3>
-<p>法線分布関数だと呼ばれる<strong>Normal Distribution Function</strong>は、微小面の法線がどうやって分布されているかを示す関数です。この関数は統計的に測定されて使っているか、それともある抽象化した数学関数を用いて使います。詳しくはmicrofacet理論の触れますので割愛します。</p>
-<p>ですけどこのNDFに特徴の一つは、あるNDF関数があって、そしてある表面の法線ベクトル <code>N</code> があった時に、球面を覆う単位ベクトルを入れたNDFの値の積分は、<code>N</code> を持つ微細表面の面積になります。ということで、
+<span class=k>float</span> <span class=n>Schlick</span><span class=p>(</span><span class=k>in</span> <span class=k>float</span> <span class=n>r0</span><span class=p>,</span> <span class=k>in</span> <span class=k>float</span> <span class=n>td</span><span class=p>)</span> 
+<span class=p>{</span>
+    <span class=k>return</span> <span class=n>r0</span> <span class=o>+</span> <span class=p>(</span><span class=mf>1.</span> <span class=o>-</span> <span class=n>r0</span><span class=p>)</span> <span class=o>*</span> <span class=n>pow</span><span class=p>(</span><span class=mf>1.</span> <span class=o>-</span> <span class=n>max</span><span class=p>(</span><span class=mf>0.</span><span class=n>f</span><span class=p>,</span> <span class=n>cos</span><span class=p>(</span><span class=n>td</span><span class=p>)),</span> <span class=mf>5.</span><span class=n>f</span><span class=p>);</span>
+<span class=p>}</span>
+</code></pre></div><p>上のコードはSchlick Approximationを2つのバージョンで実装したものです。下のバージョンの<code>td</code>は、<code>n</code>と<code>v</code>の角度差を表します。</p><h3 id=normal-distribution-function>Normal Distribution Function<a hidden class=anchor aria-hidden=true href=#normal-distribution-function>#</a></h3><p>法線分布関数だと呼ばれる<strong>Normal Distribution Function</strong>は、微小面の法線がどうやって分布されているかを示す関数です。この関数は統計的に測定されて使っているか、それともある抽象化した数学関数を用いて使います。詳しくはmicrofacet理論の触れますので割愛します。</p><p>ですけどこのNDFに特徴の一つは、あるNDF関数があって、そしてある表面の法線ベクトル <code>N</code> があった時に、球面を覆う単位ベクトルを入れたNDFの値の積分は、<code>N</code> を持つ微細表面の面積になります。ということで、
 $$
 \int_{\mathbf{m} \in \Theta} {D(\mathbf{m})(\mathbf{n} \cdot \mathbf{m})d\mathbf{m}} = 1
 $$
-になります。</p>
-<p>また、カメラまたは目線のベクトル<code>v</code>があるとき、ある表面の法線ベクトルが<code>n</code>で、そして微細表面の球体の単位ベクトルが<code>m</code>だとしたら、
+になります。</p><p>また、カメラまたは目線のベクトル<code>v</code>があるとき、ある表面の法線ベクトルが<code>n</code>で、そして微細表面の球体の単位ベクトルが<code>m</code>だとしたら、
 $$
 \int_{\mathbf{m} \in \Theta}{D(\mathbf{m})(\mathbf{v}\cdot\mathbf{m})d\mathbf{m}} = \mathbf{v}\cdot\mathbf{n}
 $$
-です。目によって実際に見える微小面の面積は微小面の凸凹の法線ベクトルたちを目線のベクトルとの内積し、結果値を全部足したのと同じです。<code>v * m</code>で目に見えない微小面はなくなりまし、見える表面は残ります。</p>
-<p>一応これもリアルタイムでは計算しにくいので、上の特性から派生した様々な抽象化したモデルがあります。僕はDisney BRDFで使った**GTR (Generalized-Trowbridge-Reitz）**モデルを使いました。このモデルはGGX（Trowbridge-Reitz）モデルを一般化したものです。
+です。目によって実際に見える微小面の面積は微小面の凸凹の法線ベクトルたちを目線のベクトルとの内積し、結果値を全部足したのと同じです。<code>v * m</code>で目に見えない微小面はなくなりまし、見える表面は残ります。</p><p>一応これもリアルタイムでは計算しにくいので、上の特性から派生した様々な抽象化したモデルがあります。僕はDisney BRDFで使った**GTR (Generalized-Trowbridge-Reitz）**モデルを使いました。このモデルはGGX（Trowbridge-Reitz）モデルを一般化したものです。
 $$
 D_{GTR} = \frac{c}{(a^2\cos^2(\theta_{h})+\sin^2(\theta_{h}))^\gamma}
-$$</p>
-<blockquote>
-<p>実はこの数式も実使用で使うために簡略化された数式です。Realtime-RenderingでGTRの完全数式を見てみますと結構ひどいです。（白目）</p>
-</blockquote>
-<p>上の数式で、<code>gamma</code>が2ならGGXと同じになります。以下はGTRをコードに写したものです。</p>
-<div class="highlight"><pre class="chroma"><code class="language-glsl" data-lang="glsl"><span class="k">float</span> <span class="n">GTR</span><span class="p">(</span><span class="k">in</span> <span class="k">float</span> <span class="n">c</span><span class="p">,</span> <span class="k">in</span> <span class="k">float</span> <span class="n">r</span><span class="p">,</span> <span class="k">in</span> <span class="k">float</span> <span class="n">dh</span><span class="p">,</span> <span class="k">in</span> <span class="k">float</span> <span class="n">gamma</span><span class="p">)</span>
-<span class="p">{</span>
-    <span class="k">return</span> 
-        						 <span class="n">c</span>
-    <span class="o">/</span> <span class="c1">//--------------------------------------------------------</span>
-        <span class="n">pow</span><span class="p">(</span><span class="n">r</span> <span class="o">*</span> <span class="n">r</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">dh</span><span class="p">)</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">dh</span><span class="p">)</span> <span class="o">+</span> <span class="n">sin</span><span class="p">(</span><span class="n">dh</span><span class="p">)</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">dh</span><span class="p">),</span> <span class="n">gamma</span><span class="p">);</span>
-<span class="p">}</span>
-</code></pre></div><h3 id="joint-masking-shadowing-function">Joint Masking Shadowing Function</h3>
-<p>Joint Masking Shadowing Functionを説明する前に、簡単に一般Masking Function <code>G</code>を説明させていただきたいと思います。日本語でいうと<strong>幾何減衰項</strong>（読み方はわかりません）と言います。Masking Functionは微小面（Microfacet）によって発生するシャドウィング（自己陰影）、マスキング（自己遮蔽）を表したものです。</p>
-<p>幾何減衰項は上で説明したNDFに（法線分布関数）と密接に関連されます。上の表面の法線・微小面の法線・目線の法線との関係がある数式は、以下のように変形できます。
+$$</p><blockquote><p>実はこの数式も実使用で使うために簡略化された数式です。Realtime-RenderingでGTRの完全数式を見てみますと結構ひどいです。（白目）</p></blockquote><p>上の数式で、<code>gamma</code>が2ならGGXと同じになります。以下はGTRをコードに写したものです。</p><div class=highlight><pre class=chroma><code class=language-glsl data-lang=glsl><span class=k>float</span> <span class=n>GTR</span><span class=p>(</span><span class=k>in</span> <span class=k>float</span> <span class=n>c</span><span class=p>,</span> <span class=k>in</span> <span class=k>float</span> <span class=n>r</span><span class=p>,</span> <span class=k>in</span> <span class=k>float</span> <span class=n>dh</span><span class=p>,</span> <span class=k>in</span> <span class=k>float</span> <span class=n>gamma</span><span class=p>)</span>
+<span class=p>{</span>
+    <span class=k>return</span> 
+        						 <span class=n>c</span>
+    <span class=o>/</span> <span class=c1>//--------------------------------------------------------</span>
+        <span class=n>pow</span><span class=p>(</span><span class=n>r</span> <span class=o>*</span> <span class=n>r</span> <span class=o>*</span> <span class=n>cos</span><span class=p>(</span><span class=n>dh</span><span class=p>)</span> <span class=o>*</span> <span class=n>cos</span><span class=p>(</span><span class=n>dh</span><span class=p>)</span> <span class=o>+</span> <span class=n>sin</span><span class=p>(</span><span class=n>dh</span><span class=p>)</span> <span class=o>*</span> <span class=n>sin</span><span class=p>(</span><span class=n>dh</span><span class=p>),</span> <span class=n>gamma</span><span class=p>);</span>
+<span class=p>}</span>
+</code></pre></div><h3 id=joint-masking-shadowing-function>Joint Masking Shadowing Function<a hidden class=anchor aria-hidden=true href=#joint-masking-shadowing-function>#</a></h3><p>Joint Masking Shadowing Functionを説明する前に、簡単に一般Masking Function <code>G</code>を説明させていただきたいと思います。日本語でいうと<strong>幾何減衰項</strong>（読み方はわかりません）と言います。Masking Functionは微小面（Microfacet）によって発生するシャドウィング（自己陰影）、マスキング（自己遮蔽）を表したものです。</p><p>幾何減衰項は上で説明したNDFに（法線分布関数）と密接に関連されます。上の表面の法線・微小面の法線・目線の法線との関係がある数式は、以下のように変形できます。
 $$
 \int_{\in\Theta}{G_1(\mathbf{m}, \mathbf{v})D(\mathbf{m})(\mathbf{v}\cdot\mathbf{m})^+d\mathbf{m}} = \mathbf{v}\cdot\mathbf{n}
 $$
@@ -322,9 +191,7 @@ D(\mathbf{m})
 \frac{(\mathbf{m}\cdot\mathbf{l})^+}{|\mathbf{n}\cdot\mathbf{l}|}
 \frac{(\mathbf{m}\cdot\mathbf{v})^+}{|\mathbf{n}\cdot\mathbf{v}|}
 d\mathbf{m}
-\\\<br>
-\\\<br>
-G_2(\mathbf{l}, \mathbf{v}, \mathbf{m}) =
+\\\<br>\\\<br>G_2(\mathbf{l}, \mathbf{v}, \mathbf{m}) =
 G_1(\mathbf{v}, \mathbf{m})
 G_1(\mathbf{l}, \mathbf{m})
 $$
@@ -332,90 +199,28 @@ $$
 $$
 G_2(\mathbf{l}, \mathbf{v}, \mathbf{m}) = \frac{\chi^+(\mathbf{v}\cdot\mathbf{m})\chi^+(\mathbf{l}\cdot\mathbf{m})}{1 + \Lambda(\mathbf{v}) + \Lambda(\mathbf{l})}
 $$
-僕は一番簡単な分離型G2を使いました。</p>
-<div class="highlight"><pre class="chroma"><code class="language-glsl" data-lang="glsl"><span class="k">float</span> <span class="n">Lambda</span><span class="p">(</span><span class="k">in</span> <span class="k">float</span> <span class="n">rad</span><span class="p">,</span> <span class="k">in</span> <span class="k">float</span> <span class="n">r</span><span class="p">)</span>
-<span class="p">{</span>
-    <span class="k">return</span> 
-        <span class="p">(</span><span class="o">-</span><span class="mf">1.</span><span class="n">f</span> <span class="o">+</span> <span class="n">sqrt</span><span class="p">(</span><span class="mf">1.</span><span class="n">f</span> <span class="o">+</span> <span class="n">r</span> <span class="o">*</span> <span class="n">r</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.</span><span class="n">f</span> <span class="o">/</span> <span class="n">cos</span><span class="p">(</span><span class="n">rad</span><span class="p">)</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">rad</span><span class="p">)</span> <span class="o">-</span> <span class="mf">1.</span><span class="n">f</span><span class="p">)))</span> <span class="o">*</span> <span class="mf">.5</span><span class="n">f</span><span class="p">;</span>
-<span class="p">}</span>
+僕は一番簡単な分離型G2を使いました。</p><div class=highlight><pre class=chroma><code class=language-glsl data-lang=glsl><span class=k>float</span> <span class=n>Lambda</span><span class=p>(</span><span class=k>in</span> <span class=k>float</span> <span class=n>rad</span><span class=p>,</span> <span class=k>in</span> <span class=k>float</span> <span class=n>r</span><span class=p>)</span>
+<span class=p>{</span>
+    <span class=k>return</span> 
+        <span class=p>(</span><span class=o>-</span><span class=mf>1.</span><span class=n>f</span> <span class=o>+</span> <span class=n>sqrt</span><span class=p>(</span><span class=mf>1.</span><span class=n>f</span> <span class=o>+</span> <span class=n>r</span> <span class=o>*</span> <span class=n>r</span> <span class=o>*</span> <span class=p>(</span><span class=mf>1.</span><span class=n>f</span> <span class=o>/</span> <span class=n>cos</span><span class=p>(</span><span class=n>rad</span><span class=p>)</span> <span class=o>*</span> <span class=n>cos</span><span class=p>(</span><span class=n>rad</span><span class=p>)</span> <span class=o>-</span> <span class=mf>1.</span><span class=n>f</span><span class=p>)))</span> <span class=o>*</span> <span class=mf>.5</span><span class=n>f</span><span class=p>;</span>
+<span class=p>}</span>
 
-<span class="k">float</span> <span class="n">SmithMasking</span><span class="p">(</span><span class="k">in</span> <span class="k">float</span> <span class="n">rad</span><span class="p">,</span> <span class="k">in</span> <span class="k">float</span> <span class="n">r</span><span class="p">)</span>
-<span class="p">{</span>
-    <span class="k">return</span>
-        		<span class="mf">1.</span><span class="n">f</span>
-    <span class="o">/</span> <span class="c1">//-----------------------</span>
-        <span class="p">(</span><span class="mf">1.</span><span class="n">f</span> <span class="o">+</span> <span class="n">Lambda</span><span class="p">(</span><span class="n">rad</span><span class="p">,</span> <span class="n">r</span><span class="p">));</span>
-<span class="p">}</span>
+<span class=k>float</span> <span class=n>SmithMasking</span><span class=p>(</span><span class=k>in</span> <span class=k>float</span> <span class=n>rad</span><span class=p>,</span> <span class=k>in</span> <span class=k>float</span> <span class=n>r</span><span class=p>)</span>
+<span class=p>{</span>
+    <span class=k>return</span>
+        		<span class=mf>1.</span><span class=n>f</span>
+    <span class=o>/</span> <span class=c1>//-----------------------</span>
+        <span class=p>(</span><span class=mf>1.</span><span class=n>f</span> <span class=o>+</span> <span class=n>Lambda</span><span class=p>(</span><span class=n>rad</span><span class=p>,</span> <span class=n>r</span><span class=p>));</span>
+<span class=p>}</span>
 
-<span class="k">float</span> <span class="n">SeparableMaskingShadowing</span><span class="p">(</span><span class="k">in</span> <span class="k">float</span> <span class="n">tl</span><span class="p">,</span> <span class="k">in</span> <span class="k">float</span> <span class="n">tv</span><span class="p">,</span> <span class="k">in</span> <span class="k">float</span> <span class="n">r</span><span class="p">)</span>
-<span class="p">{</span>
-    <span class="k">return</span> <span class="n">SmithMasking</span><span class="p">(</span><span class="n">tl</span><span class="p">,</span> <span class="n">r</span><span class="p">)</span> <span class="o">*</span> <span class="n">SmithMasking</span><span class="p">(</span><span class="n">tv</span><span class="p">,</span> <span class="n">r</span><span class="p">);</span>
-<span class="p">}</span>
-</code></pre></div><h1 id="まとめ">まとめ</h1>
-<p>以上、大雑把にコードを振り返りながらPBRの書き方、中身についてメモをしてみました。</p>
-<h1 id="もっと詳しく調べたい方に">もっと詳しく調べたい方に</h1>
-<ul>
-<li>
-<p><a href="https://qiita.com/mebiusbox2/items/1cd65993ffb546822213">https://qiita.com/mebiusbox2/items/1cd65993ffb546822213</a></p>
-</li>
-<li>
-<p><a href="https://qiita.com/mebiusbox2/items/8db00cdcaf263992a5ce">https://qiita.com/mebiusbox2/items/8db00cdcaf263992a5ce</a></p>
-</li>
-<li>
-<p><a href="https://qiita.com/emadurandal/items/3a8db7bc61438245654d">https://qiita.com/emadurandal/items/3a8db7bc61438245654d</a></p>
-</li>
-</ul>
-</div>
-  <footer class="post-footer">
-    <ul class="post-tags">
-      <li><a href="https://liliilli.github.io/tags/untagged">untagged</a></li>
-    </ul>
-  </footer>
-</article>
-    </main><footer class="footer">
-    <span>&copy; 2020 <a href="https://liliilli.github.io">neuromantic</a></span>
-    <span>&middot;</span>
-    <span>Powered by <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo️️</a>️</span>
-    <span>&middot;</span>
-    <span>Theme️ <a href="https://git.io/hugopapermod" rel="noopener" target="_blank">PaperMod</a></span>
-</footer>
-<a href="#top" aria-label="go to top" title="Go to Top">
-    <button class="top-link" id="top-link" type="button">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6">
-            <path d="M12 6H0l6-6z" /></svg>
-    </button>
-</a>
-<script src="https://liliilli.github.io/assets/js/highlight.min.e7afc2928c0925d65c4732dfebe147014d91299a98e819e4b42f25c4fa68e91c.js" integrity="sha256-56/CkowJJdZcRzLf6&#43;FHAU2RKZqY6BnktC8lxPpo6Rw="></script>
-<script>hljs.initHighlightingOnLoad();</script>
-<script>
-    window.onload = function () {
-        if (localStorage.getItem("menu-scroll-position")) {
-            document.getElementById('menu').scrollLeft = localStorage.getItem("menu-scroll-position");
-        }
-    }
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener("click", function (e) {
-            e.preventDefault();
-
-            document.querySelector(this.getAttribute("href")).scrollIntoView({
-                behavior: "smooth"
-            });
-        });
-    });
-    var mybutton = document.getElementById("top-link");
-    window.onscroll = function () {
-        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
-            mybutton.style.visibility = "visible";
-            mybutton.style.opacity = "1";
-        } else {
-            mybutton.style.visibility = "hidden";
-            mybutton.style.opacity = "0";
-        }
-    };
-    function menu_on_scroll() {
-        localStorage.setItem("menu-scroll-position", document.getElementById('menu').scrollLeft);
-    }
-</script>
-</body>
-
-</html>
+<span class=k>float</span> <span class=n>SeparableMaskingShadowing</span><span class=p>(</span><span class=k>in</span> <span class=k>float</span> <span class=n>tl</span><span class=p>,</span> <span class=k>in</span> <span class=k>float</span> <span class=n>tv</span><span class=p>,</span> <span class=k>in</span> <span class=k>float</span> <span class=n>r</span><span class=p>)</span>
+<span class=p>{</span>
+    <span class=k>return</span> <span class=n>SmithMasking</span><span class=p>(</span><span class=n>tl</span><span class=p>,</span> <span class=n>r</span><span class=p>)</span> <span class=o>*</span> <span class=n>SmithMasking</span><span class=p>(</span><span class=n>tv</span><span class=p>,</span> <span class=n>r</span><span class=p>);</span>
+<span class=p>}</span>
+</code></pre></div><h1 id=まとめ>まとめ<a hidden class=anchor aria-hidden=true href=#まとめ>#</a></h1><p>以上、大雑把にコードを振り返りながらPBRの書き方、中身についてメモをしてみました。</p><h1 id=もっと詳しく調べたい方に>もっと詳しく調べたい方に<a hidden class=anchor aria-hidden=true href=#もっと詳しく調べたい方に>#</a></h1><ul><li><p><a href=https://qiita.com/mebiusbox2/items/1cd65993ffb546822213>https://qiita.com/mebiusbox2/items/1cd65993ffb546822213</a></p></li><li><p><a href=https://qiita.com/mebiusbox2/items/8db00cdcaf263992a5ce>https://qiita.com/mebiusbox2/items/8db00cdcaf263992a5ce</a></p></li><li><p><a href=https://qiita.com/emadurandal/items/3a8db7bc61438245654d>https://qiita.com/emadurandal/items/3a8db7bc61438245654d</a></p></li></ul></div><footer class=post-footer><ul class=post-tags><li><a href=https://liliilli.github.io/tags/untagged/>untagged</a></li></ul><nav class=paginav><a class=prev href=https://liliilli.github.io/posts/cpp_concept/><span class=title>« Prev Page</span><br><span>C++2aのconceptsを使ってみた。</span></a>
+<a class=next href=https://liliilli.github.io/posts/chained-group-allocation/><span class=title>Next Page »</span><br><span>Chained-Group Allocationパターンについてメモ</span></a></nav><div class=share-buttons><a target=_blank rel="noopener noreferrer" aria-label="share ShaderToyでPBRを書いてから、自ら解説してみた。 on twitter" href="https://twitter.com/intent/tweet/?text=ShaderToy%e3%81%a7PBR%e3%82%92%e6%9b%b8%e3%81%84%e3%81%a6%e3%81%8b%e3%82%89%e3%80%81%e8%87%aa%e3%82%89%e8%a7%a3%e8%aa%ac%e3%81%97%e3%81%a6%e3%81%bf%e3%81%9f%e3%80%82&url=https%3a%2f%2fliliilli.github.io%2fposts%2fshadertoy_pbr%2f&hashtags=untagged"><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zM195.519 424.544c135.939.0 210.268-112.643 210.268-210.268.0-3.218.0-6.437-.153-9.502 14.406-10.421 26.973-23.448 36.935-38.314-13.18 5.824-27.433 9.809-42.452 11.648 15.326-9.196 26.973-23.602 32.49-40.92-14.252 8.429-30.038 14.56-46.896 17.931-13.487-14.406-32.644-23.295-53.946-23.295-40.767.0-73.87 33.104-73.87 73.87.0 5.824.613 11.494 1.992 16.858-61.456-3.065-115.862-32.49-152.337-77.241-6.284 10.881-9.962 23.601-9.962 37.088.0 25.594 13.027 48.276 32.95 61.456-12.107-.307-23.448-3.678-33.41-9.196v.92c0 35.862 25.441 65.594 59.311 72.49-6.13 1.686-12.72 2.606-19.464 2.606-4.751.0-9.348-.46-13.946-1.38 9.349 29.426 36.628 50.728 68.965 51.341-25.287 19.771-57.164 31.571-91.8 31.571-5.977.0-11.801-.306-17.625-1.073 32.337 21.15 71.264 33.41 112.95 33.41z"/></svg></a><a target=_blank rel="noopener noreferrer" aria-label="share ShaderToyでPBRを書いてから、自ら解説してみた。 on linkedin" href="https://www.linkedin.com/shareArticle?mini=true&url=https%3a%2f%2fliliilli.github.io%2fposts%2fshadertoy_pbr%2f&title=ShaderToy%e3%81%a7PBR%e3%82%92%e6%9b%b8%e3%81%84%e3%81%a6%e3%81%8b%e3%82%89%e3%80%81%e8%87%aa%e3%82%89%e8%a7%a3%e8%aa%ac%e3%81%97%e3%81%a6%e3%81%bf%e3%81%9f%e3%80%82&summary=ShaderToy%e3%81%a7PBR%e3%82%92%e6%9b%b8%e3%81%84%e3%81%a6%e3%81%8b%e3%82%89%e3%80%81%e8%87%aa%e3%82%89%e8%a7%a3%e8%aa%ac%e3%81%97%e3%81%a6%e3%81%bf%e3%81%9f%e3%80%82&source=https%3a%2f%2fliliilli.github.io%2fposts%2fshadertoy_pbr%2f"><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zM160.461 423.278V197.561h-75.04v225.717h75.04zm270.539.0V293.839c0-69.333-37.018-101.586-86.381-101.586-39.804.0-57.634 21.891-67.617 37.266v-31.958h-75.021c.995 21.181.0 225.717.0 225.717h75.02V297.222c0-6.748.486-13.492 2.474-18.315 5.414-13.475 17.767-27.434 38.494-27.434 27.135.0 38.007 20.707 38.007 51.037v120.768H431zM123.448 88.722C97.774 88.722 81 105.601 81 127.724c0 21.658 16.264 39.002 41.455 39.002h.484c26.165.0 42.452-17.344 42.452-39.002-.485-22.092-16.241-38.954-41.943-39.002z"/></svg></a><a target=_blank rel="noopener noreferrer" aria-label="share ShaderToyでPBRを書いてから、自ら解説してみた。 on reddit" href="https://reddit.com/submit?url=https%3a%2f%2fliliilli.github.io%2fposts%2fshadertoy_pbr%2f&title=ShaderToy%e3%81%a7PBR%e3%82%92%e6%9b%b8%e3%81%84%e3%81%a6%e3%81%8b%e3%82%89%e3%80%81%e8%87%aa%e3%82%89%e8%a7%a3%e8%aa%ac%e3%81%97%e3%81%a6%e3%81%bf%e3%81%9f%e3%80%82"><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zM446 265.638c0-22.964-18.616-41.58-41.58-41.58-11.211.0-21.361 4.457-28.841 11.666-28.424-20.508-67.586-33.757-111.204-35.278l18.941-89.121 61.884 13.157c.756 15.734 13.642 28.29 29.56 28.29 16.407.0 29.706-13.299 29.706-29.701.0-16.403-13.299-29.702-29.706-29.702-11.666.0-21.657 6.792-26.515 16.578l-69.105-14.69c-1.922-.418-3.939-.042-5.585 1.036-1.658 1.073-2.811 2.761-3.224 4.686l-21.152 99.438c-44.258 1.228-84.046 14.494-112.837 35.232-7.468-7.164-17.589-11.591-28.757-11.591-22.965.0-41.585 18.616-41.585 41.58.0 16.896 10.095 31.41 24.568 37.918-.639 4.135-.99 8.328-.99 12.576.0 63.977 74.469 115.836 166.33 115.836s166.334-51.859 166.334-115.836c0-4.218-.347-8.387-.977-12.493 14.564-6.47 24.735-21.034 24.735-38.001zM326.526 373.831c-20.27 20.241-59.115 21.816-70.534 21.816-11.428.0-50.277-1.575-70.522-21.82-3.007-3.008-3.007-7.882.0-10.889 3.003-2.999 7.882-3.003 10.885.0 12.777 12.781 40.11 17.317 59.637 17.317 19.522.0 46.86-4.536 59.657-17.321 3.016-2.999 7.886-2.995 10.885.008 3.008 3.011 3.003 7.882-.008 10.889zm-5.23-48.781c-16.373.0-29.701-13.324-29.701-29.698.0-16.381 13.328-29.714 29.701-29.714 16.378.0 29.706 13.333 29.706 29.714.0 16.374-13.328 29.698-29.706 29.698zM160.91 295.348c0-16.381 13.328-29.71 29.714-29.71 16.369.0 29.689 13.329 29.689 29.71.0 16.373-13.32 29.693-29.689 29.693-16.386.0-29.714-13.32-29.714-29.693z"/></svg></a><a target=_blank rel="noopener noreferrer" aria-label="share ShaderToyでPBRを書いてから、自ら解説してみた。 on facebook" href="https://facebook.com/sharer/sharer.php?u=https%3a%2f%2fliliilli.github.io%2fposts%2fshadertoy_pbr%2f"><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H342.978V319.085h66.6l12.672-82.621h-79.272v-53.617c0-22.603 11.073-44.636 46.58-44.636H425.6v-70.34s-32.71-5.582-63.982-5.582c-65.288.0-107.96 39.569-107.96 111.204v62.971h-72.573v82.621h72.573V512h-191.104c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892z"/></svg></a><a target=_blank rel="noopener noreferrer" aria-label="share ShaderToyでPBRを書いてから、自ら解説してみた。 on whatsapp" href="https://api.whatsapp.com/send?text=ShaderToy%e3%81%a7PBR%e3%82%92%e6%9b%b8%e3%81%84%e3%81%a6%e3%81%8b%e3%82%89%e3%80%81%e8%87%aa%e3%82%89%e8%a7%a3%e8%aa%ac%e3%81%97%e3%81%a6%e3%81%bf%e3%81%9f%e3%80%82%20-%20https%3a%2f%2fliliilli.github.io%2fposts%2fshadertoy_pbr%2f"><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zm-58.673 127.703c-33.842-33.881-78.847-52.548-126.798-52.568-98.799.0-179.21 80.405-179.249 179.234-.013 31.593 8.241 62.428 23.927 89.612l-25.429 92.884 95.021-24.925c26.181 14.28 55.659 21.807 85.658 21.816h.074c98.789.0 179.206-80.413 179.247-179.243.018-47.895-18.61-92.93-52.451-126.81zM263.976 403.485h-.06c-26.734-.01-52.954-7.193-75.828-20.767l-5.441-3.229-56.386 14.792 15.05-54.977-3.542-5.637c-14.913-23.72-22.791-51.136-22.779-79.287.033-82.142 66.867-148.971 149.046-148.971 39.793.014 77.199 15.531 105.329 43.692 28.128 28.16 43.609 65.592 43.594 105.4-.034 82.149-66.866 148.983-148.983 148.984zm81.721-111.581c-4.479-2.242-26.499-13.075-30.604-14.571-4.105-1.495-7.091-2.241-10.077 2.241-2.986 4.483-11.569 14.572-14.182 17.562-2.612 2.988-5.225 3.364-9.703 1.12-4.479-2.241-18.91-6.97-36.017-22.23C231.8 264.15 222.81 249.484 220.198 245s-.279-6.908 1.963-9.14c2.016-2.007 4.48-5.232 6.719-7.847 2.24-2.615 2.986-4.484 4.479-7.472 1.493-2.99.747-5.604-.374-7.846-1.119-2.241-10.077-24.288-13.809-33.256-3.635-8.733-7.327-7.55-10.077-7.688-2.609-.13-5.598-.158-8.583-.158-2.986.0-7.839 1.121-11.944 5.604-4.105 4.484-15.675 15.32-15.675 37.364.0 22.046 16.048 43.342 18.287 46.332 2.24 2.99 31.582 48.227 76.511 67.627 10.685 4.615 19.028 7.371 25.533 9.434 10.728 3.41 20.492 2.929 28.209 1.775 8.605-1.285 26.499-10.833 30.231-21.295 3.732-10.464 3.732-19.431 2.612-21.298-1.119-1.869-4.105-2.99-8.583-5.232z"/></svg></a><a target=_blank rel="noopener noreferrer" aria-label="share ShaderToyでPBRを書いてから、自ら解説してみた。 on telegram" href="https://telegram.me/share/url?text=ShaderToy%e3%81%a7PBR%e3%82%92%e6%9b%b8%e3%81%84%e3%81%a6%e3%81%8b%e3%82%89%e3%80%81%e8%87%aa%e3%82%89%e8%a7%a3%e8%aa%ac%e3%81%97%e3%81%a6%e3%81%bf%e3%81%9f%e3%80%82&url=https%3a%2f%2fliliilli.github.io%2fposts%2fshadertoy_pbr%2f"><svg viewBox="2 2 28 28"><path d="M26.49 29.86H5.5a3.37 3.37.0 01-2.47-1 3.35 3.35.0 01-1-2.47V5.48A3.36 3.36.0 013 3 3.37 3.37.0 015.5 2h21A3.38 3.38.0 0129 3a3.36 3.36.0 011 2.46V26.37a3.35 3.35.0 01-1 2.47 3.38 3.38.0 01-2.51 1.02zm-5.38-6.71a.79.79.0 00.85-.66L24.73 9.24a.55.55.0 00-.18-.46.62.62.0 00-.41-.17q-.08.0-16.53 6.11a.59.59.0 00-.41.59.57.57.0 00.43.52l4 1.24 1.61 4.83a.62.62.0 00.63.43.56.56.0 00.4-.17L16.54 20l4.09 3A.9.9.0 0021.11 23.15zM13.8 20.71l-1.21-4q8.72-5.55 8.78-5.55c.15.0.23.0.23.16a.18.18.0 010 .06s-2.51 2.3-7.52 6.8z"/></svg></a></div></footer></article></main><footer class=footer><span>Copyright © 2008–2019, Steve Francia and the Hugo Authors; all rights reserved.</span>
+<span>&#183;</span>
+<span>Powered by <a href=https://gohugo.io/ rel="noopener noreferrer" target=_blank>Hugo</a></span>
+<span>&#183;</span>
+<span>Theme <a href=https://git.io/hugopapermod rel=noopener target=_blank>PaperMod</a></span></footer><a href=#top aria-label="go to top" title="Go to Top (Alt + G)"><button class=top-link id=top-link type=button accesskey=g><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentcolor"><path d="M12 6H0l6-6z"/></svg></button></a>
+<script>window.onload=function(){localStorage.getItem("menu-scroll-position")&&(document.getElementById('menu').scrollLeft=localStorage.getItem("menu-scroll-position"))};function menu_on_scroll(){localStorage.setItem("menu-scroll-position",document.getElementById('menu').scrollLeft)}document.querySelectorAll('a[href^="#"]').forEach(a=>{a.addEventListener("click",function(b){b.preventDefault();var a=this.getAttribute("href").substr(1);window.matchMedia('(prefers-reduced-motion: reduce)').matches?document.querySelector(`[id='${decodeURIComponent(a)}']`).scrollIntoView():document.querySelector(`[id='${decodeURIComponent(a)}']`).scrollIntoView({behavior:"smooth"}),a==="top"?history.replaceState(null,null," "):history.pushState(null,null,`#${a}`)})})</script><script>var mybutton=document.getElementById("top-link");window.onscroll=function(){document.body.scrollTop>800||document.documentElement.scrollTop>800?(mybutton.style.visibility="visible",mybutton.style.opacity="1"):(mybutton.style.visibility="hidden",mybutton.style.opacity="0")}</script><script>document.getElementById("theme-toggle").addEventListener("click",()=>{document.body.className.includes("dark")?(document.body.classList.remove('dark'),localStorage.setItem("pref-theme",'light')):(document.body.classList.add('dark'),localStorage.setItem("pref-theme",'dark'))})</script><script>document.querySelectorAll('pre > code').forEach(b=>{const c=b.parentNode.parentNode,a=document.createElement('button');a.classList.add('copy-code'),a.innerText='copy';function d(){a.innerText='copied!',setTimeout(()=>{a.innerText='copy'},2e3)}a.addEventListener('click',e=>{if('clipboard'in navigator){navigator.clipboard.writeText(b.textContent),d();return}const a=document.createRange();a.selectNodeContents(b);const c=window.getSelection();c.removeAllRanges(),c.addRange(a);try{document.execCommand('copy'),d()}catch(a){}c.removeRange(a)}),c.classList.contains("highlight")?c.appendChild(a):c.parentNode.firstChild==c||(b.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName=="TABLE"?b.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(a):b.parentNode.appendChild(a))})</script></body></html>
