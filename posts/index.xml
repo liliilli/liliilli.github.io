@@ -7,7 +7,16 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright>Copyright © 2008–2019, Steve Francia and the Hugo Authors; all rights reserved.</copyright>
-    <lastBuildDate>Sun, 18 Apr 2021 18:01:36 +0900</lastBuildDate><atom:link href="https://liliilli.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Mon, 19 Apr 2021 21:49:23 +0900</lastBuildDate><atom:link href="https://liliilli.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>C&#43;&#43;のatomicにカウンターとステートを混ぜて使ってみた</title>
+      <link>https://liliilli.github.io/posts/countable_atomic/</link>
+      <pubDate>Mon, 19 Apr 2021 21:49:23 +0900</pubDate>
+      
+      <guid>https://liliilli.github.io/posts/countable_atomic/</guid>
+      <description>C++のコードを作成していて途中でひらめいた雑なテクニックです。使用上の責任はご自身でお取りください。🙇‍♂️ 発端 マルチスレッドに対応すべき</description>
+    </item>
+    
     <item>
       <title>neovim &#43; rustの作業環境セッティング</title>
       <link>https://liliilli.github.io/posts/vim_environment_setting/</link>
