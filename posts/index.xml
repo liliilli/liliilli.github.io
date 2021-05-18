@@ -6,6 +6,259 @@
     <description>Recent content in Posts on neuromantic</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <copyright>Copyright © 2008–2019, Steve Francia and the Hugo Authors; all rights reserved.</copyright><atom:link href="https://liliilli.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+    <copyright>Copyright © 2008–2019, Steve Francia and the Hugo Authors; all rights reserved.</copyright>
+    <lastBuildDate>Tue, 18 May 2021 07:42:15 +0900</lastBuildDate><atom:link href="https://liliilli.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>rustでSDL2一人勉強会（1/?）</title>
+      <link>https://liliilli.github.io/posts/sdl2_study_1/</link>
+      <pubDate>Tue, 18 May 2021 07:42:15 +0900</pubDate>
+      
+      <guid>https://liliilli.github.io/posts/sdl2_study_1/</guid>
+      <description>SDL2とは？ SDL2 公式サイトSDL 2.0のWikiページ SDLはSimple DirectMedia Layerの略語で、ゲームまたはマルチメディアを応用するアプリケ</description>
+    </item>
+    
+    <item>
+      <title>Z階層曲線から任意範囲を効果的に探索する方法のメモ</title>
+      <link>https://liliilli.github.io/posts/zordercurve_createchunk/</link>
+      <pubDate>Thu, 13 May 2021 21:42:11 +0900</pubDate>
+      
+      <guid>https://liliilli.github.io/posts/zordercurve_createchunk/</guid>
+      <description>はじめに このポストは前提として「Z階層曲線（Morton Code・Z-Order Curve）」を知っていることを要します。 添付コードは全てR</description>
+    </item>
+    
+    <item>
+      <title>GWで作ったRustライブラリの紹介</title>
+      <link>https://liliilli.github.io/posts/gw2021_rustrepo_introduction/</link>
+      <pubDate>Mon, 03 May 2021 13:43:06 +0900</pubDate>
+      
+      <guid>https://liliilli.github.io/posts/gw2021_rustrepo_introduction/</guid>
+      <description>はじめに 1年も続いてコロナが流行ってしまうことで、今年（2021年）のGWも家に居ざるを得なくなりました。 一週間も休んでるのに遠くまでは行け</description>
+    </item>
+    
+    <item>
+      <title>C&#43;&#43;のatomicにカウンターとステートを混ぜて使ってみた</title>
+      <link>https://liliilli.github.io/posts/countable_atomic/</link>
+      <pubDate>Mon, 19 Apr 2021 21:49:23 +0900</pubDate>
+      
+      <guid>https://liliilli.github.io/posts/countable_atomic/</guid>
+      <description>C++のコードを作成していて途中でひらめいた雑なテクニックです。使用上の責任はご自身でお取りください。🙇‍♂️ 発端 マルチスレッドに対応すべき</description>
+    </item>
+    
+    <item>
+      <title>neovim &#43; rustの作業環境セッティング</title>
+      <link>https://liliilli.github.io/posts/vim_environment_setting/</link>
+      <pubDate>Sun, 18 Apr 2021 18:01:36 +0900</pubDate>
+      
+      <guid>https://liliilli.github.io/posts/vim_environment_setting/</guid>
+      <description>環境 Windows 10 2004 version Rust自体は既にインストールされているとします。 neovimのインストール https://neovim.io/ vimも良いけど、neovimをインストールします</description>
+    </item>
+    
+    <item>
+      <title>gitignoreが無視される時の対処法</title>
+      <link>https://liliilli.github.io/posts/fix_gitignore_reset/</link>
+      <pubDate>Sat, 05 Dec 2020 18:34:27 +0900</pubDate>
+      
+      <guid>https://liliilli.github.io/posts/fix_gitignore_reset/</guid>
+      <description>https://stackoverflow.com/a/52621453/7339320 一旦リポジトリの変更事項を全部コミットして、プッシュする。 git rm -r --cached を実行してGitの情報を全て削除する。 git add . を実行して全てを追加する。 .</description>
+    </item>
+    
+    <item>
+      <title>RustでChip-8インタプリタを作ってみた</title>
+      <link>https://liliilli.github.io/posts/self_review_chipmunk/</link>
+      <pubDate>Sat, 05 Dec 2020 15:17:29 +0900</pubDate>
+      
+      <guid>https://liliilli.github.io/posts/self_review_chipmunk/</guid>
+      <description>https://github.com/liliilli/chipmunk 最近色んな所で注目されているプログラミング言語、Rustの勉強も兼ねてCHIP-8エミュレータを作ってみました。 CHIP-8とは？ https://en.wikipedia.org/wiki/CHIP-8 CHI</description>
+    </item>
+    
+    <item>
+      <title>Rustメモ（2020-11-21~）</title>
+      <link>https://liliilli.github.io/posts/rust_3_memo/</link>
+      <pubDate>Sat, 21 Nov 2020 23:10:01 +0900</pubDate>
+      
+      <guid>https://liliilli.github.io/posts/rust_3_memo/</guid>
+      <description>unsafe unsafeコードブロックを使うことによって、Safeなコード（普通のRustコード）では出来なかったことが出来るようになる。つまり、所有</description>
+    </item>
+    
+    <item>
+      <title>Rustメモ（20-11-20～)</title>
+      <link>https://liliilli.github.io/posts/rust_2_memo/</link>
+      <pubDate>Thu, 19 Nov 2020 22:21:23 +0900</pubDate>
+      
+      <guid>https://liliilli.github.io/posts/rust_2_memo/</guid>
+      <description>Smart Pointerのあらゆる実装分析 1. Deref trait Box&amp;lt;T&amp;gt;などは基本的にDeref traitを実装している。また、Box&amp;lt;T&amp;g</description>
+    </item>
+    
+    <item>
+      <title>Rustメモ（20-11-16～20-11-19)</title>
+      <link>https://liliilli.github.io/posts/rust_1_memo/</link>
+      <pubDate>Mon, 16 Nov 2020 23:46:46 +0900</pubDate>
+      
+      <guid>https://liliilli.github.io/posts/rust_1_memo/</guid>
+      <description>if let if let 文法はある変数（OptionとかResultなどの）パターンマッチングで生じる不必要なインデント、例外処理などの手間を省くために提供</description>
+    </item>
+    
+    <item>
+      <title>CppCon2017 C&#43;&#43; atomics, from basic to advancedのメモ</title>
+      <link>https://liliilli.github.io/posts/cppcon2017_atomics_memo/</link>
+      <pubDate>Sun, 04 Oct 2020 11:45:17 +0900</pubDate>
+      
+      <guid>https://liliilli.github.io/posts/cppcon2017_atomics_memo/</guid>
+      <description>本文 https://www.youtube.com/watch?v=ZQFzMfHIxng はじめに Atomicはマルチスレッドに対応したロジックでMutexなしにLock-free programmingを実装するために利用出</description>
+    </item>
+    
+    <item>
+      <title>C&#43;&#43;でのDoxygenの書き方のメモ</title>
+      <link>https://liliilli.github.io/posts/doxygen_memo/</link>
+      <pubDate>Sat, 05 Sep 2020 16:21:55 +0900</pubDate>
+      
+      <guid>https://liliilli.github.io/posts/doxygen_memo/</guid>
+      <description>以前にもコードの説明を書く時にDoxygenみたいな構文で書いてきたんですが、本格的にAPIのマニュアルを成立しようとしたらどう書けばいいか</description>
+    </item>
+    
+    <item>
+      <title>C&#43;&#43;で実装するDelegateコードの分析（Don Clugston）</title>
+      <link>https://liliilli.github.io/posts/donclugston_delegate/</link>
+      <pubDate>Thu, 27 Aug 2020 09:30:34 +0900</pubDate>
+      
+      <guid>https://liliilli.github.io/posts/donclugston_delegate/</guid>
+      <description>ざっくりとコードを読みながら分析したものに過ぎないと思いますが、気になるコードを抜粋して解説して行きたいと思います。 リンク https://www.codeproject.com/Articles/7150/Member-Function-Pointers-and-the-Fastest-Possible 元ソースコードと</description>
+    </item>
+    
+    <item>
+      <title>Rust＋Winapiで窓を生成してみた</title>
+      <link>https://liliilli.github.io/posts/rust_winapi_memo/</link>
+      <pubDate>Thu, 13 Aug 2020 10:04:36 +0900</pubDate>
+      
+      <guid>https://liliilli.github.io/posts/rust_winapi_memo/</guid>
+      <description>暇つぶしでRustとwinapi crateを使って、窓を生成してイベントメッセージを処理するルーチンを作ってみました。実はdinput8とx</description>
+    </item>
+    
+    <item>
+      <title>AMD GCNアーキテクチャ文書を読んでメモ</title>
+      <link>https://liliilli.github.io/posts/gcn_architecture_crash/</link>
+      <pubDate>Fri, 19 Jun 2020 12:16:09 +0900</pubDate>
+      
+      <guid>https://liliilli.github.io/posts/gcn_architecture_crash/</guid>
+      <description>用語 略語 説明 VS Vertex Shader PS Pixel Shader (Fragment Shader) VLIW Very Long Instruction Word FLOPS FLoating point Operations Per Second GCN Graphics Core Next CU Compute Unit EU Export Unit ISA Instruction Set Architecture SIMD Single Instruction Multiple Data ALU Arithmetic Logic Unit AGU Address Generation Unit SALU Scalar Arithmetic Logic Unit VALU Vector Arithmetic Logic Unit APU Accelated Processing Unit PC Program Counter IB</description>
+    </item>
+    
+    <item>
+      <title>最近簡単に読んだポスト</title>
+      <link>https://liliilli.github.io/posts/week25_2020/</link>
+      <pubDate>Fri, 19 Jun 2020 11:39:40 +0900</pubDate>
+      
+      <guid>https://liliilli.github.io/posts/week25_2020/</guid>
+      <description>Avoid double negation, unless&amp;hellip; !!x == xのような構文を使わないこと。代わりにenabledに終わる（何かが有効化されたか？）ように関数またはフラグなどを作って渡すこと</description>
+    </item>
+    
+    <item>
+      <title>Low-level shader optimization for next-gen and D3D11のメモ</title>
+      <link>https://liliilli.github.io/posts/shader_opti_memo_2/</link>
+      <pubDate>Thu, 18 Jun 2020 10:27:48 +0900</pubDate>
+      
+      <guid>https://liliilli.github.io/posts/shader_opti_memo_2/</guid>
+      <description>メモの基になる原文は2014年GDCで発表されたもので、翻訳ミスによる間違いがある可能性があります。また、GCN（AMD）アーキテクチャの重</description>
+    </item>
+    
+    <item>
+      <title>SFINAEの活用、ざっくりメモ</title>
+      <link>https://liliilli.github.io/posts/sfinae_afaid/</link>
+      <pubDate>Wed, 17 Jun 2020 19:15:18 +0900</pubDate>
+      
+      <guid>https://liliilli.github.io/posts/sfinae_afaid/</guid>
+      <description>SFINAEとは SFINAEとはSubstitution Failure is not an error（SFINAE)の略語として、テンプレートパラメータの一致しないテ</description>
+    </item>
+    
+    <item>
+      <title>Low Level Thinking in High Shader Languages</title>
+      <link>https://liliilli.github.io/posts/shader_opti_memo/</link>
+      <pubDate>Wed, 17 Jun 2020 12:00:15 +0900</pubDate>
+      
+      <guid>https://liliilli.github.io/posts/shader_opti_memo/</guid>
+      <description>これは参照項目のGDCのリンクを読んで適当にメモしたものです。詳しくは参照のリンクをご覧ください。 Goal of this presentation ローレベル思考はいまだに有効である</description>
+    </item>
+    
+    <item>
+      <title>DirectInput8 導入メモ</title>
+      <link>https://liliilli.github.io/posts/dinput8/</link>
+      <pubDate>Sat, 25 Apr 2020 13:28:07 +0900</pubDate>
+      
+      <guid>https://liliilli.github.io/posts/dinput8/</guid>
+      <description>https://en.wikipedia.org/wiki/DirectInput https://bell0bytes.eu/directinput/ https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee416842(v=vs.85)?redirectedfrom=MSDN https://docs.microsoft.com/ko-kr/windows/win32/xinput/xinput-and-directinput?redirectedfrom=MSDN DirectInputとは DirectInputは、キーボード、マウス、そして各種のコントローラーを含んでほぼ同一な挙動制御をサポー</description>
+    </item>
+    
+    <item>
+      <title>TLSF Allocatorを作ってみた</title>
+      <link>https://liliilli.github.io/posts/tlsf_basic/</link>
+      <pubDate>Sun, 15 Mar 2020 19:13:14 +0900</pubDate>
+      
+      <guid>https://liliilli.github.io/posts/tlsf_basic/</guid>
+      <description>TLSFとは何なのか http://www.gii.upv.es/tlsf/http://www.gii.upv.es/tlsf/files/ecrts04_tlsf.pdfhttps://www.researchgate.net/publication/234785757_A_comparison_of_memory_allocators_for_real-time_applications TLSF（Two-Level Segregate Fit）は、リアルタイムで要求される速度、安定性、決定性（Deterministic）を</description>
+    </item>
+    
+    <item>
+      <title>行列変数のネーミングについて</title>
+      <link>https://liliilli.github.io/posts/matrix_name/</link>
+      <pubDate>Fri, 13 Mar 2020 13:11:47 +0900</pubDate>
+      
+      <guid>https://liliilli.github.io/posts/matrix_name/</guid>
+      <description>https://www.sebastiansylvan.com/post/matrix_naming_convention/ D3Dスタイル（Row-Major、左から右へ演算していくスタイル）でやると、 vector4_t transformed_point = point * M * A; が普通だけど、このままじゃ後でまた見る時に何</description>
+    </item>
+    
+    <item>
+      <title>自分でやるDyのCMakeListsファイル説明</title>
+      <link>https://liliilli.github.io/posts/dy_cmake/</link>
+      <pubDate>Sun, 08 Mar 2020 11:48:19 +0900</pubDate>
+      
+      <guid>https://liliilli.github.io/posts/dy_cmake/</guid>
+      <description>はじめに 自分の個人プロジェクトのDyという、ゲームエンジンプロジェクトがあって、たまに時間がある時開発をしています。ですけど今は表じゃなく裏</description>
+    </item>
+    
+    <item>
+      <title>CMakeのメモまとめ</title>
+      <link>https://liliilli.github.io/posts/cmake_memo/</link>
+      <pubDate>Tue, 03 Mar 2020 23:59:05 +0900</pubDate>
+      
+      <guid>https://liliilli.github.io/posts/cmake_memo/</guid>
+      <description>https://cliutils.gitlab.io/modern-cmake/chapters/intro/dodonot.html https://gist.github.com/mbinna/c61dbb39bca0e4fb7d1f73b0d66a4fd1 Do&amp;rsquo;s and Don&amp;rsquo;ts CMakeで避けるべきのパターン https://cliutils.gitlab.io/modern-cmake/chapters/intro/dodonot.htmlhttps://gist.github.com/mbinna/c61dbb39bca0e4fb7d1f73b0d66a4fd1 link_directories、include_librariesなどのグローバル関数を使わな</description>
+    </item>
+    
+    <item>
+      <title>Hugoブログを使いこなせるためのメモ</title>
+      <link>https://liliilli.github.io/posts/hugo_memo/</link>
+      <pubDate>Tue, 03 Mar 2020 23:10:28 +0900</pubDate>
+      
+      <guid>https://liliilli.github.io/posts/hugo_memo/</guid>
+      <description>すごく久しぶりにHugoのブログを使おうとしましたが、ブログに記事を書くどころかHugoの使い方すらすっかり忘れてしまいました。だもんで自分</description>
+    </item>
+    
+    <item>
+      <title>C&#43;&#43;2aのconceptsを使ってみた。</title>
+      <link>https://liliilli.github.io/posts/cpp_concept/</link>
+      <pubDate>Thu, 21 Nov 2019 20:33:04 +0900</pubDate>
+      
+      <guid>https://liliilli.github.io/posts/cpp_concept/</guid>
+      <description>C++のConceptを簡略説明 C++2a（20）から追加する文法の一つであるconceptは、あるタイプの制約条件を記すことができる識別子</description>
+    </item>
+    
+    <item>
+      <title>ShaderToyでPBRを書いてから、自ら解説してみた。</title>
+      <link>https://liliilli.github.io/posts/shadertoy_pbr/</link>
+      <pubDate>Sat, 16 Nov 2019 19:51:58 +0900</pubDate>
+      
+      <guid>https://liliilli.github.io/posts/shadertoy_pbr/</guid>
+      <description>なんで、このシェーダーを書きながら、どうやってPBRのDiffuseとSpecularを実装したのかを簡単と大雑把に書きたいと思います。図形</description>
+    </item>
+    
+    <item>
+      <title>Chained-Group Allocationパターンについてメモ</title>
+      <link>https://liliilli.github.io/posts/chained-group-allocation/</link>
+      <pubDate>Sat, 09 Nov 2019 22:15:34 +0900</pubDate>
+      
+      <guid>https://liliilli.github.io/posts/chained-group-allocation/</guid>
+      <description>https://www.plflib.org/chained_group_allocation_pattern.htmを見て、分かったことを</description>
+    </item>
+    
   </channel>
 </rss>
