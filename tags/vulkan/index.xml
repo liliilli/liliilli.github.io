@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>vulkan on neuromantic</title>
+    <link>https://liliilli.github.io/tags/vulkan/</link>
+    <description>Recent content in vulkan on neuromantic</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <copyright>Copyright © 2008–2019, Steve Francia and the Hugo Authors; all rights reserved.</copyright>
+    <lastBuildDate>Thu, 20 May 2021 08:56:02 +0900</lastBuildDate><atom:link href="https://liliilli.github.io/tags/vulkan/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>rustでSDL2一人勉強会（3/?）</title>
+      <link>https://liliilli.github.io/posts/sdl2_study_3/</link>
+      <pubDate>Thu, 20 May 2021 08:56:02 +0900</pubDate>
+      
+      <guid>https://liliilli.github.io/posts/sdl2_study_3/</guid>
+      <description>rustでSDL2一人勉強会（1/?） rustでSDL2一人勉強会（2/?） Window（窓）の操作 SDL Wiki - Display and Window Management SDL_GetWindowPosition SDL2ではVideoシ</description>
+    </item>
+    
+  </channel>
+</rss>

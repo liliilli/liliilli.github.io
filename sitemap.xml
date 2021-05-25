@@ -3,22 +3,28 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://liliilli.github.io/</loc>
-    <lastmod>2021-05-19T08:51:02+09:00</lastmod>
+    <lastmod>2021-05-20T08:56:02+09:00</lastmod>
   </url><url>
     <loc>https://liliilli.github.io/posts/</loc>
-    <lastmod>2021-05-19T08:51:02+09:00</lastmod>
+    <lastmod>2021-05-20T08:56:02+09:00</lastmod>
   </url><url>
     <loc>https://liliilli.github.io/tags/rust/</loc>
-    <lastmod>2021-05-19T08:51:02+09:00</lastmod>
+    <lastmod>2021-05-20T08:56:02+09:00</lastmod>
   </url><url>
-    <loc>https://liliilli.github.io/posts/sdl2_study_2/</loc>
-    <lastmod>2021-05-19T08:51:02+09:00</lastmod>
+    <loc>https://liliilli.github.io/posts/sdl2_study_3/</loc>
+    <lastmod>2021-05-20T08:56:02+09:00</lastmod>
   </url><url>
     <loc>https://liliilli.github.io/tags/sdl2/</loc>
-    <lastmod>2021-05-19T08:51:02+09:00</lastmod>
+    <lastmod>2021-05-20T08:56:02+09:00</lastmod>
   </url><url>
     <loc>https://liliilli.github.io/tags/</loc>
-    <lastmod>2021-05-19T08:51:02+09:00</lastmod>
+    <lastmod>2021-05-20T08:56:02+09:00</lastmod>
+  </url><url>
+    <loc>https://liliilli.github.io/tags/vulkan/</loc>
+    <lastmod>2021-05-20T08:56:02+09:00</lastmod>
+  </url><url>
+    <loc>https://liliilli.github.io/posts/sdl2_study_2/</loc>
+    <lastmod>2021-05-20T08:35:02+09:00</lastmod>
   </url><url>
     <loc>https://liliilli.github.io/posts/sdl2_study_1/</loc>
     <lastmod>2021-05-19T00:18:19+09:00</lastmod>

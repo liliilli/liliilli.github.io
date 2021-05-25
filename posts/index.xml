@@ -7,7 +7,16 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright>Copyright © 2008–2019, Steve Francia and the Hugo Authors; all rights reserved.</copyright>
-    <lastBuildDate>Wed, 19 May 2021 08:51:02 +0900</lastBuildDate><atom:link href="https://liliilli.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Thu, 20 May 2021 08:56:02 +0900</lastBuildDate><atom:link href="https://liliilli.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>rustでSDL2一人勉強会（3/?）</title>
+      <link>https://liliilli.github.io/posts/sdl2_study_3/</link>
+      <pubDate>Thu, 20 May 2021 08:56:02 +0900</pubDate>
+      
+      <guid>https://liliilli.github.io/posts/sdl2_study_3/</guid>
+      <description>rustでSDL2一人勉強会（1/?） rustでSDL2一人勉強会（2/?） Window（窓）の操作 SDL Wiki - Display and Window Management SDL_GetWindowPosition SDL2ではVideoシ</description>
+    </item>
+    
     <item>
       <title>rustでSDL2一人勉強会（2/?）</title>
       <link>https://liliilli.github.io/posts/sdl2_study_2/</link>
